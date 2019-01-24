@@ -14,9 +14,10 @@ type ApiServer struct {
 	Addr       string
 	OAuth      *oauth2.Config
 	OAuthState string
+	Admin      []string
 }
 
-func New(addr, githubClientId, githubClientSecret string) *ApiServer {
+func New(addr, githubClientId, githubClientSecret string, admin []string) *ApiServer {
 	return &ApiServer{
 		Addr: addr,
 		OAuth: &oauth2.Config{
@@ -26,6 +27,7 @@ func New(addr, githubClientId, githubClientSecret string) *ApiServer {
 			Scopes:       []string{"user", "user:email"},
 		},
 		OAuthState: strings.Replace(uuid.New().String(), "-", "", -1),
+		Admin:      admin,
 	}
 }
 

@@ -1,11 +1,10 @@
 package apiserver
 
 import (
-	"fmt"
+	"github.com/expectedsh/expected/pkg/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"net/http"
-	"net/http/httputil"
 )
 
 func (s *ApiServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
@@ -21,12 +20,16 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		logrus.WithError(err).Warningln("unable exchange oauth token")
 	}
-	client := oauth2.NewClient(r.Context(), oauth2.StaticTokenSource(token))
-	resp, err := client.Get("https://api.github.com/user")
+	ghUser, err := github.GetUser(r.Context(), token)
+	if err != nil {
+		logrus.WithError(err).Warningln("ghuser")
+	}
+	email, err := github.GetPrimaryEmail(r.Context(), token)
+	if err != nil {
+		logrus.WithError(err).Warningln("email")
+	}
+	logrus.WithField("ghUser", ghUser).WithField("emai", email).Infoln("ok")
 
-	// /user/emails get email
-	b, _ := httputil.DumpResponse(resp, true)
-	fmt.Println(string(b))
 	w.WriteHeader(200)
 	w.Write([]byte("ok"))
 }

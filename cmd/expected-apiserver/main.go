@@ -9,7 +9,8 @@ import (
 )
 
 type Config struct {
-	Addr     string `envconfig:"addr" default:":3000"`
+	Addr     string   `envconfig:"addr" default:":3000"`
+	Admin    []string `envconfig:"admin"`
 	Postgres struct {
 		Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
 		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
@@ -23,16 +24,23 @@ type Config struct {
 }
 
 func main() {
+	logrus.Infoln("processing environment configuration")
 	config := &Config{}
 	if err := envconfig.Process("", config); err != nil {
 		logrus.WithError(err).Fatalln("unable to parse environment variables")
 	}
+
+	logrus.Infoln("initializing the database")
 	if err := models.InitDB(config.Postgres.Addr, config.Postgres.ConnMaxLifetime, config.Postgres.MaxIdleConns,
 		config.Postgres.MaxOpenConns); err != nil {
 		logrus.WithError(err).Fatalln("unable to init the database")
 	}
-	server := apiserver.New(config.Addr, config.Github.ClientID, config.Github.ClientSecret)
+
+	logrus.Infoln("starting api server")
+	server := apiserver.New(config.Addr, config.Github.ClientID, config.Github.ClientSecret, config.Admin)
+
+	logrus.Infof("listening on %v\n", config.Addr)
 	if err := server.Start(); err != nil {
-		logrus.WithError(err).Fatalln("unable to start the apiserver")
+		logrus.WithError(err).Fatalln("unable to start api server")
 	}
 }

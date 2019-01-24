@@ -21,7 +21,7 @@ func InitDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenCon
   			name VARCHAR(255) NOT NULL,
   			email VARCHAR(255) NOT NULL,
   			avatar_url VARCHAR(255) NOT NULL,
-  			github_id VARCHAR(255) NOT NULL,
+  			github_id BIGINT NOT NULL,
   			admin BOOLEAN DEFAULT FALSE
 		)
 	`)
