@@ -1,35 +1,53 @@
 package apiserver
 
 import (
+	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/github"
-	"github.com/sirupsen/logrus"
+	"github.com/expectedsh/expected/pkg/models"
 	"golang.org/x/oauth2"
 	"net/http"
 )
 
 func (s *ApiServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, s.OAuth.AuthCodeURL(s.OAuthState, oauth2.AccessTypeOnline), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, s.OAuth.AuthCodeURL("", oauth2.AccessTypeOnline), http.StatusTemporaryRedirect)
 }
 
 func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
-	if r.FormValue("state") != s.OAuthState {
-		http.Redirect(w, r, s.OAuth.AuthCodeURL(s.OAuthState, oauth2.AccessTypeOnline), http.StatusTemporaryRedirect)
-		return
-	}
 	token, err := s.OAuth.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
-		logrus.WithError(err).Warningln("unable exchange oauth token")
+		response.ErrorBadRequest(w, "Invalid oauth code.")
+		return
 	}
-	ghUser, err := github.GetUser(r.Context(), token)
+	user, err := github.GetUser(r.Context(), token)
 	if err != nil {
-		logrus.WithError(err).Warningln("ghuser")
+		response.ErrorInternal(w, "Unable to retrieve your github data.")
+		return
 	}
-	email, err := github.GetPrimaryEmail(r.Context(), token)
+	account, err := models.Accounts.GetByGithubID(r.Context(), user.ID)
 	if err != nil {
-		logrus.WithError(err).Warningln("email")
+		response.ErrorInternal(w, "Unable to retrieve your account.")
+		return
 	}
-	logrus.WithField("ghUser", ghUser).WithField("emai", email).Infoln("ok")
-
-	w.WriteHeader(200)
-	w.Write([]byte("ok"))
+	if account == nil {
+		email, err := github.GetPrimaryEmail(r.Context(), token)
+		if err != nil {
+			response.ErrorInternal(w, "Unable to retrieve your github data.")
+			return
+		}
+		account = &models.Account{}
+		account.Name = user.Name
+		account.Email = email.Email
+		account.AvatarUrl = user.AvatarUrl
+		account.GithubID = user.ID
+		account.GithubAccessToken = token.AccessToken
+		account.GithubRefreshToken = token.RefreshToken
+		account.Admin = s.Admin == user.Login
+		if err = models.Accounts.Create(r.Context(), account); err != nil {
+			response.ErrorInternal(w, "Unable to create your account.")
+			return
+		}
+		response.SingleResource(w, "user", user)
+	} else {
+		response.SingleResource(w, "user", user)
+	}
 }

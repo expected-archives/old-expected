@@ -9,8 +9,8 @@ import (
 )
 
 type Config struct {
-	Addr     string   `envconfig:"addr" default:":3000"`
-	Admin    []string `envconfig:"admin"`
+	Addr     string `envconfig:"addr" default:":3000"`
+	Admin    string `envconfig:"admin"`
 	Postgres struct {
 		Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
 		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
