@@ -34,20 +34,11 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 			response.ErrorInternal(w, "Unable to retrieve your github data.")
 			return
 		}
-		account = &models.Account{}
-		account.Name = user.Name
-		account.Email = email.Email
-		account.AvatarUrl = user.AvatarUrl
-		account.GithubID = user.ID
-		account.GithubAccessToken = token.AccessToken
-		account.GithubRefreshToken = token.RefreshToken
-		account.Admin = s.Admin == user.Login
-		if err = models.Accounts.Create(r.Context(), account); err != nil {
+		if account, err = models.Accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
+			token.AccessToken, s.Admin == user.Login); err != nil {
 			response.ErrorInternal(w, "Unable to create your account.")
 			return
 		}
-		response.SingleResource(w, "user", user)
-	} else {
-		response.SingleResource(w, "user", user)
 	}
+	response.SingleResource(w, "account", account)
 }

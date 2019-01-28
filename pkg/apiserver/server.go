@@ -9,14 +9,16 @@ import (
 )
 
 type ApiServer struct {
-	Addr  string
-	OAuth *oauth2.Config
-	Admin string
+	Addr   string
+	Secret string
+	OAuth  *oauth2.Config
+	Admin  string
 }
 
-func New(addr, githubClientId, githubClientSecret string, admin string) *ApiServer {
+func New(addr, secret, githubClientId, githubClientSecret string, admin string) *ApiServer {
 	return &ApiServer{
-		Addr: addr,
+		Addr:   addr,
+		Secret: secret,
 		OAuth: &oauth2.Config{
 			ClientID:     githubClientId,
 			ClientSecret: githubClientSecret,
