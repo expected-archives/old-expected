@@ -22,3 +22,10 @@ func ErrorInternal(w http.ResponseWriter, message string) {
 	w.WriteHeader(http.StatusInternalServerError)
 	_, _ = w.Write(b)
 }
+
+func ErrorForbidden(w http.ResponseWriter) {
+	b, _ := json.Marshal(errorMessage{Message: "You do not have access for the attempted action."})
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusForbidden)
+	_, _ = w.Write(b)
+}

@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	Addr     string `envconfig:"addr" default:":3000"`
-	Admin    string `envconfig:"admin"`
-	Secret   string `envconfig:"secret" default:"changeme"`
-	Postgres struct {
+	Addr         string `envconfig:"addr" default:":3000"`
+	Secret       string `envconfig:"secret" default:"changeme"`
+	Admin        string `envconfig:"admin"`
+	DashboardURL string `envconfig:"dashboard_url"`
+	Postgres     struct {
 		Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
 		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
 		MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
@@ -38,8 +39,8 @@ func main() {
 	}
 
 	logrus.Infoln("starting api server")
-	server := apiserver.New(config.Addr, config.Secret, config.Github.ClientID, config.Github.ClientSecret,
-		config.Admin)
+	server := apiserver.New(config.Addr, config.Secret, config.Admin, config.DashboardURL, config.Github.ClientID,
+		config.Github.ClientSecret)
 
 	logrus.Infof("listening on %v\n", config.Addr)
 	if err := server.Start(); err != nil {

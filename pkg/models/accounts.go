@@ -31,8 +31,8 @@ func (m AccountsModel) GetByID(ctx context.Context, id string) (*Account, error)
 	defer rows.Close()
 	if rows.Next() {
 		account := &Account{}
-		if err := rows.Scan(account.ID, account.Name, account.Email, account.AvatarUrl, account.GithubID,
-			account.GithubAccessToken, account.ApiKey, account.Admin, account.CreatedAt); err != nil {
+		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarUrl, &account.GithubID,
+			&account.GithubAccessToken, &account.ApiKey, &account.Admin, &account.CreatedAt); err != nil {
 			return nil, err
 		}
 		return account, nil
@@ -51,8 +51,8 @@ func (m AccountsModel) GetByGithubID(ctx context.Context, id int64) (*Account, e
 	defer rows.Close()
 	if rows.Next() {
 		account := &Account{}
-		if err := rows.Scan(account.ID, account.Name, account.Email, account.AvatarUrl, account.GithubID,
-			account.GithubAccessToken, account.ApiKey, account.Admin, account.CreatedAt); err != nil {
+		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarUrl, &account.GithubID,
+			&account.GithubAccessToken, &account.ApiKey, &account.Admin, &account.CreatedAt); err != nil {
 			return nil, err
 		}
 		return account, nil

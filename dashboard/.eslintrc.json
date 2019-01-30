@@ -1,0 +1,14 @@
+{
+    "extends": "airbnb",
+    "env": {
+        "es6": true,
+        "browser": true
+    },
+    "rules": {
+        "semi": ["error", "never"],
+        "jsx-quotes": ["error", "prefer-single"],
+        "react/jsx-indent": ["error", 4],
+        "indent": ["error", 4],
+        "react/jsx-closing-bracket-location": ["error", "after-props"]
+    }
+}
