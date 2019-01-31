@@ -9,6 +9,7 @@ module.exports = {
     entry: join(__dirname, 'src', 'index.jsx'),
     output: {
         path: join(__dirname, 'build'),
+        publicPath: '/',
         filename: '[hash].js',
     },
     resolve: {

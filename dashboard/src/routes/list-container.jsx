@@ -1,6 +1,7 @@
 import React from 'react'
 import TimeAgo from 'react-timeago'
-import { Table, Tag } from 'antd'
+import { Link } from 'react-router-dom'
+import { Table, Tag, Button } from 'antd'
 
 const dataSource = [{
     key: '1',
@@ -31,7 +32,8 @@ const columns = [{
     dataIndex: 'status',
     key: 'status',
     render: tag => (
-        <Tag color={tag === 'started' ? 'green' : 'red'}>{tag === 'started' ? 'Started' : 'Stopped'}</Tag>
+        <Tag
+            color={tag === 'started' ? 'green' : 'red'}>{tag === 'started' ? 'Started' : 'Stopped'}</Tag>
     ),
 }, {
     title: 'Image',
@@ -47,7 +49,7 @@ const columns = [{
     dataIndex: 'deploy_at',
     key: 'deploy_at',
     render: deployAt => (
-        <TimeAgo date={deployAt} minPeriod={10} />
+        <TimeAgo date={deployAt} minPeriod={10}/>
     ),
 }, {
     title: 'Tags',
@@ -62,8 +64,13 @@ const columns = [{
 
 export default () => (
     <div>
-        <h1>Containers</h1>
+        <div>
+            <h1 style={{ float: 'left' }}>List Containers</h1>
+            <Link to={'/containers/new'} className={'ant-btn ant-btn-primary'} style={{ float: 'right' }}>
+                Create new
+            </Link>
+        </div>
 
-        <Table dataSource={dataSource} columns={columns} />
+        <Table dataSource={dataSource} columns={columns}/>
     </div>
 )
