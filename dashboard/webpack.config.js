@@ -11,6 +11,9 @@ module.exports = {
         path: join(__dirname, 'build'),
         filename: '[hash].js',
     },
+    resolve: {
+        extensions: ['.js', '.jsx'],
+    },
     module: {
         rules: [
             {
@@ -69,5 +72,8 @@ module.exports = {
     devServer: {
         port: process.env.PORT || 8080,
         disableHostCheck: true,
+        historyApiFallback: {
+            filename: 'index.html',
+        },
     },
 }

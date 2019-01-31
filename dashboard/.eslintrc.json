@@ -1,14 +1,52 @@
 {
-    "extends": "airbnb",
-    "env": {
-        "es6": true,
-        "browser": true
-    },
-    "rules": {
-        "semi": ["error", "never"],
-        "jsx-quotes": ["error", "prefer-single"],
-        "react/jsx-indent": ["error", 4],
-        "indent": ["error", 4],
-        "react/jsx-closing-bracket-location": ["error", "after-props"]
-    }
+  "extends": "airbnb",
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "rules": {
+    "semi": [
+      "error",
+      "never"
+    ],
+    "jsx-quotes": [
+      "error",
+      "prefer-single"
+    ],
+    "react/jsx-indent": [
+      "error",
+      4
+    ],
+    "indent": [
+      "error",
+      4
+    ],
+    "react/jsx-closing-bracket-location": [
+      "error",
+      "after-props"
+    ],
+    "react/jsx-curly-brace-presence": [
+      "error",
+      {
+        "props": "always",
+        "children": "ignore"
+      }
+    ],
+    "object-curly-newline": [
+      "error",
+      {
+        "multiline": true
+      }
+    ],
+    "react/jsx-tag-spacing": [
+      "error",
+      {
+        "closingSlash": "never",
+        "beforeSelfClosing": "always",
+        "afterOpening": "never",
+        "beforeClosing": "allow"
+      }
+    ],
+    "import/prefer-default-export": "off"
+  }
 }
