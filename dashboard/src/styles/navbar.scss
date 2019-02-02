@@ -1,0 +1,13 @@
+@import 'variables';
+@import '~bootstrap/scss/nav';
+@import '~bootstrap/scss/navbar';
+
+.navbar-dark {
+  background: $dark;
+}
+
+.nav-item.active {
+  border-bottom: 3px solid $primary;
+  padding-bottom: 5px;
+  margin-bottom: -8px;
+}

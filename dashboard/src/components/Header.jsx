@@ -1,6 +1,7 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
-export default ({ title, pretitle, children }) => (
+const Header = ({ title, pretitle, children }) => (
     <div className={'header'}>
         <div className={'row align-items-end'}>
             <div className={'col'}>
@@ -19,3 +20,10 @@ export default ({ title, pretitle, children }) => (
         </div>
     </div>
 )
+
+Header.propTypes = {
+    title: PropTypes.string.isRequired,
+    pretitle: PropTypes.string.isRequired,
+}
+
+export default Header

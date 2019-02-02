@@ -2,32 +2,30 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import createBrowserHistory from 'history/createBrowserHistory'
 import { Link, Router } from 'react-router-dom'
-import { Header, Card } from './components'
-import './index.scss'
+import { Header, TableCard, Card } from './components'
+import './styles/index.scss'
 
 const App = () => (
     <Router history={createBrowserHistory()}>
         <div>
-            <nav className="navbar navbar-expand-lg navbar-dark">
+            <nav className={'navbar navbar-expand-lg navbar-dark'}>
                 <div className={'container'}>
                     <Link to={'/'} className={'navbar-brand'}>Expected.sh</Link>
-                    <button className="navbar-toggler" type="button" data-toggle="collapse"
-                            data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-                            aria-label="Toggle navigation">
-                        <span className="navbar-toggler-icon"></span>
+                    <button className={'navbar-toggler'} type={'button'}>
+                        <span className={'navbar-toggler-icon'}/>
                     </button>
-                    <div className="collapse navbar-collapse" id="navbarNav">
-                        <ul className="navbar-nav">
-                            <li className="nav-item active">
-                                <a className="nav-link" href="#">Containers</a>
+                    <div className={'collapse navbar-collapse'}>
+                        <ul className={'navbar-nav'}>
+                            <li className={'nav-item active'}>
+                                <Link to={'/containers'} className={'nav-link'}>Containers</Link>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link" href="#">Images</a>
+                            <li className={'nav-item'}>
+                                <Link to={'/images'} className={'nav-link'}>Images</Link>
                             </li>
                         </ul>
-                        <ul className="navbar-nav ml-auto">
-                            <li className="nav-item">
-                                <a className="nav-link" href="#">Settings</a>
+                        <ul className={'navbar-nav ml-auto'}>
+                            <li className={'nav-item'}>
+                                <Link to={'/settings'} className={'nav-link'}>Settings</Link>
                             </li>
                         </ul>
                     </div>
@@ -41,9 +39,7 @@ const App = () => (
                     </Link>
                 </Header>
 
-                <Card title={'Hello'}>
-                    <p>Hello</p>
-                </Card>
+                <TableCard />
             </div>
         </div>
     </Router>

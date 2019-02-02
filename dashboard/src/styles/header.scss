@@ -1,0 +1,19 @@
+@import 'variables';
+
+.header {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $grey-light;
+  margin-bottom: 2rem;
+}
+
+.header-title {
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.header-pretitle {
+  color: $grey;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}

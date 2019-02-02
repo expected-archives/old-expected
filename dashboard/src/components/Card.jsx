@@ -1,6 +1,7 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
-export default ({ title, children }) => (
+const Card = ({ title, children }) => (
     <div className={'card'}>
         {title && (
             <div className={'card-header'}>
@@ -12,3 +13,9 @@ export default ({ title, children }) => (
         </div>
     </div>
 )
+
+Card.propTypes = {
+    title: PropTypes.string,
+}
+
+export default Card
