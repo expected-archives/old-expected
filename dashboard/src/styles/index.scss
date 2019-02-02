@@ -9,14 +9,19 @@
 @import '~bootstrap/scss/tables';
 @import '~bootstrap/scss/forms';
 @import '~bootstrap/scss/buttons';
+@import '~bootstrap/scss/card';
+@import '~bootstrap/scss/nav';
+@import '~bootstrap/scss/navbar';
+@import '~bootstrap/scss/utilities';
 @import 'variables';
-@import 'header';
 @import 'card';
+@import 'form';
+@import 'header';
 @import 'navbar';
 
 body {
   font-family: 'Open Sans', sans-serif;
-  background: #f9fbfd;
+  background: $grey-light;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -51,6 +56,10 @@ h6 {
 
 p {
   color: $dark;
+}
+
+hr {
+  border-color: $grey;
 }
 
 .content {
