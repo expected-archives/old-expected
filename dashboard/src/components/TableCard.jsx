@@ -8,7 +8,7 @@ export default ({ title, children }) => (
             </div>
         )}
         <div className={'card-table table-responsive'}>
-            <table className={'table'}>
+            <table className={'table table-hover'}>
                 <thead>
                     <tr>
                         <th>Name</th>

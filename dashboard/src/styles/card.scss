@@ -11,7 +11,7 @@
   margin-bottom: 0;
   padding: 1rem 1.5rem;
   color: inherit;
-  border-bottom: 1px solid $grey-light;
+  border-bottom: 1px solid $grey;
   background-color: transparent;
 }
 
@@ -28,7 +28,23 @@
 }
 
 .card-table thead th {
+  color: $dark;
+  font-size: .9375rem;
+  font-weight: 700;
   border: none;
+}
+
+.card-table th {
+  color: $dark;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+}
+
+.card-header + .card-table th {
+  color: $grey-dark;
+  font-size: .625rem;
+  background: $grey-light;
 }
 
 .card-table tbody td {
@@ -37,12 +53,10 @@
 
 .card-table .table th {
   border: none;
-  border-bottom: 1px solid $grey-light;
+  border-bottom: 1px solid $grey;
 }
 
-.card-table th {
-  color: $dark;
-  font-weight: 700;
-  text-transform: uppercase;
-  border: none;
+.card-table .table-hover tbody tr:hover {
+  transition: all .3s, height 0s;
+  background: $grey-light;
 }
