@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const TableCard = ({ title, dataSource, columns }) => (
+const TableCard = ({ title, onRowClick, dataSource, columns }) => (
     <div className={'card'}>
         {title && (
             <div className={'card-header'}>
@@ -18,10 +18,10 @@ const TableCard = ({ title, dataSource, columns }) => (
                     </tr>
                 </thead>
                 <tbody>
-                    {dataSource.map(data => (
-                        <tr>
+                    {dataSource.map((data, index) => (
+                        <tr key={index} onClick={onRowClick && onRowClick.bind(this, data)}>
                             {columns.map(({ key, render }) => (
-                                <td>{render ? render(data[key]) : data[key]}</td>
+                                <td key={key}>{render ? render(data[key]) : data[key]}</td>
                             ))}
                         </tr>
                     ))}
@@ -33,6 +33,7 @@ const TableCard = ({ title, dataSource, columns }) => (
 
 TableCard.propTypes = {
     title: PropTypes.string,
+    onRowClick: PropTypes.func,
     dataSource: PropTypes.arrayOf(PropTypes.object).isRequired,
     columns: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string.isRequired,

@@ -25,7 +25,7 @@ export default class ListContainer extends React.Component {
             key: 'tags',
             render: tags => (
                 <span>
-                    {tags.map(tag => <div>{tag}</div>)}
+                    {tags.map((tag, index) => <div key={index}>{tag}</div>)}
                 </span>
             ),
         },
@@ -63,7 +63,7 @@ export default class ListContainer extends React.Component {
                     </Link>
                 </Header>
 
-                <TableCard dataSource={ListContainer.dataSource} columns={ListContainer.columns} />
+                <TableCard dataSource={ListContainer.dataSource} columns={ListContainer.columns} onRowClick={(data) => console.log(data)} />
             </div>
         )
     }

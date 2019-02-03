@@ -9,3 +9,12 @@
   box-shadow: none;
   border-color: $blue;
 }
+
+.form-text {
+  margin-top: 0;
+  margin-bottom: .5rem;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  box-shadow: none;
+}
