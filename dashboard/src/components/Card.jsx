@@ -16,6 +16,7 @@ const Card = ({ title, children }) => (
 
 Card.propTypes = {
     title: PropTypes.string,
+    children: PropTypes.node,
 }
 
 export default Card

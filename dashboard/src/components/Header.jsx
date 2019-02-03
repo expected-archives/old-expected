@@ -24,6 +24,7 @@ const Header = ({ title, pretitle, children }) => (
 Header.propTypes = {
     title: PropTypes.string.isRequired,
     pretitle: PropTypes.string.isRequired,
+    children: PropTypes.node,
 }
 
 export default Header

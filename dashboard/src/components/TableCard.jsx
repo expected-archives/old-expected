@@ -1,6 +1,7 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
-export default ({ title, children }) => (
+const TableCard = ({ title, dataSource, columns }) => (
     <div className={'card'}>
         {title && (
             <div className={'card-header'}>
@@ -11,21 +12,33 @@ export default ({ title, children }) => (
             <table className={'table table-hover'}>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>URL</th>
-                        <th>Created</th>
-                        <th>Tags</th>
+                        {columns.map(({ title: columnTitle }) => (
+                            <th key={columnTitle}>{columnTitle}</th>
+                        ))}
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Hello</td>
-                        <td>hello.remicaumette.ctr.expected.sh</td>
-                        <td>1 minute ago</td>
-                        <td></td>
-                    </tr>
+                    {dataSource.map(data => (
+                        <tr>
+                            {columns.map(({ key, render }) => (
+                                <td>{render ? render(data[key]) : data[key]}</td>
+                            ))}
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
     </div>
 )
+
+TableCard.propTypes = {
+    title: PropTypes.string,
+    dataSource: PropTypes.arrayOf(PropTypes.object).isRequired,
+    columns: PropTypes.arrayOf(PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        key: PropTypes.string.isRequired,
+        render: PropTypes.func,
+    })).isRequired,
+}
+
+export default TableCard
