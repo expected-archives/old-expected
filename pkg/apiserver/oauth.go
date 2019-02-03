@@ -1,14 +1,12 @@
 package apiserver
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/github"
 	"github.com/expectedsh/expected/pkg/models"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"net/http"
-	"time"
 )
 
 func (s *ApiServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
@@ -49,23 +47,10 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	expires := time.Now().Add(72 * time.Hour)
-	issuedToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Subject:   account.ID,
-		ExpiresAt: expires.Unix(),
-		IssuedAt:  time.Now().Unix(),
-	}).SignedString([]byte(s.Secret))
-	if err != nil {
-		logrus.WithError(err).Errorln("Unable to generate new token.")
-		response.ErrorInternal(w, "Unable to generate new token.")
-		return
-	}
-
 	http.SetCookie(w, &http.Cookie{
 		Name:    "token",
 		Path:    "/",
-		Expires: expires,
-		Value:   issuedToken,
+		Value:   account.ApiKey,
 	})
 	http.Redirect(w, r, s.DashboardURL, http.StatusTemporaryRedirect)
 }

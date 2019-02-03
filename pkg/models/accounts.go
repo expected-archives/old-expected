@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"github.com/google/uuid"
+	"strings"
 	"time"
 )
 
@@ -60,10 +61,30 @@ func (m AccountsModel) GetByGithubID(ctx context.Context, id int64) (*Account, e
 	return nil, nil
 }
 
+func (m AccountsModel) GetByApiKey(ctx context.Context, apiKey string) (*Account, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
+		FROM accounts WHERE api_key = $1
+	`, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	if rows.Next() {
+		account := &Account{}
+		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarUrl, &account.GithubID,
+			&account.GithubAccessToken, &account.ApiKey, &account.Admin, &account.CreatedAt); err != nil {
+			return nil, err
+		}
+		return account, nil
+	}
+	return nil, nil
+}
+
 func (m AccountsModel) Create(ctx context.Context, name, email, avatarUrl string, githubId int64,
 	githubAccessToken string, admin bool) (*Account, error) {
 	id := uuid.New().String()
-	apiKey := uuid.New().String()
+	apiKey := strings.Replace(uuid.New().String(), "-", "", -1)
 	createdAt := time.Now()
 	_, err := db.ExecContext(ctx, `
 		INSERT INTO accounts (id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at)

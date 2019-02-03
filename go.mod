@@ -3,8 +3,8 @@ module github.com/expectedsh/expected
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.0
-	github.com/gorilla/context v1.1.1 // indirect
-	github.com/gorilla/mux v1.6.2
+	github.com/gorilla/context v1.1.1
+	github.com/gorilla/mux v1.7.0
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/lib/pq v1.0.0
 	github.com/sirupsen/logrus v1.3.0

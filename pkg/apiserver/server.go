@@ -31,17 +31,15 @@ func New(addr, secret, admin, dashboardUrl, githubClientId, githubClientSecret s
 	}
 }
 
-func cors(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		f(w, r)
-	}
-}
-
 func (s *ApiServer) Start() error {
 	router := mux.NewRouter()
+
 	router.HandleFunc("/oauth/github", s.OAuthGithub).Methods("GET")
 	router.HandleFunc("/oauth/github/callback", s.OAuthGithubCallback).Methods("GET")
-	router.HandleFunc("/account", cors(s.Account)).Methods("GET")
+	v1 := router.PathPrefix("/v1").Subrouter()
+	{
+		v1.Use(s.corsMiddleware, s.authMiddleware)
+		v1.HandleFunc("/account", s.Account).Methods("GET")
+	}
 	return http.ListenAndServe(s.Addr, router)
 }

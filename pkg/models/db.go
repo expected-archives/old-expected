@@ -26,7 +26,7 @@ func InitDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenCon
   			avatar_url VARCHAR(255) NOT NULL,
   			github_id BIGINT NOT NULL,
   			github_access_token VARCHAR(255) NOT NULL,
-  			api_key VARCHAR(36) NOT NULL,
+  			api_key VARCHAR(32) NOT NULL,
   			admin BOOLEAN DEFAULT FALSE,
   			created_at TIMESTAMP DEFAULT NOW()
 		)
