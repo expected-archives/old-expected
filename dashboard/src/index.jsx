@@ -12,7 +12,7 @@ const App = () => (
                 <div className={'container'}>
                     <Link to={'/'} className={'navbar-brand'}>Expected.sh</Link>
                     <button className={'navbar-toggler'} type={'button'}>
-                        <span className={'navbar-toggler-icon'}/>
+                        <span className={'navbar-toggler-icon'} />
                     </button>
                     <div className={'collapse navbar-collapse'}>
                         <ul className={'navbar-nav'}>
@@ -34,14 +34,14 @@ const App = () => (
 
             <div className={'container'}>
                 <Switch>
-                    <Route path={'/containers/new'} component={NewContainer}/>
-                    <Route path={'/containers'} component={ListContainer}/>
-                    <Route path={'/images'} component={ListImage}/>
-                    <Redirect from={'/'} to={'/containers'}/>
+                    <Route path={'/containers/new'} component={NewContainer} />
+                    <Route path={'/containers'} component={ListContainer} />
+                    <Route path={'/images'} component={ListImage} />
+                    <Redirect from={'/'} to={'/containers'} />
                 </Switch>
             </div>
         </div>
     </Router>
 )
 
-ReactDOM.render(<App/>, document.getElementById('root'))
+ReactDOM.render(<App />, document.getElementById('root'))

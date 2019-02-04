@@ -63,7 +63,10 @@ export default class ListContainer extends React.Component {
                     </Link>
                 </Header>
 
-                <TableCard dataSource={ListContainer.dataSource} columns={ListContainer.columns} onRowClick={(data) => console.log(data)} />
+                <TableCard
+                    dataSource={ListContainer.dataSource}
+                    columns={ListContainer.columns}
+                    onRowClick={data => console.log(data)} />
             </div>
         )
     }
