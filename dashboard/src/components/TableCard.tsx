@@ -1,7 +1,19 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { ReactNode } from "react";
 
-const TableCard = ({ title, onRowClick, dataSource, columns }) => (
+interface IColumn {
+    title: string;
+    key: string;
+    render?: (data: object) => ReactNode;
+}
+
+interface IProps {
+    title?: string;
+    onRowClick?: () => void;
+    dataSource: object[];
+    columns: IColumn[];
+}
+
+export default ({ title, onRowClick, dataSource, columns }: IProps) => (
     <div className={'card'}>
         {title && (
             <div className={'card-header'}>
@@ -20,8 +32,8 @@ const TableCard = ({ title, onRowClick, dataSource, columns }) => (
                 <tbody>
                     {dataSource.map((data, index) => (
                         <tr key={index} onClick={onRowClick && onRowClick.bind(this, data)}>
-                            {columns.map(({ key, render }) => (
-                                <td key={key}>{render ? render(data[key]) : data[key]}</td>
+                            {columns.map(({ key, render }, index) => (
+                                <td key={index}>{render ? render(data[key]) : data[key]}</td>
                             ))}
                         </tr>
                     ))}
@@ -29,17 +41,4 @@ const TableCard = ({ title, onRowClick, dataSource, columns }) => (
             </table>
         </div>
     </div>
-)
-
-TableCard.propTypes = {
-    title: PropTypes.string,
-    onRowClick: PropTypes.func,
-    dataSource: PropTypes.arrayOf(PropTypes.object).isRequired,
-    columns: PropTypes.arrayOf(PropTypes.shape({
-        title: PropTypes.string.isRequired,
-        key: PropTypes.string.isRequired,
-        render: PropTypes.func,
-    })).isRequired,
-}
-
-export default TableCard
+);

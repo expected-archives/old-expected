@@ -1,9 +1,9 @@
-import React from 'react'
-import createBrowserHistory from 'history/createBrowserHistory'
-import { Link, Redirect, Route, Router, Switch } from 'react-router-dom'
-import { ListContainer, ListImage, NewContainer } from './views'
+import React, { Component } from "react";
+import createBrowserHistory from "history/createBrowserHistory";
+import { Link, Redirect, Route, Router, Switch } from "react-router-dom";
+import { ListContainer, ListImage, NewContainer } from "./views";
 
-export default class App extends React.Component {
+export default class App extends Component {
     constructor(props) {
         super(props)
         this.history = createBrowserHistory()

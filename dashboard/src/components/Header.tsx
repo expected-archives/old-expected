@@ -1,7 +1,12 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { ReactNode } from "react";
 
-const Header = ({ title, pretitle, children }) => (
+interface IProps {
+    title: string;
+    pretitle: string;
+    children: ReactNode;
+}
+
+export default ({ title, pretitle, children }: IProps) => (
     <div className={'header'}>
         <div className={'row align-items-end'}>
             <div className={'col'}>
@@ -19,12 +24,4 @@ const Header = ({ title, pretitle, children }) => (
             )}
         </div>
     </div>
-)
-
-Header.propTypes = {
-    title: PropTypes.string.isRequired,
-    pretitle: PropTypes.string.isRequired,
-    children: PropTypes.node,
-}
-
-export default Header
+);

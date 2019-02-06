@@ -1,7 +1,11 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { ReactNode } from "react";
 
-const Card = ({ title, children }) => (
+interface IProps {
+    title?: string;
+    children: ReactNode;
+}
+
+export default ({ title, children }: IProps) => (
     <div className={'card'}>
         {title && (
             <div className={'card-header'}>
@@ -12,11 +16,4 @@ const Card = ({ title, children }) => (
             {children}
         </div>
     </div>
-)
-
-Card.propTypes = {
-    title: PropTypes.string,
-    children: PropTypes.node,
-}
-
-export default Card
+);

@@ -6,27 +6,20 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
     mode: 'development',
-    entry: join(__dirname, 'src', 'index.jsx'),
+    entry: join(__dirname, 'src', 'index.tsx'),
     output: {
         path: join(__dirname, 'build'),
         publicPath: '/',
         filename: '[hash].js',
     },
     resolve: {
-        extensions: ['.js', '.jsx'],
+        extensions: ['.js', '.ts', '.tsx'],
     },
     module: {
         rules: [
             {
-                test: /\.(js|jsx)$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env', '@babel/preset-react'],
-                        plugins: ['@babel/plugin-proposal-class-properties'],
-                    },
-                },
+                test: /\.tsx?$/,
+                loader: 'awesome-typescript-loader',
             },
             {
                 test: /\.scss$/,

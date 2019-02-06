@@ -1,7 +1,12 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { ReactNode } from "react";
 
-const FormGroup = ({ name, description, children }) => (
+interface IProps {
+    name?: string;
+    description?: string;
+    children: ReactNode;
+}
+
+export default ({ name, description, children }: IProps) => (
     <div className={'form-group'}>
         {name && (
             <label>{name}</label>
@@ -13,12 +18,4 @@ const FormGroup = ({ name, description, children }) => (
         )}
         {children}
     </div>
-)
-
-FormGroup.propTypes = {
-    name: PropTypes.string,
-    description: PropTypes.string,
-    children: PropTypes.node,
-}
-
-export default FormGroup
+);
