@@ -12,8 +12,8 @@ const TableCard = ({ title, onRowClick, dataSource, columns }) => (
             <table className={'table table-hover'}>
                 <thead>
                     <tr>
-                        {columns.map(({ title: columnTitle }) => (
-                            <th key={columnTitle}>{columnTitle}</th>
+                        {columns.map(({ title: columnTitle }, index) => (
+                            <th key={index}>{columnTitle}</th>
                         ))}
                     </tr>
                 </thead>
