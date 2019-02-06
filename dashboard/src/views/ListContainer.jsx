@@ -10,8 +10,8 @@ export default class ListContainer extends React.Component {
             key: 'name',
         },
         {
-            title: 'URL',
-            key: 'url',
+            title: 'Endpoint',
+            key: 'endpoint',
         },
         {
             title: 'Created',
@@ -37,7 +37,7 @@ export default class ListContainer extends React.Component {
             name: 'Nginx',
             status: 'stopped',
             image: 'nginx:latest',
-            url: 'nginx.remicaumette.ctr.expected.sh',
+            endpoint: 'nginx.remicaumette.ctr.expected.sh',
             memory: 64,
             tags: ['frontend', 'expected.sh'],
             created_at: new Date(),
@@ -47,7 +47,7 @@ export default class ListContainer extends React.Component {
             name: 'Mysql',
             status: 'started',
             image: 'mysql:latest',
-            url: 'mysql.remicaumette.ctr.expected.sh',
+            endpoint: 'mysql.remicaumette.ctr.expected.sh',
             memory: 128,
             tags: ['database', 'expected.sh'],
             created_at: new Date(Date.now() - 7200),
@@ -63,7 +63,8 @@ export default class ListContainer extends React.Component {
                     </Link>
                 </Header>
 
-                <TableCard dataSource={ListContainer.dataSource} columns={ListContainer.columns} onRowClick={(data) => console.log(data)} />
+                <TableCard dataSource={ListContainer.dataSource} columns={ListContainer.columns}
+                            onRowClick={data => console.log(data)} />
             </div>
         )
     }

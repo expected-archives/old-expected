@@ -2,12 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 const FormGroup = ({ name, description, children }) => (
-    <div className="form-group">
+    <div className={'form-group'}>
         {name && (
             <label>{name}</label>
         )}
         {description && (
-            <small className="form-text text-muted">
+            <small className={'form-text text-muted'}>
                 {description}
             </small>
         )}
