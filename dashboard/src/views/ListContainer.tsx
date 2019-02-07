@@ -1,9 +1,9 @@
-import React from 'react'
-import TimeAgo from 'react-timeago'
-import { Link } from 'react-router-dom'
-import { Header, TableCard } from '../components'
+import React, { Component } from "react";
+import TimeAgo from "react-timeago";
+import { Link } from "react-router-dom";
+import { Header, TableCard } from "../components";
 
-export default class ListContainer extends React.Component {
+export default class ListContainer extends Component {
     static columns = [
         {
             title: 'Name',
@@ -16,18 +16,18 @@ export default class ListContainer extends React.Component {
         {
             title: 'Created',
             key: 'created_at',
-            render: createdAt => (
+            render: (createdAt: any) => (
                 <TimeAgo date={createdAt} minPeriod={10} />
             ),
         },
         {
             title: 'Tags',
             key: 'tags',
-            render: tags => (
+			render: (tags: any) => (
                 <span>
-                    {tags.map((tag, index) => <div key={index}>{tag}</div>)}
+                    {tags.map((tag: string, index: number) => <div key={index}>{tag}</div>)}
                 </span>
-            ),
+			),
         },
     ]
 

@@ -3,13 +3,13 @@ import React, { ReactNode } from "react";
 interface IColumn {
     title: string;
     key: string;
-    render?: (data: object) => ReactNode;
+	render?: (data: any) => ReactNode;
 }
 
 interface IProps {
     title?: string;
-    onRowClick?: () => void;
-    dataSource: object[];
+    onRowClick?: (data: any) => any;
+    dataSource: any[];
     columns: IColumn[];
 }
 
@@ -31,7 +31,7 @@ export default ({ title, onRowClick, dataSource, columns }: IProps) => (
                 </thead>
                 <tbody>
                     {dataSource.map((data, index) => (
-                        <tr key={index} onClick={onRowClick && onRowClick.bind(this, data)}>
+                        <tr key={index} onClick={onRowClick}>
                             {columns.map(({ key, render }, index) => (
                                 <td key={index}>{render ? render(data[key]) : data[key]}</td>
                             ))}

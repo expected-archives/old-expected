@@ -3,7 +3,7 @@ import React, { ReactNode } from "react";
 interface IProps {
     title: string;
     pretitle: string;
-    children: ReactNode;
+    children?: ReactNode;
 }
 
 export default ({ title, pretitle, children }: IProps) => (

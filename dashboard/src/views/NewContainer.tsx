@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { FormEvent, Component } from "react";
 import { Form, FormGroup, Header } from '../components'
 import { Link } from 'react-router-dom'
 
 
-export default class NewContainer extends React.Component {
-    onSubmit(event) {
+export default class NewContainer extends Component {
+    onSubmit(event: FormEvent) {
         event.preventDefault()
         console.log(event)
     }
