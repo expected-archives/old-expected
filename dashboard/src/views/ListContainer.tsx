@@ -1,10 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import TimeAgo from "react-timeago";
 import { Link } from "react-router-dom";
 import { Header, TableCard } from "../components";
 
-export default class ListContainer extends Component {
-    static columns = [
+export default () => {
+    const columns = [
         {
             title: 'Name',
             key: 'name',
@@ -23,15 +23,15 @@ export default class ListContainer extends Component {
         {
             title: 'Tags',
             key: 'tags',
-			render: (tags: any) => (
+            render: (tags: any) => (
                 <span>
                     {tags.map((tag: string, index: number) => <div key={index}>{tag}</div>)}
                 </span>
-			),
+            ),
         },
-    ]
+    ];
 
-    static dataSource = [
+    const dataSource = [
         {
             key: '1',
             name: 'Nginx',
@@ -52,22 +52,18 @@ export default class ListContainer extends Component {
             tags: ['database', 'expected.sh'],
             created_at: new Date(Date.now() - 7200),
         },
-    ]
+    ];
 
-    render() {
-        return (
-            <div>
-                <Header title={'Containers'} pretitle={'Overview'}>
-                    <Link to={'/containers/new'} className={'btn btn-primary'}>
-                        Create
+    return (
+        <div>
+            <Header title={'Containers'} pretitle={'Overview'}>
+                <Link to={'/containers/new'} className={'btn btn-primary'}>
+                    Create
                     </Link>
-                </Header>
+            </Header>
 
-                <TableCard
-                    dataSource={ListContainer.dataSource}
-                    columns={ListContainer.columns}
-                    onRowClick={data => console.log(data)} />
-            </div>
-        )
-    }
-}
+            <TableCard dataSource={dataSource} columns={columns}
+                onRowClick={data => console.log(data)} />
+        </div>
+    );
+};
