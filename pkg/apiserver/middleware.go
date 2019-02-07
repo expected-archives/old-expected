@@ -3,9 +3,9 @@ package apiserver
 import (
 	"net/http"
 
+	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/apiserver/session"
-	"github.com/expectedsh/expected/pkg/models"
 )
 
 func (s *ApiServer) corsMiddleware(next http.Handler) http.Handler {
@@ -28,7 +28,7 @@ func (s *ApiServer) authMiddleware(next http.Handler) http.Handler {
 			response.ErrorForbidden(w)
 			return
 		}
-		account, err := models.Accounts.GetByApiKey(r.Context(), header)
+		account, err := accounts.FindByAPIKey(r.Context(), header)
 		if err != nil {
 			response.ErrorInternal(w)
 			return

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
+	"time"
+
+	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/apiserver"
-	"github.com/expectedsh/expected/pkg/models"
+	"github.com/expectedsh/expected/pkg/containers"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 type Config struct {
@@ -25,6 +28,23 @@ type Config struct {
 	}
 }
 
+func initDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenConns int) (*sql.DB, error) {
+	db, err := sql.Open("postgres", addr)
+	if err != nil {
+		return nil, err
+	}
+	db.SetConnMaxLifetime(connMaxLifetime)
+	db.SetMaxIdleConns(maxIdleConns)
+	db.SetMaxOpenConns(maxOpenConns)
+	if err = accounts.InitDB(db); err != nil {
+		return nil, err
+	}
+	if err = containers.InitDB(db); err != nil {
+		return nil, err
+	}
+	return db, err
+}
+
 func main() {
 	logrus.Infoln("processing environment configuration")
 	config := &Config{}
@@ -33,14 +53,16 @@ func main() {
 	}
 
 	logrus.Infoln("initializing the database")
-	if err := models.InitDB(config.Postgres.Addr, config.Postgres.ConnMaxLifetime, config.Postgres.MaxIdleConns,
-		config.Postgres.MaxOpenConns); err != nil {
+	db, err := initDB(config.Postgres.Addr, config.Postgres.ConnMaxLifetime,
+		config.Postgres.MaxIdleConns, config.Postgres.MaxOpenConns)
+	if err != nil {
 		logrus.WithError(err).Fatalln("unable to init the database")
 	}
+	defer db.Close()
 
 	logrus.Infoln("starting api server")
-	server := apiserver.New(config.Addr, config.Secret, config.Admin, config.DashboardURL, config.Github.ClientID,
-		config.Github.ClientSecret)
+	server := apiserver.New(config.Addr, config.Secret, config.Admin,
+		config.DashboardURL, config.Github.ClientID, config.Github.ClientSecret)
 
 	logrus.Infof("listening on %v\n", config.Addr)
 	if err := server.Start(); err != nil {

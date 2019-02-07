@@ -42,6 +42,7 @@ func (s *ApiServer) Start() error {
 		v1.Use(s.corsMiddleware, s.authMiddleware)
 		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
+		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 	}
 	return http.ListenAndServe(s.Addr, router)
 }
