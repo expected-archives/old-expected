@@ -1,15 +1,17 @@
 import React, { FormEvent } from "react";
-import { Form, FormGroup, Header } from '../components'
-import { Link } from 'react-router-dom'
+import { Form, FormGroup, Header } from "../components";
+import { Link } from "react-router-dom";
 
 export default () => {
+    const ref = React.createRef<HTMLDivElement>();
+
     const onSubmit = (event: FormEvent) => {
         event.preventDefault();
         console.log(event);
     };
 
     return (
-        <div className={'row justify-content-center'}>
+        <div className={'row justify-content-center'} ref={ref}>
             <div className={'col-12 col-lg-10 col-xl-8'}>
                 <Header pretitle={'Containers'} title={'Create a new container'} />
 
@@ -41,10 +43,10 @@ export default () => {
 
                     <button className={'btn btn-block btn-primary'}>
                         Create container
-                        </button>
+                    </button>
                     <Link to={'/containers'} className={'btn btn-block btn-link text-muted'}>
                         Cancel
-                        </Link>
+                    </Link>
                 </Form>
             </div>
         </div>

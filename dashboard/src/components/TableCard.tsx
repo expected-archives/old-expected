@@ -1,4 +1,4 @@
-import React, { ReactNode, Component } from "react";
+import React, { ReactNode } from "react";
 
 interface IColumn {
     title: string;

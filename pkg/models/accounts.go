@@ -2,9 +2,10 @@ package models
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type AccountsModel struct{}
@@ -13,10 +14,10 @@ type Account struct {
 	ID                string    `json:"id"`
 	Name              string    `json:"name"`
 	Email             string    `json:"email"`
-	AvatarUrl         string    `json:"avatar_url"`
+	AvatarURL         string    `json:"avatar_url"`
 	GithubID          int64     `json:"-"`
 	GithubAccessToken string    `json:"-"`
-	ApiKey            string    `json:"api_key"`
+	APIKey            string    `json:"api_key"`
 	Admin             bool      `json:"admin"`
 	CreatedAt         time.Time `json:"created_at"`
 }
@@ -32,8 +33,8 @@ func (m AccountsModel) GetByID(ctx context.Context, id string) (*Account, error)
 	defer rows.Close()
 	if rows.Next() {
 		account := &Account{}
-		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarUrl, &account.GithubID,
-			&account.GithubAccessToken, &account.ApiKey, &account.Admin, &account.CreatedAt); err != nil {
+		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
+			&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
 			return nil, err
 		}
 		return account, nil
@@ -52,8 +53,8 @@ func (m AccountsModel) GetByGithubID(ctx context.Context, id int64) (*Account, e
 	defer rows.Close()
 	if rows.Next() {
 		account := &Account{}
-		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarUrl, &account.GithubID,
-			&account.GithubAccessToken, &account.ApiKey, &account.Admin, &account.CreatedAt); err != nil {
+		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
+			&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
 			return nil, err
 		}
 		return account, nil
@@ -72,8 +73,8 @@ func (m AccountsModel) GetByApiKey(ctx context.Context, apiKey string) (*Account
 	defer rows.Close()
 	if rows.Next() {
 		account := &Account{}
-		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarUrl, &account.GithubID,
-			&account.GithubAccessToken, &account.ApiKey, &account.Admin, &account.CreatedAt); err != nil {
+		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
+			&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
 			return nil, err
 		}
 		return account, nil
@@ -94,10 +95,10 @@ func (m AccountsModel) Create(ctx context.Context, name, email, avatarUrl string
 		ID:                id,
 		Name:              name,
 		Email:             email,
-		AvatarUrl:         avatarUrl,
+		AvatarURL:         avatarUrl,
 		GithubID:          githubId,
 		GithubAccessToken: githubAccessToken,
-		ApiKey:            apiKey,
+		APIKey:            apiKey,
 		Admin:             admin,
 		CreatedAt:         createdAt,
 	}, err
@@ -107,8 +108,8 @@ func (m AccountsModel) Update(ctx context.Context, account *Account) error {
 	_, err := db.ExecContext(ctx, `
 		UPDATE accounts SET name = $2, email = $3, avatar_url = $4, github_id = $5, github_access_token = $6,
 		api_key = $7, admin = $8 WHERE id = $1
-	`, account.ID, account.Name, account.Email, account.AvatarUrl, account.GithubID, account.GithubAccessToken,
-		account.ApiKey, account.Admin)
+	`, account.ID, account.Name, account.Email, account.AvatarURL, account.GithubID, account.GithubAccessToken,
+		account.APIKey, account.Admin)
 	return err
 }
 

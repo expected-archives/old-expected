@@ -1,11 +1,12 @@
 package apiserver
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
-	"net/http"
 )
 
 type ApiServer struct {
@@ -39,7 +40,8 @@ func (s *ApiServer) Start() error {
 	v1 := router.PathPrefix("/v1").Subrouter()
 	{
 		v1.Use(s.corsMiddleware, s.authMiddleware)
-		v1.HandleFunc("/account", s.Account).Methods("GET")
+		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
+		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 	}
 	return http.ListenAndServe(s.Addr, router)
 }

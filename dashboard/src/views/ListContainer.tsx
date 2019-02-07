@@ -3,6 +3,17 @@ import TimeAgo from "react-timeago";
 import { Link } from "react-router-dom";
 import { Header, TableCard } from "../components";
 
+interface IContainerDataSource {
+    key: string;
+    name: string;
+    status: string;
+    image: string;
+    endpoint: string;
+    memory: number;
+    tags: string[];
+    createdAt: Date;
+}
+
 export default () => {
     const columns = [
         {
@@ -15,7 +26,7 @@ export default () => {
         },
         {
             title: 'Created',
-            key: 'created_at',
+            key: 'createdAt',
             render: (createdAt: any) => (
                 <TimeAgo date={createdAt} minPeriod={10} />
             ),
@@ -25,7 +36,11 @@ export default () => {
             key: 'tags',
             render: (tags: any) => (
                 <span>
-                    {tags.map((tag: string, index: number) => <div key={index}>{tag}</div>)}
+                    {tags.map((tag: string, index: number) => (
+                        <div key={index}>
+                            {tag}
+                        </div>
+                    ))}
                 </span>
             ),
         },
@@ -40,7 +55,7 @@ export default () => {
             endpoint: 'nginx.remicaumette.ctr.expected.sh',
             memory: 64,
             tags: ['frontend', 'expected.sh'],
-            created_at: new Date(),
+            createdAt: new Date(),
         },
         {
             key: '2',
@@ -50,7 +65,7 @@ export default () => {
             endpoint: 'mysql.remicaumette.ctr.expected.sh',
             memory: 128,
             tags: ['database', 'expected.sh'],
-            created_at: new Date(Date.now() - 7200),
+            createdAt: new Date(Date.now() - 7200),
         },
     ];
 
@@ -59,10 +74,10 @@ export default () => {
             <Header title={'Containers'} pretitle={'Overview'}>
                 <Link to={'/containers/new'} className={'btn btn-primary'}>
                     Create
-                    </Link>
+                </Link>
             </Header>
 
-            <TableCard dataSource={dataSource} columns={columns}
+            <TableCard<IContainerDataSource> dataSource={dataSource} columns={columns}
                 onRowClick={data => console.log(data)} />
         </div>
     );

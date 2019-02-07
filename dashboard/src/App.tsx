@@ -3,7 +3,6 @@ import { createBrowserHistory } from "history";
 import { Link, Redirect, Route, Router, Switch } from "react-router-dom";
 import { ListContainer, ListImage, NewContainer } from "./views";
 
-
 export default () => {
     const history = createBrowserHistory();
 
