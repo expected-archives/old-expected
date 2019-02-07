@@ -1,11 +1,11 @@
 package apiserver
 
 import (
+	"net/http"
+
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/apiserver/session"
 	"github.com/expectedsh/expected/pkg/models"
-	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *ApiServer) corsMiddleware(next http.Handler) http.Handler {
@@ -30,7 +30,8 @@ func (s *ApiServer) authMiddleware(next http.Handler) http.Handler {
 		}
 		account, err := models.Accounts.GetByApiKey(r.Context(), header)
 		if err != nil {
-			logrus.Errorln(err)
+			response.ErrorInternal(w)
+			return
 		}
 		if account == nil {
 			response.ErrorForbidden(w)

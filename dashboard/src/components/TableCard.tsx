@@ -3,42 +3,49 @@ import React, { ReactNode } from "react";
 interface IColumn {
     title: string;
     key: string;
-    render?: (data: object) => ReactNode;
+    render?: (data: any) => ReactNode;
 }
 
-interface IProps {
+interface IProps<T> {
     title?: string;
-    onRowClick?: () => void;
-    dataSource: object[];
+    onRowClick?: (data: T) => any;
+    dataSource: T[];
     columns: IColumn[];
 }
 
-export default ({ title, onRowClick, dataSource, columns }: IProps) => (
-    <div className={'card'}>
-        {title && (
-            <div className={'card-header'}>
-                <h4>{title}</h4>
-            </div>
-        )}
-        <div className={'card-table table-responsive'}>
-            <table className={'table table-hover'}>
-                <thead>
-                    <tr>
-                        {columns.map(({ title: columnTitle }, index) => (
-                            <th key={index}>{columnTitle}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {dataSource.map((data, index) => (
-                        <tr key={index} onClick={onRowClick && onRowClick.bind(this, data)}>
-                            {columns.map(({ key, render }, index) => (
-                                <td key={index}>{render ? render(data[key]) : data[key]}</td>
+export default <T,>({ title, onRowClick, dataSource, columns }: IProps<T>) => {
+    const onClick = (data: T) => () => {
+        if (onRowClick)
+            onRowClick(data);
+    };
+
+    return (
+        <div className={'card'}>
+            {title && (
+                <div className={'card-header'}>
+                    <h4>{title}</h4>
+                </div>
+            )}
+            <div className={'card-table table-responsive'}>
+                <table className={'table table-hover'}>
+                    <thead>
+                        <tr>
+                            {columns.map(({ title: columnTitle }, index) => (
+                                <th key={index}>{columnTitle}</th>
                             ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {dataSource.map((data: any, index) => (
+                            <tr key={index} onClick={onClick(data)}>
+                                {columns.map(({ key, render }, index) => (
+                                    <td key={index}>{render ? render(data[key]) : data[key]}</td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-);
+    );
+}
