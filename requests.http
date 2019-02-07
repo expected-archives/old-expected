@@ -6,11 +6,16 @@ Authorization: c2e827438b6a4a26b8262d89e2673ed0
 {
   "name": "hello",
   "image": "google/golang-hello",
-  "size": 64,
+  "memory": 64,
   "tags": ["expectedsh", "test"],
   "environment": {
     "PORT": "80"
   }
 }
 
-### Create new container with
+### List containers
+GET http://localhost:3000/v1/containers
+Content-Type: application/json
+Authorization: c2e827438b6a4a26b8262d89e2673ed0
+
+###

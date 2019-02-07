@@ -8,5 +8,5 @@ import (
 )
 
 func (s *ApiServer) GetAccount(w http.ResponseWriter, r *http.Request) {
-	response.SingleResource(w, "account", session.GetAccount(r))
+	response.Resource(w, "account", session.GetAccount(r))
 }
