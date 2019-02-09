@@ -1,5 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { Header } from "../components";
 
 export default () => (
-    <h1>Images</h1>
+    <div>
+        <Header title={'Images'} pretitle={'Overview'} />
+    </div>
 );
