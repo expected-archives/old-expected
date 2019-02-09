@@ -27,12 +27,9 @@ func applyCORS(router *mux.Router) error {
 	}); err != nil {
 		return err
 	}
-	for route, methods := range routes {
+	for route := range routes {
 		fmt.Println(route)
 		router.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Add("Access-Control-Allow-Origin", "*")
-			w.Header().Add("Access-Control-Allow-Methods", methods)
-			w.Header().Add("Access-Control-Allow-Headers", "authorization, origin, content-type, accept")
 			w.WriteHeader(http.StatusOK)
 		}).Methods("OPTIONS")
 	}
@@ -41,7 +38,7 @@ func applyCORS(router *mux.Router) error {
 			w.Header().Add("Access-Control-Allow-Origin", "*")
 			w.Header().Add("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
 			w.Header().Add("Access-Control-Allow-Headers", "authorization, origin, content-type, accept")
-			w.WriteHeader(http.StatusOK)
+			next.ServeHTTP(w, r)
 		})
 	})
 	return nil
