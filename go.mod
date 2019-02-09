@@ -1,6 +1,9 @@
 module github.com/expectedsh/expected
 
 require (
+	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
+	github.com/expectedsh/oauth-registry-server v0.0.0-20190111161201-8229f967bb7c // indirect
 	github.com/google/uuid v1.1.0
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/mux v1.7.0

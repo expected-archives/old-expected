@@ -10,5 +10,19 @@ services:
       - data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  registry:
+    restart: always
+    image: registry:latest
+    ports:
+      - 5000:5000
+    environment:
+      - REGISTRY_AUTH=token
+      - REGISTRY_AUTH_TOKEN_REALM=http://localhost:3000/registry/auth
+      - REGISTRY_AUTH_TOKEN_SERVICE=registry
+      - REGISTRY_AUTH_TOKEN_ISSUER=auth_registry
+      - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/server.crt
+      - REGISTRY_AUTH_TOKEN_AUTOREDIRECT=false
+    volumes:
+      - ./certs:/certs
 volumes:
   data: {}
