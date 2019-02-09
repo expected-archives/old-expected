@@ -12,8 +12,11 @@ func Authenticate(login, token string) (*accounts.Account, error) {
 	if e != nil {
 		return account, e
 	}
+	if account == nil {
+		return nil, errors.New("account not found")
+	}
 	if account.Email == login {
-		return nil, nil
+		return account, nil
 	}
 	log.Printf("failed authentication with login %q and token %q\n", login, token)
 	return nil, errors.New("bad credentials")

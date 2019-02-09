@@ -74,7 +74,7 @@ func scopeToResourceActions(scopes []auth.AuthorizedScope) []*token.ResourceActi
 		sort.Strings(ra.Actions)
 		actions = append(actions, ra)
 	}
-
+	fmt.Printf("actions %v", actions)
 	return actions
 }
 

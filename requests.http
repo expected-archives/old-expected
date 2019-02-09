@@ -1,11 +1,11 @@
 ### Create new container
-POST http://localhost:3000/v1/containers
+POST http://localhost:3001/v1/containers
 Content-Type: application/json
-Authorization: c2e827438b6a4a26b8262d89e2673ed0
+Authorization: 4803e168eed94f4fba79ea19679fe935
 
 {
   "name": "hello",
-  "image": "google/golang-hello",
+  "image": "hello-world",
   "memory": 64,
   "tags": ["expectedsh", "test"],
   "environment": {

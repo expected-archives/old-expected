@@ -7,6 +7,7 @@ import (
 	"github.com/expectedsh/expected/pkg/registryserver"
 	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
 	"github.com/kelseyhightower/envconfig"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -14,7 +15,7 @@ import (
 type Config struct {
 	Addr     string `envconfig:"addr" default:":3000"`
 	Postgres struct {
-		Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
+		Addr            string        `envconfig:"addr" default:"postgres://expected:expected@localhost/expected?sslmode=disable"`
 		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
 		MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
 		MaxOpenConns    int           `envconfig:"maxopenconns" default:"2"`

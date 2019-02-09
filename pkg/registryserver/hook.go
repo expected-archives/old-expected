@@ -14,9 +14,9 @@ func Hook(response http.ResponseWriter, request *http.Request) {
 		event := &notifications.Event{}
 		err := json.Unmarshal(bytes, event)
 		if err != nil {
-			fmt.Println("---- HOOK ----")
+			fmt.Println("HOOK ----------------------")
 			fmt.Println(event.Action, string(bytes))
-			fmt.Println("----  END  ----")
+			fmt.Println("END  ----------------------\n")
 		}
 
 	}
