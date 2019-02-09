@@ -51,12 +51,12 @@ func Generate(auth auth.RequestFromDaemon, scopes []auth.AuthorizedScope) (strin
 		return "", fmt.Errorf("failed to marshal claims: %s", err)
 	}
 
-	payload := fmt.Sprintf("%s%s%s", b64(headerJSON), token.TokenSeparator, b64(claimsJSON))
+	payload := fmt.Sprintf("%s%s%s", toBase64(headerJSON), token.TokenSeparator, toBase64(claimsJSON))
 	sig, sigAlg, err := privateKey.Sign(strings.NewReader(payload), 0)
 	if err != nil || sigAlg != alg {
 		return "", fmt.Errorf("failed to sign token: %s", err)
 	}
-	return fmt.Sprintf("%s%s%s", payload, token.TokenSeparator, b64(sig)), nil
+	return fmt.Sprintf("%s%s%s", payload, token.TokenSeparator, toBase64(sig)), nil
 }
 
 func scopeToResourceActions(scopes []auth.AuthorizedScope) []*token.ResourceActions {
@@ -74,10 +74,9 @@ func scopeToResourceActions(scopes []auth.AuthorizedScope) []*token.ResourceActi
 		sort.Strings(ra.Actions)
 		actions = append(actions, ra)
 	}
-	fmt.Printf("actions %v", actions)
 	return actions
 }
 
-func b64(b []byte) string {
+func toBase64(b []byte) string {
 	return strings.TrimRight(base64.URLEncoding.EncodeToString(b), "=")
 }

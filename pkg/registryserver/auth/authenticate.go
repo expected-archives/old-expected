@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/expectedsh/expected/pkg/accounts"
-	"log"
 )
 
 func Authenticate(login, token string) (*accounts.Account, error) {
@@ -15,9 +14,8 @@ func Authenticate(login, token string) (*accounts.Account, error) {
 	if account == nil {
 		return nil, errors.New("account not found")
 	}
-	if account.Email == login {
-		return account, nil
+	if account.Email != login {
+		return nil, errors.New("bad credentials")
 	}
-	log.Printf("failed authentication with login %q and token %q\n", login, token)
-	return nil, errors.New("bad credentials")
+	return account, nil
 }
