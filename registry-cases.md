@@ -30,7 +30,9 @@ La notification du tag arrive *normalement* en dernier.
 #### Cas bizangouin
 
 - Si le gars ctrl c, son push:
-    - on va avoir des layers sans tag
+    - on va avoir des layers sans tag 
+    -> `SELECT name, string_agg(tag, '') as tag FROM images GROUP BY name`
+    Commande pour qui retourne un tag vide si il n'y a pas de tag (donc pas fini de push)
 
 - Si le gars push une nouvelle version sur un meme tag:
     - on va avoir des layers en bdd non utilisé
