@@ -44,7 +44,7 @@ La notification du tag arrive *normalement* en dernier.
     - Pendant x temps on aura son image dans notre registry 
  
  
- __Proposition solution cas 1__
+ __Proposition solution cas 1 et 3__
  
  Une app qui tourne toutes les heures (configurable). Cette app va récupérer depuis maintenant à il y a une semaine
  tous les layers qui ont été crée groupé par `name` et `owner_id` en aggregant `tag`. 
