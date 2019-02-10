@@ -29,18 +29,42 @@ La notification du tag arrive *normalement* en dernier.
 
 #### Cas bizangouin
 
-- Si le gars ctrl c, son push:
+1. Si le gars ctrl c, son push:
     - on va avoir des layers sans tag 
     -> `SELECT name, string_agg(tag, '') as tag FROM images GROUP BY name`
     Commande pour qui retourne un tag vide si il n'y a pas de tag (donc pas fini de push)
 
-- Si le gars push une nouvelle version sur un meme tag:
+2. Si le gars push une nouvelle version sur un meme tag:
     - on va avoir des layers en bdd non utilisé
  
-- Si un gars a une permission denied:
+3. Si un gars a une permission denied:
     - et bien pour une raison inconnu on aura un layer vide en notification et donc en bdd ¯\_(ツ)_/¯
 
-- Le gars dépasse ses 1gb ou son cota max:
+4. Le gars dépasse ses 1gb ou son cota max:
     - Pendant x temps on aura son image dans notre registry 
  
  
+ __Proposition solution cas 1__
+ 
+ Une app qui tourne toutes les heures (configurable). Cette app va récupérer depuis maintenant à il y a une semaine
+ tous les layers qui ont été crée groupé par `name` et `owner_id` en aggregant `tag`. 
+ 
+ Quelque chose de ce style ce présentera:
+ ```
+  name  |   tag    ...
+--------+----------...
+ golang | latest   ...
+ redis  | latestv1 ...
+ neo4j  |          ...
+```
+
+Ici si le tag est vide c'est que les layers ont été push mais qu'il en manque.
+On va regarder la date de chaque layer et si le layer date d'il y a plus de 4 heures (configurable), alors il est supprimé.
+
+Une ombre survient au tableau, car ce cas fonctionne si et seulement si il n'a jamais re-push l'image entièrement.
+
+Pour réglé ce problème on peut faire un deuxième scheduler qui tourne moins fréquement, beaucoup moins fréquement.
+Lui groupera par `name` et `owner_id` mais va aggreger les tag avec une `,` et les digests avec une `,` aussi.
+Ensuite on va pour chaque tags regarder les layers qui compose l'image, en faire une liste, regarder la liste complète 
+aggrégué et supprimer ceux qui n'y sont pas.
+
