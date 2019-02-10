@@ -8,6 +8,7 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver"
 	"github.com/expectedsh/expected/pkg/containers"
 	"github.com/kelseyhightower/envconfig"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 

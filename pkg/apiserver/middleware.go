@@ -1,8 +1,8 @@
 package apiserver
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/expectedsh/expected/pkg/accounts"
@@ -28,7 +28,6 @@ func applyCORS(router *mux.Router) error {
 		return err
 	}
 	for route := range routes {
-		fmt.Println(route)
 		router.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}).Methods("OPTIONS")
@@ -53,6 +52,7 @@ func (s *ApiServer) authMiddleware(next http.Handler) http.Handler {
 		}
 		account, err := accounts.FindByAPIKey(r.Context(), header)
 		if err != nil {
+			logrus.WithError(err).Errorln("unable to find account")
 			response.ErrorInternal(w)
 			return
 		}

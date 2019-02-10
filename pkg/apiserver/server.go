@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 )

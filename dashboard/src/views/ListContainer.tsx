@@ -1,22 +1,18 @@
-import React from "react";
+import React, {Component} from "react";
 import TimeAgo from "react-timeago";
-import { Link } from "react-router-dom";
-import { Header, TableCard } from "../components";
-import axios from "axios";
+import {Link} from "react-router-dom";
+import {Header, TableCard} from "../components";
+import {fetchContainers, IContainer} from "../client";
 
-interface IContainerDataSource {
-    key: string;
-    name: string;
-    status: string;
-    image: string;
-    endpoint: string;
-    memory: number;
-    tags: string[];
-    createdAt: Date;
+interface IProps {
 }
 
-export default () => {
-    const columns = [
+interface IState {
+    containers: IContainer[];
+}
+
+export default class ListContainer extends Component<IProps, IState> {
+    static columns = [
         {
             title: 'Name',
             key: 'name',
@@ -29,7 +25,7 @@ export default () => {
             title: 'Created',
             key: 'createdAt',
             render: (createdAt: any) => (
-                <TimeAgo date={createdAt} minPeriod={10} />
+                <TimeAgo date={createdAt} minPeriod={10}/>
             ),
         },
         {
@@ -47,48 +43,32 @@ export default () => {
         },
     ];
 
-    const client = axios.create({
-        baseURL: "http://localhost:3000",
-        headers: {
-            Authorization: document.cookie.split('=')[1],
-        },
-    })
+    constructor(props: IProps) {
+        super(props);
 
-    client.get("/v1/containers").then(console.log)
+        this.state = {
+            containers: [],
+        };
+    }
 
-    const dataSource = [
-        {
-            key: '1',
-            name: 'Nginx',
-            status: 'stopped',
-            image: 'nginx:latest',
-            endpoint: 'nginx.remicaumette.ctr.expected.sh',
-            memory: 64,
-            tags: ['frontend', 'expected.sh'],
-            createdAt: new Date(),
-        },
-        {
-            key: '2',
-            name: 'Mysql',
-            status: 'started',
-            image: 'mysql:latest',
-            endpoint: 'mysql.remicaumette.ctr.expected.sh',
-            memory: 128,
-            tags: ['database', 'expected.sh'],
-            createdAt: new Date(Date.now() - 7200),
-        },
-    ];
+    componentDidMount() {
+        fetchContainers()
+            .then((containers) => this.setState({containers}))
+            .catch(console.error);
+    }
 
-    return (
-        <div>
-            <Header title={'Containers'} pretitle={'Overview'}>
-                <Link to={'/containers/new'} className={'btn btn-primary'}>
-                    Create
-                </Link>
-            </Header>
+    render() {
+        return (
+            <div>
+                <Header title={'Containers'} pretitle={'Overview'}>
+                    <Link to={'/containers/new'} className={'btn btn-primary'}>
+                        Create
+                    </Link>
+                </Header>
 
-            <TableCard<IContainerDataSource> dataSource={dataSource} columns={columns}
-                onRowClick={data => console.log(data)} />
-        </div>
-    );
-};
+                <TableCard<IContainer> columns={ListContainer.columns} dataSource={this.state.containers}
+                                       onRowClick={data => console.log(data)}/>
+            </div>
+        );
+    }
+}
