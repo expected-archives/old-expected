@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/containers"
+	"github.com/expectedsh/expected/pkg/images"
 	"github.com/expectedsh/expected/pkg/registryserver"
 	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
 	"github.com/kelseyhightower/envconfig"
@@ -38,6 +39,9 @@ func initDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenCon
 		return nil, err
 	}
 	if err = containers.InitDB(db); err != nil {
+		return nil, err
+	}
+	if err = images.InitDB(db); err != nil {
 		return nil, err
 	}
 	return db, err

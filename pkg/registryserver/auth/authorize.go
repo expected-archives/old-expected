@@ -34,7 +34,7 @@ func Authorize(account accounts.Account, scopes []Scope) ([]AuthorizedScope, err
 func resource(scopeName string) (namespace string, image string, err error) {
 	scopeSplit := strings.Split(scopeName, "/")
 	if len(scopeSplit) != 2 {
-		return "", "", errors.New("should be url.com/repo/image")
+		return "", "", errors.New("should be url/repo/image")
 	}
 	return scopeSplit[0], scopeSplit[1], nil
 }

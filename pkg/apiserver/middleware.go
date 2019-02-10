@@ -1,8 +1,8 @@
 package apiserver
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/expectedsh/expected/pkg/accounts"
@@ -28,7 +28,7 @@ func applyCORS(router *mux.Router) error {
 		return err
 	}
 	for route := range routes {
-		fmt.Println(route)
+		logrus.Info(route)
 		router.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}).Methods("OPTIONS")

@@ -19,7 +19,7 @@ func (s *RegistryServer) Start() error {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/registry/auth", Auth).Methods("GET")
-	router.HandleFunc("/registry/hook", Hook).Methods("POST")
+	router.HandleFunc("/registry/hook", Hook)
 
 	return http.ListenAndServe(s.Addr, router)
 }
