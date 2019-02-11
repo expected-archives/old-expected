@@ -26,6 +26,9 @@ func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
+	if ctrs == nil {
+		ctrs = []*containers.Container{}
+	}
 	response.Resource(w, "containers", ctrs)
 }
 

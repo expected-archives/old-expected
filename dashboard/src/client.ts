@@ -7,10 +7,10 @@ const client = axios.create({
     },
 });
 
-const remapFields = (obj: any, fields: any) =>
+const remapFields = (obj: any, fields: any): any =>
     Object.entries(obj)
-        .map(([key, value]) => [fields[key] || key, value ])
-        .reduce((obj, [key, value]) => ({...obj, [key]: value }), {});
+        .map(([key, value]) => [fields[key] || key, value])
+        .reduce((obj, [key, value]) => ({...obj, [key]: value}), {});
 
 export interface IContainer {
     key: string;
@@ -23,11 +23,24 @@ export interface IContainer {
     createdAt: Date;
 }
 
+const toContainer = (data: object): IContainer => {
+    const container = remapFields(data, {created_at: "createdAt"});
+    container.createdAt = new Date(container.createdAt);
+    return container;
+};
+
 export const fetchContainers = (): Promise<IContainer[]> =>
     client.get("/v1/containers")
         .then((res) => {
             if (res.status !== 200)
                 throw new Error(res.data.message);
-            return res.data.containers.map((container: object) =>
-                remapFields(container, {created_at: "createdAt"}));
+            return res.data.containers.map((data: object) => toContainer(data));
+        });
+
+export const createContainer = (name: string, image: string, size: string, tags: string[]): Promise<IContainer> =>
+    client.post("/v1/containers", { name, image, size, tags })
+        .then((res) => {
+            if (res.status !== 200)
+                throw new Error(res.data.message);
+            return toContainer(res.data.container);
         });

@@ -51,24 +51,22 @@ export default class ListContainer extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
         fetchContainers()
             .then((containers) => this.setState({containers}))
             .catch(console.error);
-    }
+    };
 
-    render() {
-        return (
-            <div>
-                <Header title={'Containers'} pretitle={'Overview'}>
-                    <Link to={'/containers/new'} className={'btn btn-primary'}>
-                        Create
-                    </Link>
-                </Header>
+    render = () => (
+        <div>
+            <Header title={'Containers'} pretitle={'Overview'}>
+                <Link to={'/containers/new'} className={'btn btn-primary'}>
+                    Create
+                </Link>
+            </Header>
 
-                <TableCard<IContainer> columns={ListContainer.columns} dataSource={this.state.containers}
-                                       onRowClick={data => console.log(data)}/>
-            </div>
-        );
-    }
+            <TableCard<IContainer> columns={ListContainer.columns} dataSource={this.state.containers}
+                                   onRowClick={data => console.log(data)}/>
+        </div>
+    );
 }
