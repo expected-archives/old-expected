@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"github.com/expectedsh/expected/pkg/middlewares"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -43,7 +44,7 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 	}
-	if err := applyCORS(router); err != nil {
+	if err := middlewares.ApplyCORS(router); err != nil {
 		return err
 	}
 	return http.ListenAndServe(s.Addr, router)

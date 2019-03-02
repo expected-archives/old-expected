@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/apiserver/session"
-	"github.com/expectedsh/expected/pkg/containers"
+	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
