@@ -19,12 +19,12 @@ services:
     environment:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
       REGISTRY_AUTH: "token"
-      REGISTRY_AUTH_TOKEN_REALM: "http://localhost:3001/registry/auth"
+      REGISTRY_AUTH_TOKEN_REALM: "http://localhost:3000/registry/auth"
       REGISTRY_AUTH_TOKEN_SERVICE: "registry"
       REGISTRY_AUTH_TOKEN_ISSUER: "auth_registry"
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: "/certs/server.crt"
       REGISTRY_AUTH_TOKEN_AUTOREDIRECT: "false"
-      REGISTRY_NOTIFICATIONS_ENDPOINTS: "- name: expected-hook\n  url: http://localhost:3001/registry/hook\n  timeout: 5s\n  threshold: 8\n  backoff: 10s"
+      REGISTRY_NOTIFICATIONS_ENDPOINTS: "- name: expected-hook\n  url: http://localhost:3000/registry/hook\n  timeout: 5s\n  threshold: 8\n  backoff: 10s"
     volumes:
       - ./certs:/certs
 volumes:

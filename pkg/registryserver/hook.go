@@ -34,6 +34,13 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, fmt.Sprintf("failed to decode envelope: %s", err), http.StatusBadRequest)
 		return
 	}
+	bytes, err := json.MarshalIndent(envelope, "", "  ")
+	if err == nil {
+		fmt.Println(string(bytes))
+	}
+
+	fmt.Println()
+	fmt.Println()
 
 	processNotifications(envelope)
 }
