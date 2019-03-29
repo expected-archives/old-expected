@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	el, err := election.NewElection("test", "localhost:8500", 2*time.Second)
+	el, err := election.NewElection("test", "localhost:2379")
 	if err != nil {
 		panic(err)
 	}
