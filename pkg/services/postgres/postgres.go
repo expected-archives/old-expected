@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	"github.com/expectedsh/expected/pkg/app/services"
 	"github.com/sirupsen/logrus"
 	"time"
 
@@ -38,7 +37,7 @@ func NewFromEnv() *Service {
 }
 
 func (srv *Service) Name() string {
-	return services.Postgres
+	return "postgres"
 }
 
 func (srv *Service) Start() error {

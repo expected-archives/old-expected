@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/expectedsh/expected/pkg/app"
-	"github.com/expectedsh/expected/pkg/app/services/postgres"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	app.AddService(postgres.NewFromEnv())
-	app.Start()
-	defer app.Stop()
+	services.Register(postgres.NewFromEnv())
+	services.Start()
+	defer services.Stop()
 
 	logrus.Infoln("ok")
 }
