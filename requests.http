@@ -7,7 +7,10 @@ Authorization: 1e691f308d474f51b87f1116301ea1f2
   "name": "hello",
   "image": "google/golang-hello",
   "memory": 64,
-  "tags": ["expectedsh", "test"],
+  "tags": [
+    "expectedsh",
+    "test"
+  ],
   "environment": {
     "PORT": "80"
   }

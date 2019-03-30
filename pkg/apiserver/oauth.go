@@ -17,7 +17,7 @@ func (s *ApiServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
 func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
 	token, err := s.OAuth.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
-		response.ErrorBadRequest(w, "Invalid oauth code.")
+		response.ErrorBadRequest(w, "Invalid oauth code.", nil)
 		return
 	}
 	user, err := github.GetUser(r.Context(), token)

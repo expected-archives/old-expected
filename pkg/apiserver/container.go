@@ -41,7 +41,7 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = json.Unmarshal(b, form); err != nil {
-		response.ErrorBadRequest(w, "Invalid json payload.")
+		response.ErrorBadRequest(w, "Invalid json payload.", nil)
 		return
 	}
 	// todo check form
