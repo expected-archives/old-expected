@@ -1,9 +1,12 @@
 package accounts
 
-import "context"
+import (
+	"context"
+	"github.com/expectedsh/expected/pkg/services"
+)
 
 func FindByID(ctx context.Context, id string) (*Account, error) {
-	rows, err := db.QueryContext(ctx, `
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
 		FROM accounts WHERE id = $1
 	`, id)
@@ -23,7 +26,7 @@ func FindByID(ctx context.Context, id string) (*Account, error) {
 }
 
 func FindByGithubID(ctx context.Context, id int64) (*Account, error) {
-	rows, err := db.QueryContext(ctx, `
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
 		FROM accounts WHERE github_id = $1
 	`, id)
@@ -43,7 +46,7 @@ func FindByGithubID(ctx context.Context, id int64) (*Account, error) {
 }
 
 func FindByAPIKey(ctx context.Context, apiKey string) (*Account, error) {
-	rows, err := db.QueryContext(ctx, `
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
 		FROM accounts WHERE api_key = $1
 	`, apiKey)

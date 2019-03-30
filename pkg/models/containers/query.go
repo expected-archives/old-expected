@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/expectedsh/expected/pkg/services"
 )
 
 func containerFromRows(rows *sql.Rows) (*Container, error) {
@@ -31,7 +32,7 @@ func containerFromRows(rows *sql.Rows) (*Container, error) {
 }
 
 func FindByOwnerID(ctx context.Context, id string) ([]*Container, error) {
-	rows, err := db.QueryContext(ctx, `
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, image, endpoint, memory, environment, tags, owner_id, created_at FROM containers
 		WHERE owner_id = $1
 	`, id)

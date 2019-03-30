@@ -1,12 +1,9 @@
 package main
 
 import (
-	"database/sql"
-	"time"
-
-	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/expectedsh/expected/pkg/apiserver"
-	"github.com/expectedsh/expected/pkg/models/containers"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -17,33 +14,10 @@ type Config struct {
 	Secret       string `envconfig:"secret" default:"changeme"`
 	Admin        string `envconfig:"admin"`
 	DashboardURL string `envconfig:"dashboard_url"`
-	Postgres     struct {
-		Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
-		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
-		MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
-		MaxOpenConns    int           `envconfig:"maxopenconns" default:"2"`
-	}
-	Github struct {
+	Github       struct {
 		ClientID     string `envconfig:"client_id"`
 		ClientSecret string `envconfig:"client_secret"`
 	}
-}
-
-func initDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenConns int) (*sql.DB, error) {
-	db, err := sql.Open("postgres", addr)
-	if err != nil {
-		return nil, err
-	}
-	db.SetConnMaxLifetime(connMaxLifetime)
-	db.SetMaxIdleConns(maxIdleConns)
-	db.SetMaxOpenConns(maxOpenConns)
-	if err = accounts.InitDB(db); err != nil {
-		return nil, err
-	}
-	if err = containers.InitDB(db); err != nil {
-		return nil, err
-	}
-	return db, err
 }
 
 func main() {
@@ -53,13 +27,10 @@ func main() {
 		logrus.WithError(err).Fatalln("unable to parse environment variables")
 	}
 
-	logrus.Infoln("initializing the database")
-	db, err := initDB(config.Postgres.Addr, config.Postgres.ConnMaxLifetime,
-		config.Postgres.MaxIdleConns, config.Postgres.MaxOpenConns)
-	if err != nil {
-		logrus.WithError(err).Fatalln("unable to init the database")
-	}
-	defer db.Close()
+	logrus.Infoln("initializing services")
+	services.Register(postgres.NewFromEnv())
+	services.Start()
+	defer services.Stop()
 
 	logrus.Infoln("starting api server")
 	server := apiserver.New(config.Addr, config.Secret, config.Admin,

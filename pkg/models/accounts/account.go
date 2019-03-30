@@ -1,11 +1,12 @@
 package accounts
 
 import (
-	"database/sql"
+	"context"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/google/uuid"
+	"strings"
 	"time"
 )
-
-var db *sql.DB
 
 type Account struct {
 	ID                string    `json:"id"`
@@ -19,20 +20,44 @@ type Account struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
-func InitDB(database *sql.DB) error {
-	db = database
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS accounts (
-			id UUID NOT NULL PRIMARY KEY,
-			name VARCHAR(255) NOT NULL,
-			email VARCHAR(255) NOT NULL,
-			avatar_url VARCHAR(255) NOT NULL,
-			github_id BIGINT NOT NULL,
-			github_access_token VARCHAR(255) NOT NULL,
-			api_key VARCHAR(32) NOT NULL,
-			admin BOOLEAN DEFAULT FALSE,
-			created_at TIMESTAMP DEFAULT NOW()
-		);
-	`)
+func Create(ctx context.Context, name, email, avatarUrl string, githubId int64,
+	githubAccessToken string, admin bool) (*Account, error) {
+	id := uuid.New().String()
+	apiKey := strings.Replace(uuid.New().String(), "-", "", -1)
+	createdAt := time.Now()
+
+	_, err := services.Postgres().Client().ExecContext(ctx, `
+		INSERT INTO accounts (id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`, id, name, email, avatarUrl, githubId, githubAccessToken, apiKey, admin, createdAt)
+
+	return &Account{
+		ID:                id,
+		Name:              name,
+		Email:             email,
+		AvatarURL:         avatarUrl,
+		GithubID:          githubId,
+		GithubAccessToken: githubAccessToken,
+		APIKey:            apiKey,
+		Admin:             admin,
+		CreatedAt:         createdAt,
+	}, err
+}
+
+func Update(ctx context.Context, account *Account) error {
+	_, err := services.Postgres().Client().ExecContext(ctx, `
+		UPDATE accounts SET name = $2, email = $3, avatar_url = $4, github_id = $5, github_access_token = $6,
+		api_key = $7, admin = $8 WHERE id = $1
+	`, account.ID, account.Name, account.Email, account.AvatarURL, account.GithubID, account.GithubAccessToken,
+		account.APIKey, account.Admin)
+
+	return err
+}
+
+func Delete(ctx context.Context, id string) error {
+	_, err := services.Postgres().Client().ExecContext(ctx, `
+		DELETE FROM accounts WHERE id = $1
+	`, id)
+
 	return err
 }
