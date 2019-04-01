@@ -2,6 +2,7 @@ import React from "react";
 import TimeAgo from "react-timeago";
 import { Link } from "react-router-dom";
 import { Header, TableCard } from "../components";
+import axios from "axios";
 
 interface IContainerDataSource {
     key: string;
@@ -45,6 +46,15 @@ export default () => {
             ),
         },
     ];
+
+    const client = axios.create({
+        baseURL: "http://localhost:3000",
+        headers: {
+            Authorization: document.cookie.split('=')[1],
+        },
+    })
+
+    client.get("/v1/containers").then(console.log)
 
     const dataSource = [
         {

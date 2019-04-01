@@ -3,9 +3,9 @@ package apiserver
 import (
 	"net/http"
 
+	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/github"
-	"github.com/expectedsh/expected/pkg/models"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -27,7 +27,7 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	account, err := models.Accounts.GetByGithubID(r.Context(), user.ID)
+	account, err := accounts.FindByGithubID(r.Context(), user.ID)
 	if err != nil {
 		logrus.WithError(err).Errorln("Unable to retrieve your account.")
 		response.ErrorInternal(w)
@@ -40,7 +40,7 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 			response.ErrorInternal(w)
 			return
 		}
-		if account, err = models.Accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
+		if account, err = accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
 			token.AccessToken, s.Admin == user.Login); err != nil {
 			logrus.WithError(err).Errorln("Unable to create your account.")
 			response.ErrorInternal(w)

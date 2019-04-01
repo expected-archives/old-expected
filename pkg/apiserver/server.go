@@ -39,9 +39,13 @@ func (s *ApiServer) Start() error {
 	router.HandleFunc("/oauth/github/callback", s.OAuthGithubCallback).Methods("GET")
 	v1 := router.PathPrefix("/v1").Subrouter()
 	{
-		v1.Use(s.corsMiddleware, s.authMiddleware)
+		v1.Use(s.authMiddleware)
 		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
+		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+	}
+	if err := applyCORS(router); err != nil {
+		return err
 	}
 	return http.ListenAndServe(s.Addr, router)
 }

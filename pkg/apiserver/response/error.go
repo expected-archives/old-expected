@@ -17,7 +17,7 @@ func ErrorBadRequest(w http.ResponseWriter, message string) {
 }
 
 func ErrorInternal(w http.ResponseWriter) {
-	b, _ := json.Marshal(errorMessage{Message: "An internal error occurred."})
+	b, _ := json.Marshal(errorMessage{Message: "Something went wrong."})
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusInternalServerError)
 	_, _ = w.Write(b)

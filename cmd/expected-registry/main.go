@@ -2,29 +2,28 @@ package main
 
 import (
 	"database/sql"
-	"time"
-
 	"github.com/expectedsh/expected/pkg/accounts"
-	"github.com/expectedsh/expected/pkg/apiserver"
 	"github.com/expectedsh/expected/pkg/containers"
+	"github.com/expectedsh/expected/pkg/images"
+	"github.com/expectedsh/expected/pkg/registryserver"
+	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
 	"github.com/kelseyhightower/envconfig"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 type Config struct {
-	Addr         string `envconfig:"addr" default:":3000"`
-	Secret       string `envconfig:"secret" default:"changeme"`
-	Admin        string `envconfig:"admin"`
-	DashboardURL string `envconfig:"dashboard_url"`
-	Postgres     struct {
-		Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
+	Addr     string `envconfig:"addr" default:":3000"`
+	Postgres struct {
+		Addr            string        `envconfig:"addr" default:"postgres://expected:expected@localhost/expected?sslmode=disable"`
 		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
 		MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
 		MaxOpenConns    int           `envconfig:"maxopenconns" default:"2"`
 	}
-	Github struct {
-		ClientID     string `envconfig:"client_id"`
-		ClientSecret string `envconfig:"client_secret"`
+	Certs struct {
+		PublicKey  string `envconfig:"public_key" default:"./certs/server.crt"`
+		PrivateKey string `envconfig:"private_key" default:"./certs/server.key"`
 	}
 }
 
@@ -42,6 +41,9 @@ func initDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenCon
 	if err = containers.InitDB(db); err != nil {
 		return nil, err
 	}
+	if err = images.InitDB(db); err != nil {
+		return nil, err
+	}
 	return db, err
 }
 
@@ -52,7 +54,6 @@ func main() {
 		logrus.WithError(err).Fatalln("unable to parse environment variables")
 	}
 
-	logrus.Infoln("initializing the database")
 	db, err := initDB(config.Postgres.Addr, config.Postgres.ConnMaxLifetime,
 		config.Postgres.MaxIdleConns, config.Postgres.MaxOpenConns)
 	if err != nil {
@@ -60,9 +61,10 @@ func main() {
 	}
 	defer db.Close()
 
+	token.Init(config.Certs.PublicKey, config.Certs.PrivateKey)
+
 	logrus.Infoln("starting api server")
-	server := apiserver.New(config.Addr, config.Secret, config.Admin,
-		config.DashboardURL, config.Github.ClientID, config.Github.ClientSecret)
+	server := registryserver.New(config.Addr)
 
 	logrus.Infof("listening on %v\n", config.Addr)
 	if err := server.Start(); err != nil {

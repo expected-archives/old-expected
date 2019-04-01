@@ -1,6 +1,7 @@
 /.idea
 /.vscode
 /.env
+/certs
 .DS_Store
 *.iml
 /dashboard/node_modules
