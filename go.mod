@@ -39,6 +39,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190115181402-5dab4167f31c
 	golang.org/x/sys v0.0.0-20190123074212-c6b37f3e9285 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	google.golang.org/grpc v1.19.1 // indirect
+	google.golang.org/grpc v1.19.1
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

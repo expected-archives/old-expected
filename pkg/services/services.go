@@ -3,7 +3,7 @@ package services
 import (
 	"github.com/expectedsh/expected/pkg/services/etcd"
 	"github.com/expectedsh/expected/pkg/services/postgres"
-	"github.com/expectedsh/expected/pkg/util"
+	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,7 +27,7 @@ func Register(service Service) {
 func Start() {
 	for _, service := range registeredServices {
 		entry := logrus.WithField("service", service.Name())
-		if err := util.New("starting service", service.Start, entry).Execute(); err != nil {
+		if err := backoff.New("starting service", service.Start, entry).Execute(); err != nil {
 			logrus.WithField("service", service.Name()).WithError(err).Fatalln("unable to start this service")
 		}
 	}
