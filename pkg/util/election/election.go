@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"
+	"github.com/expectedsh/expected/pkg/services/etcd"
 	"time"
 )
 
@@ -12,25 +13,20 @@ const TTL = time.Second * 10
 
 // Election represent a way to elect 1 master over multiple nodes.
 type Election struct {
-	ServiceName string
-
+	appName string
 	session *concurrency.Session
 	client  *clientv3.Client
 	key     string
 }
 
 // NewElection create an instance of Election.
-func NewElection(serviceName, etcdAddress string) (*Election, error) {
-	client, err := clientv3.New(clientv3.Config{Endpoints: []string{etcdAddress}})
-	if err != nil {
-		return nil, err
-	}
+func NewElection(service etcd.Service) *Election {
 	return &Election{
-		ServiceName: serviceName,
-		session:     nil,
-		client:      client,
-		key:         fmt.Sprintf("service/%s/leader", serviceName),
-	}, err
+		appName: service.Config().AppName,
+		session: nil,
+		client:  service.Client(),
+		key:     fmt.Sprintf("service/%s/leader", service.Config().AppName),
+	}
 }
 
 // ElectLeader check with consul if the current session (with the serviceName)
@@ -78,7 +74,7 @@ func (e *Election) newSession() error {
 // Return a bool which is the representation if it is the leader.
 func (e *Election) acquireSession() (bool, error) {
 	elect := concurrency.NewElection(e.session, e.key)
-	if err := elect.Campaign(context.Background(), "e1"); err != nil {
+	if err := elect.Campaign(context.Background(), e.appName); err != nil {
 		return false, err
 	}
 	return true, nil
