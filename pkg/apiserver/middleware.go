@@ -53,7 +53,7 @@ func (s *ApiServer) authMiddleware(next http.Handler) http.Handler {
 		}
 		account, err := accounts.FindByAPIKey(r.Context(), header)
 		if err != nil {
-			logrus.WithError(err).Errorln("unable to find account")
+			logrus.WithField("header", header).WithError(err).Errorln("unable to find account")
 			response.ErrorInternal(w)
 			return
 		}

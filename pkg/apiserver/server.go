@@ -40,6 +40,8 @@ func (s *ApiServer) Start() error {
 	{
 		v1.Use(s.authMiddleware)
 		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
+		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
+		v1.HandleFunc("/account/renew_apikey", s.RenewAPIKeyAccount).Methods("POST")
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 	}

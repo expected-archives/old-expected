@@ -22,27 +22,27 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 	}
 	user, err := github.GetUser(r.Context(), token)
 	if err != nil {
-		logrus.WithError(err).Errorln("unable to retrieve your github data.")
+		logrus.WithError(err).Errorln("unable to retrieve your github data")
 		response.ErrorInternal(w)
 		return
 	}
 
 	account, err := accounts.FindByGithubID(r.Context(), user.ID)
 	if err != nil {
-		logrus.WithError(err).Errorln("unable to retrieve your account.")
+		logrus.WithError(err).Errorln("unable to retrieve your account")
 		response.ErrorInternal(w)
 		return
 	}
 	if account == nil {
 		email, err := github.GetPrimaryEmail(r.Context(), token)
 		if err != nil {
-			logrus.WithError(err).Errorln("unable to retrieve your github data.")
+			logrus.WithError(err).Errorln("unable to retrieve your github data")
 			response.ErrorInternal(w)
 			return
 		}
 		if account, err = accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
 			token.AccessToken, s.Admin == user.Login); err != nil {
-			logrus.WithError(err).Errorln("unable to create your account.")
+			logrus.WithError(err).Errorln("unable to create your account")
 			response.ErrorInternal(w)
 			return
 		}

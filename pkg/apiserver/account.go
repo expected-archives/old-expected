@@ -7,6 +7,20 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver/session"
 )
 
+
+
 func (s *ApiServer) GetAccount(w http.ResponseWriter, r *http.Request) {
+	response.Resource(w, "account", session.GetAccount(r))
+}
+
+func (s *ApiServer) SyncAccount(w http.ResponseWriter, r *http.Request) {
+
+
+	response.Resource(w, "account", session.GetAccount(r))
+}
+
+func (s *ApiServer) RenewAPIKeyAccount(w http.ResponseWriter, r *http.Request) {
+
+
 	response.Resource(w, "account", session.GetAccount(r))
 }
