@@ -7,6 +7,7 @@ import (
 	"github.com/docker/distribution/notifications"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/images"
+	"github.com/expectedsh/expected/pkg/util/registrycli"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
@@ -48,27 +49,57 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 func processNotifications(envelope notifications.Envelope) {
 	for _, v := range envelope.Events {
 		if v.Action == "push" {
+
+			//todo add error actions
+
+			//todo change this
 			account, err := accounts.FindByID(context.Background(), getUserId(v.Target.Repository))
 			if err != nil {
 				// todo add a way to know there is a error here
 				continue
 			}
-			image, err := images.Create(
-				context.Background(),
-				getName(v.Target.Repository),
-				account.ID,
-				v.Target.Digest.String(),
-				v.Target.Repository,
-				v.Target.Tag,
-				v.Target.Size,
-			)
-			if err != nil {
-				// todo add a way to know there is a error here
-				continue
+
+			//
+			layer, _ := images.FindLayerByDigest(context.Background(), v.Target.Digest.String())
+			if layer == nil {
+				_, _ = images.CreateLayer(context.Background(), v.Target.Digest.String(), v.Target.Size)
 			}
-			logrus.Infof("%v+", image)
+
+			if v.Target.Tag != "" {
+				img, err := images.Create(
+					context.Background(),
+					getName(v.Target.Repository),
+					account.ID,
+					v.Target.Digest.String(),
+					account.ID, // namespace id , now its the user id
+					v.Target.Tag,
+				)
+				fmt.Println(err)
+				registerManifest(account.Email, img.ID, v.Target.Repository, v.Target.Digest.String())
+				// todo check total size of the image
+			}
 		}
 	}
+}
+
+func registerManifest(email, imageId, repo, digest string) {
+	manifest := registrycli.GetManifest("http://localhost:5000", email, repo, digest)
+
+	if manifest == nil {
+		// todo err
+		return
+	}
+	for _, layer := range manifest.Layers {
+		dig := layer.Digest.String()
+		_, _ = images.CreateImageLayer(context.Background(), imageId, dig)
+		_ = images.LayerIncrement(context.Background(), dig)
+	}
+
+	_, _ = images.CreateImageLayer(context.Background(), imageId, digest)
+	_ = images.LayerIncrement(context.Background(), digest)
+
+	_, _ = images.CreateImageLayer(context.Background(), imageId, manifest.Config.Digest.String())
+	_ = images.LayerIncrement(context.Background(), manifest.Config.Digest.String())
 }
 
 func getName(repo string) string {

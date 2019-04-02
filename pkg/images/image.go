@@ -15,7 +15,6 @@ type Image struct {
 	Digest      string    `json:"digest"`       // digest of the image (a sha256)
 	Tag         string    `json:"tag"`          // tag version name: latest, v1, v2...
 	Name        string    `json:"name"`         // name of the tag
-	Size        int64     `json:"size"`         // total size of the image
 	CreatedAt   time.Time `json:"created_at"`   // when the image was created
 }
 
@@ -23,7 +22,7 @@ type Image struct {
 // An image can contain X layers and a layer can be used by Y images.
 type Layer struct {
 	Digest    string    `json:"digest"`     // digest sha256 id of the layer
-	Size      int64     `json:"size"`       // size of the layer
+	Size      int64     `json:"size"`       // size of the layer in bytes
 	Count     uint64    `json:"-"`          // count the number of image that use this layer
 	CreatedAt time.Time `json:"created_at"` // when the layer was first registered
 }
@@ -46,14 +45,13 @@ func InitDB(database *sql.DB) error {
 			digest TEXT NOT NULL,
 			name VARCHAR(255) NOT NULL,
 			tag VARCHAR(255) NOT NULL,
-			size INT NOT NULL,
 			created_at TIMESTAMP DEFAULT NOW()
 		);
 	`)
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS layers (
 			digest TEXT NOT NULL PRIMARY KEY,
-			size INT NOT NULL,
+			size BIGINT NOT NULL,
 			count BIGINT NOT NULL DEFAULT 0,
 			created_at TIMESTAMP DEFAULT NOW()
 		);
