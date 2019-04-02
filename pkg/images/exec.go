@@ -14,13 +14,13 @@ func Create(ctx context.Context, name, ownerId, digest, repository, tag string, 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`, id, name, ownerId, digest, repository, tag, size, now)
 	return &Image{
-		ID:         id,
-		Name:       name,
-		OwnerID:    ownerId,
-		Digest:     digest,
-		Repository: repository,
-		Tag:        tag,
-		Size:       size,
-		CreatedAt:  now,
+		ID:          id,
+		OwnerID:     ownerId,
+		NamespaceID: repository,
+		Digest:      digest,
+		Name:        name,
+		Tag:         tag,
+		Size:        size,
+		CreatedAt:   now,
 	}, err
 }
