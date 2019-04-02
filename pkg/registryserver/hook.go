@@ -66,7 +66,10 @@ func processNotifications(envelope notifications.Envelope) {
 			}
 
 			if v.Target.Tag != "" {
-				img, err := images.Create(
+
+				// todo check if image exist
+
+				img, _ := images.Create(
 					context.Background(),
 					getName(v.Target.Repository),
 					account.ID,
@@ -74,7 +77,7 @@ func processNotifications(envelope notifications.Envelope) {
 					account.ID, // namespace id , now its the user id
 					v.Target.Tag,
 				)
-				fmt.Println(err)
+
 				registerManifest(account.Email, img.ID, v.Target.Repository, v.Target.Digest.String())
 				// todo check total size of the image
 			}
@@ -89,15 +92,19 @@ func registerManifest(email, imageId, repo, digest string) {
 		// todo err
 		return
 	}
+
+	// add layer digest
 	for _, layer := range manifest.Layers {
 		dig := layer.Digest.String()
 		_, _ = images.CreateImageLayer(context.Background(), imageId, dig)
 		_ = images.LayerIncrement(context.Background(), dig)
 	}
 
+	// add final digest
 	_, _ = images.CreateImageLayer(context.Background(), imageId, digest)
 	_ = images.LayerIncrement(context.Background(), digest)
 
+	// add config digest
 	_, _ = images.CreateImageLayer(context.Background(), imageId, manifest.Config.Digest.String())
 	_ = images.LayerIncrement(context.Background(), manifest.Config.Digest.String())
 }
