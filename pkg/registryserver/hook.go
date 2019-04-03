@@ -45,27 +45,38 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 }
 
 // processNotifications is idem potent.
+// resume:
 func processNotifications(envelope notifications.Envelope) error {
 	for _, v := range envelope.Events {
 		if v.Action == "push" {
+
+			// create layer if not exist with 0 to count
+			digest := v.Target.Digest.String()
+			layer, err := images.FindLayerByDigest(context.Background(), digest)
+			if err != nil {
+				return err
+			} else if layer == nil {
+				_, err := images.CreateLayer(context.Background(), digest, v.Target.Size)
+				if err != nil {
+					return err
+				}
+			}
+
 			if v.Target.Tag != "" {
 
-				digest := v.Target.Digest.String()
-
-				account, err := accounts.FindByID(context.Background(), getUserId(v.Target.Repository))
+				account, err := accounts.FindByID(context.Background(), getNamespaceID(v.Target.Repository))
 				if err != nil {
 					return err
 				}
 
 				image, err := images.FindImageByInfos(context.Background(), v.Target.Repository, v.Target.Tag, digest)
-
 				if err != nil {
 					logrus.Trace(err)
 					return err
 				}
 
+				// insert image if not exist
 				if image == nil {
-					// insert image
 					image, err = images.Create(
 						context.Background(),
 						getName(v.Target.Repository),
@@ -78,8 +89,6 @@ func processNotifications(envelope notifications.Envelope) error {
 						return err
 					}
 				}
-
-				logrus.Infof("hook-push: account email: %s, repo: %s, digest: %s", account.Email, v.Target.Repository, digest)
 
 				// get layers by calling the registry manifest
 				layers := getLayers(account.Email, v.Target.Repository, digest, v.Target.Size)
@@ -156,6 +165,6 @@ func getName(repo string) string {
 	return strings.Split(repo, "/")[1]
 }
 
-func getUserId(repo string) string {
+func getNamespaceID(repo string) string {
 	return strings.Split(repo, "/")[0]
 }

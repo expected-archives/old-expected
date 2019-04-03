@@ -66,11 +66,10 @@ func InsertLayers(ctx context.Context, layers []Layer, imageId string) error {
 	query += `
 		ON CONFLICT (digest)
 		DO UPDATE
-			SET 
-				updated_at = now(), 
-				count =(SELECT count(*) 
-						FROM image_layer 
-						WHERE layer_digest=EXCLUDED.digest AND image_id<>$` + strconv.Itoa(n) + `)+1`
+			SET updated_at = now(), 
+				count = (SELECT count(*) 
+					FROM image_layer 
+					WHERE layer_digest=EXCLUDED.digest AND image_id<>$` + strconv.Itoa(n) + `)+1`
 
 	values = append(values, imageId)
 	stmt, err := db.Prepare(query)
@@ -93,6 +92,7 @@ func InsertImageLayer(ctx context.Context, layers []Layer, imageId string) error
 	}
 
 	query = query[0 : len(query)-2]
+	query += `ON CONFLICT DO NOTHING`
 	query, _ = replaceSQL(query, "?")
 	stmt, _ := db.Prepare(query)
 	return backoff.StmtExecContext(stmt, ctx, values...)
@@ -185,7 +185,8 @@ func FindImageByInfos(ctx context.Context, name, tag, digest string) (*Image, er
 
 func GetStatsByImageId(ctx context.Context, imageId string) (*Stats, error) {
 	rows, err := db.QueryContext(ctx, `
-		SELECT img.namespace_id,
+		SELECT
+			img.namespace_id,
        		img.digest,
        		img.name,
        		img.tag,
