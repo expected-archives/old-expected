@@ -39,7 +39,7 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 
 	err = processNotifications(envelope)
 	if err != nil {
-		http.Error(res, fmt.Sprintf("failed to process notifications: %s", err), http.StatusBadRequest)
+		http.Error(res, fmt.Sprintf("failed to process notifications: %s", err), http.StatusInternalServerError)
 		return
 	}
 }
