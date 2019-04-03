@@ -2,20 +2,20 @@ package images
 
 import (
 	"context"
+	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/google/uuid"
 	"time"
 )
 
-func Create(ctx context.Context, name, ownerId, digest, namespaceId, tag string) (*Image, error) {
+func Create(ctx context.Context, name, digest, namespaceId, tag string) (*Image, error) {
 	id := uuid.New().String()
 	now := time.Now()
-	_, err := db.ExecContext(ctx, `
-		INSERT INTO images (id, name, owner_id, digest, namespace_id, tag, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, id, name, ownerId, digest, namespaceId, tag, now)
+	err := backoff.ExecContext(db, ctx, `
+		INSERT INTO images (id, name, digest, namespace_id, tag, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, id, name, digest, namespaceId, tag, now)
 	return &Image{
 		ID:          id,
-		OwnerID:     ownerId,
 		NamespaceID: namespaceId,
 		Digest:      digest,
 		Name:        name,
@@ -34,6 +34,7 @@ func CreateLayer(ctx context.Context, digest string, size int64) (*Layer, error)
 		Digest:    digest,
 		Size:      size,
 		CreatedAt: now,
+		UpdatedAt: now,
 	}, err
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func Hook(res http.ResponseWriter, req *http.Request) {
@@ -49,64 +50,102 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 func processNotifications(envelope notifications.Envelope) {
 	for _, v := range envelope.Events {
 		if v.Action == "push" {
-
-			//todo add error actions
-
-			//todo change this
-			account, err := accounts.FindByID(context.Background(), getUserId(v.Target.Repository))
-			if err != nil {
-				// todo add a way to know there is a error here
-				continue
-			}
-
-			//
-			layer, _ := images.FindLayerByDigest(context.Background(), v.Target.Digest.String())
-			if layer == nil {
-				_, _ = images.CreateLayer(context.Background(), v.Target.Digest.String(), v.Target.Size)
-			}
-
 			if v.Target.Tag != "" {
+				image, err := images.FindImageByDigest(context.Background(), v.Target.Digest.String())
 
-				// todo check if image exist
+				if err != nil {
+					logrus.Trace(err)
+					continue
+				}
 
-				img, _ := images.Create(
+				if image != nil {
+					continue
+				}
+
+				account, err := accounts.FindByID(context.Background(), getUserId(v.Target.Repository))
+				if err != nil {
+					logrus.Trace(err)
+					continue
+				}
+
+				// insert image
+				image, err = images.Create(
 					context.Background(),
 					getName(v.Target.Repository),
-					account.ID,
 					v.Target.Digest.String(),
-					account.ID, // namespace id , now its the user id
+					account.ID, // todo change this with the real
 					v.Target.Tag,
 				)
+				if err != nil {
+					logrus.Trace("can't create image", image, err)
+					continue
+				}
 
-				registerManifest(account.Email, img.ID, v.Target.Repository, v.Target.Digest.String())
-				// todo check total size of the image
+				// get layers by calling the registry manifest
+				layers := GetLayers(account.Email, v.Target.Repository, v.Target.Digest.String(), v.Target.Size)
+				if layers == nil {
+					logrus.Trace("can't get layers", image, err)
+					continue
+				}
+
+				// insert layers and many to many relation with image id <-> layer digest
+				err = registerManifest(layers, image.ID)
+				if err != nil {
+					logrus.Trace("can't insert layers", image, err)
+				}
 			}
 		}
 	}
 }
 
-func registerManifest(email, imageId, repo, digest string) {
+func GetLayers(email, repo, digest string, size int64) []images.Layer {
 	manifest := registrycli.GetManifest("http://localhost:5000", email, repo, digest)
 
 	if manifest == nil {
-		// todo err
-		return
+		return nil
 	}
+
+	var layers []images.Layer
 
 	// add layer digest
 	for _, layer := range manifest.Layers {
-		dig := layer.Digest.String()
-		_, _ = images.CreateImageLayer(context.Background(), imageId, dig)
-		_ = images.LayerIncrement(context.Background(), dig)
+		layers = append(layers, images.Layer{
+			Digest:    layer.Digest.String(),
+			Size:      layer.Size,
+			Count:     1,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		})
 	}
 
-	// add final digest
-	_, _ = images.CreateImageLayer(context.Background(), imageId, digest)
-	_ = images.LayerIncrement(context.Background(), digest)
+	layers = append(layers, images.Layer{
+		Digest:    digest,
+		Size:      size,
+		Count:     1,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
 
-	// add config digest
-	_, _ = images.CreateImageLayer(context.Background(), imageId, manifest.Config.Digest.String())
-	_ = images.LayerIncrement(context.Background(), manifest.Config.Digest.String())
+	layers = append(layers, images.Layer{
+		Digest:    manifest.Config.Digest.String(),
+		Size:      manifest.Config.Size,
+		Count:     1,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	return layers
+}
+
+func registerManifest(layers []images.Layer, imageId string) error {
+	err := images.InsertLayers(context.Background(), layers)
+	if err != nil {
+		return err
+	}
+	err = images.InsertImageLayer(context.Background(), layers, imageId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getName(repo string) string {

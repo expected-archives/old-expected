@@ -54,10 +54,12 @@ func (s *Backoff) WithInterval(interval time.Duration) *Backoff {
 
 func (s *Backoff) Execute() error {
 	for {
-		s.entry.
-			WithField("attempt", s.attempt).
-			WithField("maxAttempt", s.maxAttempt).
-			Info(s.description)
+		if s.attempt != 1 {
+			s.entry.
+				WithField("attempt", s.attempt).
+				WithField("maxAttempt", s.maxAttempt).
+				Info(s.description)
+		}
 		if err := s.function(); err != nil {
 			time.Sleep(time.Duration(fibonacci(s.attempt)) * s.interval)
 			if s.attempt == s.maxAttempt {
