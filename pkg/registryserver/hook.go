@@ -45,7 +45,6 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 }
 
 // processNotifications is idem potent.
-// resume:
 func processNotifications(envelope notifications.Envelope) error {
 	for _, v := range envelope.Events {
 		if v.Action == "push" {
