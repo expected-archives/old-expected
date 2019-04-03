@@ -36,69 +36,72 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, fmt.Sprintf("failed to decode envelope: %s", err), http.StatusBadRequest)
 		return
 	}
-	bytes, err := json.MarshalIndent(envelope, "", "  ")
-	if err == nil {
-		fmt.Println(string(bytes))
+
+	err = processNotifications(envelope)
+	if err != nil {
+		http.Error(res, fmt.Sprintf("failed to process notifications: %s", err), http.StatusBadRequest)
+		return
 	}
-
-	fmt.Println()
-	fmt.Println()
-
-	processNotifications(envelope)
 }
 
-func processNotifications(envelope notifications.Envelope) {
+// processNotifications is idem potent.
+func processNotifications(envelope notifications.Envelope) error {
 	for _, v := range envelope.Events {
 		if v.Action == "push" {
 			if v.Target.Tag != "" {
-				image, err := images.FindImageByDigest(context.Background(), v.Target.Digest.String())
 
-				if err != nil {
-					logrus.Trace(err)
-					continue
-				}
-
-				if image != nil {
-					continue
-				}
+				digest := v.Target.Digest.String()
 
 				account, err := accounts.FindByID(context.Background(), getUserId(v.Target.Repository))
 				if err != nil {
-					logrus.Trace(err)
-					continue
+					return err
 				}
 
-				// insert image
-				image, err = images.Create(
-					context.Background(),
-					getName(v.Target.Repository),
-					v.Target.Digest.String(),
-					account.ID, // todo change this with the real
-					v.Target.Tag,
-				)
+				image, err := images.FindImageByInfos(context.Background(), v.Target.Repository, v.Target.Tag, digest)
+
 				if err != nil {
-					logrus.Trace("can't create image", image, err)
-					continue
+					logrus.Trace(err)
+					return err
 				}
+
+				if image == nil {
+					// insert image
+					image, err = images.Create(
+						context.Background(),
+						getName(v.Target.Repository),
+						digest,
+						account.ID, // todo change this with the real
+						v.Target.Tag,
+					)
+					if err != nil {
+						logrus.Trace("can't create image", image, err)
+						return err
+					}
+				}
+
+				logrus.Infof("hook-push: account email: %s, repo: %s, digest: %s", account.Email, v.Target.Repository, digest)
 
 				// get layers by calling the registry manifest
-				layers := GetLayers(account.Email, v.Target.Repository, v.Target.Digest.String(), v.Target.Size)
+				layers := getLayers(account.Email, v.Target.Repository, digest, v.Target.Size)
 				if layers == nil {
-					logrus.Trace("can't get layers", image, err)
-					continue
+					logrus.Trace("can't get layers", image)
+					return fmt.Errorf("can't get layers with digest %s and repo %s", digest, v.Target.Repository)
 				}
 
 				// insert layers and many to many relation with image id <-> layer digest
-				err = registerManifest(layers, image.ID)
+				err = insertLayers(layers, image.ID)
 				if err != nil {
 					logrus.Trace("can't insert layers", image, err)
+					return err
 				}
 			}
 		}
 	}
+	return nil
 }
 
-func GetLayers(email, repo, digest string, size int64) []images.Layer {
+// getLayers call the registry to get all fs layers for a given digest and repo.
+func getLayers(email, repo, digest string, size int64) []images.Layer {
 	manifest := registrycli.GetManifest("http://localhost:5000", email, repo, digest)
 
 	if manifest == nil {
@@ -136,8 +139,9 @@ func GetLayers(email, repo, digest string, size int64) []images.Layer {
 	return layers
 }
 
-func registerManifest(layers []images.Layer, imageId string) error {
-	err := images.InsertLayers(context.Background(), layers)
+// insertLayers will insert layers to table layers and image_layer.
+func insertLayers(layers []images.Layer, imageId string) error {
+	err := images.InsertLayers(context.Background(), layers, imageId)
 	if err != nil {
 		return err
 	}

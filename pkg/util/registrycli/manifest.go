@@ -41,10 +41,8 @@ func GetManifest(registryUrl, email, repo, digest string) *schema2.Manifest {
 	}
 
 	err = json.Unmarshal(bytes, manifest)
-	fmt.Println("bytes", string(bytes))
 	if err != nil {
 		return nil
 	}
-	fmt.Println("manifest", manifest)
 	return manifest
 }
