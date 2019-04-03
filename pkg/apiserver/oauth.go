@@ -46,6 +46,13 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 			response.ErrorInternal(w)
 			return
 		}
+	} else {
+		account.GithubAccessToken = token.AccessToken
+		if err = accounts.Update(r.Context(), account); err != nil {
+			logrus.WithField("account", account.ID).WithError(err).Errorln("unable to update your account")
+			response.ErrorInternal(w)
+			return
+		}
 	}
 
 	http.SetCookie(w, &http.Cookie{
