@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"golang.org/x/oauth2"
 	"io/ioutil"
 )
@@ -34,6 +35,9 @@ func GetUser(ctx context.Context, token *oauth2.Token) (*User, error) {
 	var user User
 	if err = json.Unmarshal(body, &user); err != nil {
 		return nil, err
+	}
+	if user.Login == "" || user.Name == "" || user.AvatarUrl == "" {
+		return nil, errors.New("invalid github account")
 	}
 	return &user, nil
 }
