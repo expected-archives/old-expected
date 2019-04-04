@@ -12,7 +12,6 @@ services:
     ports:
       - 5432:5432
   registry:
-    network_mode: "host"
     restart: always
     image: registry:latest
     ports:

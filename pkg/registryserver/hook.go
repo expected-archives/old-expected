@@ -70,7 +70,7 @@ func processNotifications(envelope notifications.Envelope) error {
 
 				image, err := images.FindImageByInfos(context.Background(), v.Target.Repository, v.Target.Tag, digest)
 				if err != nil {
-					logrus.Trace(err)
+					logrus.Error(err)
 					return err
 				}
 
@@ -84,7 +84,7 @@ func processNotifications(envelope notifications.Envelope) error {
 						v.Target.Tag,
 					)
 					if err != nil {
-						logrus.Trace("can't create image", image, err)
+						logrus.Error("can't create image", image, err)
 						return err
 					}
 				}
@@ -92,14 +92,14 @@ func processNotifications(envelope notifications.Envelope) error {
 				// get layers by calling the registry manifest
 				layers := getLayers(account.Email, v.Target.Repository, digest, v.Target.Size)
 				if layers == nil {
-					logrus.Trace("can't get layers", image)
+					logrus.Error("can't get layers", image)
 					return fmt.Errorf("can't get layers with digest %s and repo %s", digest, v.Target.Repository)
 				}
 
 				// insert layers and many to many relation with image id <-> layer digest
 				err = insertLayers(layers, image.ID)
 				if err != nil {
-					logrus.Trace("can't insert layers", image, err)
+					logrus.Error("can't insert layers", image, err)
 					return err
 				}
 			}

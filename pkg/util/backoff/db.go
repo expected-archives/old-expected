@@ -3,6 +3,7 @@ package backoff
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/sirupsen/logrus"
 )
 
@@ -64,7 +65,8 @@ func StmtExecContext(stmt *sql.Stmt, ctx context.Context, i ...interface{}) erro
 	entry := logrus.NewEntry(logrus.StandardLogger())
 
 	backoff := New("query-context", func() error {
-		_, e := stmt.ExecContext(ctx, i...)
+		r, e := stmt.ExecContext(ctx, i...)
+		fmt.Println(r)
 		if e != nil {
 			return e
 		} else {

@@ -67,9 +67,7 @@ func InsertLayers(ctx context.Context, layers []Layer, imageId string) error {
 		ON CONFLICT (digest)
 		DO UPDATE
 			SET updated_at = now(), 
-				count = (SELECT count(*) 
-					FROM image_layer 
-					WHERE layer_digest=EXCLUDED.digest AND image_id<>$` + strconv.Itoa(n) + `)+1`
+				count = (SELECT count(*) FROM image_layer WHERE layer_digest=EXCLUDED.digest AND image_id<>$` + strconv.Itoa(n) + `)+1`
 
 	values = append(values, imageId)
 	stmt, err := db.Prepare(query)
