@@ -32,6 +32,18 @@ func Create(ctx context.Context, name, email, avatarUrl string, githubId int64,
 	}, err
 }
 
+func CreateAdmin(ctx context.Context) error {
+	id := "b431e1c9-3b04-42bd-83f5-47c05e49c70c"
+	createdAt := time.Now()
+
+	_, err := db.ExecContext(ctx, `
+		INSERT INTO accounts (id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		ON CONFLICT DO NOTHING 
+	`, id, "admin", "admin", "", 0, "", "admin", true, createdAt)
+	return err
+}
+
 func Update(ctx context.Context, account *Account) error {
 	_, err := db.ExecContext(ctx, `
 		UPDATE accounts SET name = $2, email = $3, avatar_url = $4, github_id = $5, github_access_token = $6,

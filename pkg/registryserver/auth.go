@@ -40,7 +40,6 @@ func Auth(response http.ResponseWriter, request *http.Request) {
 	}
 
 	result, _ := json.Marshal(&map[string]string{"token": tok})
-	fmt.Println(string(result))
 	response.Header().Set("Content-Type", "application/json")
 	_, _ = response.Write(result)
 }

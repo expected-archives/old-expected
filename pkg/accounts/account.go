@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -34,5 +35,8 @@ func InitDB(database *sql.DB) error {
 			created_at TIMESTAMP DEFAULT NOW()
 		);
 	`)
-	return err
+	if err != nil {
+		return err
+	}
+	return CreateAdmin(context.Background())
 }

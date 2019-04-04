@@ -1,6 +1,7 @@
 version: '3.4'
 services:
   postgres:
+    container_name: expected-postgres
     image: postgres:alpine
     restart: on-failure
     environment:
@@ -12,6 +13,8 @@ services:
     ports:
       - 5432:5432
   registry:
+    container_name: expected-registry
+    network_mode: host
     restart: always
     image: registry:latest
     ports:

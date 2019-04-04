@@ -9,15 +9,15 @@ import (
 )
 
 func scanImage(rows *sql.Rows, image *Image) error {
-	return rows.Scan(image.ID, image.NamespaceID, image.Digest, image.Tag, image.Name, image.CreatedAt)
+	return rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt)
 }
 
 func scanLayer(rows *sql.Rows, layer *Layer) error {
-	return rows.Scan(layer.Digest, layer.Count, layer.Size, layer.CreatedAt, layer.UpdatedAt)
+	return rows.Scan(&layer.Digest, &layer.Size, &layer.Count, &layer.CreatedAt, &layer.UpdatedAt)
 }
 
 func scanStats(rows *sql.Rows, stats *Stats) error {
-	return rows.Scan(stats.NamespaceID, stats.Digest, stats.Name, stats.Tag, stats.Layers, stats.Size)
+	return rows.Scan(&stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag, &stats.Layers, &stats.Size)
 }
 
 // replaceSQL replaces the instance occurrence of any string pattern with an increasing $n based sequence
@@ -32,7 +32,7 @@ func replaceSQL(old, searchPattern string) (string, int) {
 
 func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 	rows, err := db.QueryContext(ctx, `
-		SELECT digest, count, size, created_at, updated_at
+		SELECT *
 		FROM layers
 		WHERE digest = $1
 	`, digest)
@@ -42,7 +42,7 @@ func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 	if rows.Next() {
 		layer := &Layer{}
 		if err := scanLayer(rows, layer); err != nil {
-			return nil, nil
+			return nil, err
 		}
 		return layer, nil
 	}
@@ -67,14 +67,12 @@ func InsertLayers(ctx context.Context, layers []Layer, imageId string) error {
 		ON CONFLICT (digest)
 		DO UPDATE
 			SET updated_at = now(), 
-				count = (SELECT count(*) FROM image_layer WHERE layer_digest=EXCLUDED.digest AND image_id<>$` + strconv.Itoa(n) + `)+1`
+				count = (SELECT count(*) 
+					FROM image_layer 
+					WHERE layer_digest=EXCLUDED.digest AND image_id<>$` + strconv.Itoa(n) + `)+1`
 
 	values = append(values, imageId)
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-	return backoff.StmtExecContext(stmt, ctx, values...)
+	return backoff.ExecContext(db, ctx, query, values...)
 }
 
 func InsertImageLayer(ctx context.Context, layers []Layer, imageId string) error {
@@ -92,16 +90,18 @@ func InsertImageLayer(ctx context.Context, layers []Layer, imageId string) error
 	query = query[0 : len(query)-2]
 	query += `ON CONFLICT DO NOTHING`
 	query, _ = replaceSQL(query, "?")
-	stmt, _ := db.Prepare(query)
-	return backoff.StmtExecContext(stmt, ctx, values...)
+	return backoff.ExecContext(db, ctx, query, values...)
 }
 
-func LayerDecrement(ctx context.Context, digest string) error {
+func LayerUpdate(ctx context.Context, digest, imageId string) error {
 	_, err := db.ExecContext(ctx, `
 		UPDATE layers 
-		SET count = count - 1, updated_at = now() 
-		WHERE digest = $1
-	`, digest)
+		SET updated_at = now(), 
+			count = (	SELECT count(*) 
+						FROM image_layer 
+						WHERE layer_digest=EXCLUDED.digest AND image_id<>$1)+1
+		WHERE digest = $2
+	`, imageId, digest)
 	return err
 }
 

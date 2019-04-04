@@ -15,7 +15,7 @@ type Service struct {
 }
 
 type Config struct {
-	Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
+	Addr            string        `envconfig:"addr" default:"postgres://expected:expected@localhost/expected?sslmode=disable"`
 	ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
 	MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
 	MaxOpenConns    int           `envconfig:"maxopenconns" default:"2"`

@@ -7,6 +7,8 @@ import (
 	"github.com/expectedsh/expected/pkg/images"
 	"github.com/expectedsh/expected/pkg/registryserver"
 	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -14,13 +16,7 @@ import (
 )
 
 type Config struct {
-	Addr     string `envconfig:"addr" default:":3000"`
-	Postgres struct {
-		Addr            string        `envconfig:"addr" default:"postgres://expected:expected@localhost/expected?sslmode=disable"`
-		ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
-		MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
-		MaxOpenConns    int           `envconfig:"maxopenconns" default:"2"`
-	}
+	Addr  string `envconfig:"addr" default:":3000"`
 	Certs struct {
 		PublicKey  string `envconfig:"public_key" default:"./certs/server.crt"`
 		PrivateKey string `envconfig:"private_key" default:"./certs/server.key"`
@@ -54,12 +50,18 @@ func main() {
 		logrus.WithError(err).Fatalln("unable to parse environment variables")
 	}
 
-	db, err := initDB(config.Postgres.Addr, config.Postgres.ConnMaxLifetime,
-		config.Postgres.MaxIdleConns, config.Postgres.MaxOpenConns)
-	if err != nil {
-		logrus.WithError(err).Fatalln("unable to init the database")
+	logrus.SetFormatter(&logrus.TextFormatter{})
+
+	services.Register(postgres.NewFromEnv())
+	services.Start()
+	defer services.Stop()
+
+	if err := accounts.InitDB(services.Postgres().Client()); err != nil {
+		logrus.Fatal(err)
 	}
-	defer db.Close()
+	if err := images.InitDB(services.Postgres().Client()); err != nil {
+		logrus.Fatal(err)
+	}
 
 	token.Init(config.Certs.PublicKey, config.Certs.PrivateKey)
 
