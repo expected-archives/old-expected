@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/sirupsen/logrus"
 	"strings"
@@ -16,14 +15,14 @@ type AuthorizedScope struct {
 func Authorize(account accounts.Account, scopes []Scope) ([]AuthorizedScope, error) {
 	authorizedScopes := make([]AuthorizedScope, 0)
 
-	fmt.Println()
-	fmt.Println("scopes:", scopes)
 	for _, scope := range scopes {
 		logrus.Infof("authorization for %s actions: %v type: %v", scope.Name, scope.Actions, scope.Type)
 
-		namespace, _, err := resource(scope.Name)
-		if err != nil || namespace != account.ID {
-			continue
+		if !account.Admin {
+			namespace, _, err := resource(scope.Name)
+			if err != nil || namespace != account.ID {
+				continue
+			}
 		}
 
 		authorizedScopes = append(authorizedScopes, AuthorizedScope{
