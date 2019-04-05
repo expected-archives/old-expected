@@ -3,6 +3,7 @@ package images
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 func scanImage(rows *sql.Rows, image *Image) error {
@@ -10,7 +11,7 @@ func scanImage(rows *sql.Rows, image *Image) error {
 }
 
 func scanLayer(rows *sql.Rows, layer *Layer) error {
-	return rows.Scan(&layer.Digest, &layer.Size, &layer.Count, &layer.CreatedAt, &layer.UpdatedAt)
+	return rows.Scan(&layer.Digest, &layer.OriginRepo, &layer.Size, &layer.Count, &layer.CreatedAt, &layer.UpdatedAt)
 }
 
 func scanStats(rows *sql.Rows, stats *Stats) error {
@@ -34,18 +35,6 @@ func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 		return layer, nil
 	}
 	return nil, nil
-}
-
-func LayerUpdate(ctx context.Context, digest, imageId string) error {
-	_, err := db.ExecContext(ctx, `
-		UPDATE layers 
-		SET updated_at = now(), 
-			count = (	SELECT count(*) 
-						FROM image_layer 
-						WHERE layer_digest=$2 AND image_id<>$1)+1
-		WHERE digest = $2
-	`, imageId, digest)
-	return err
 }
 
 func FindImageByID(ctx context.Context, id string) (*Image, error) {
@@ -124,7 +113,7 @@ func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string
 	return nil, nil
 }
 
-func GetStatsByImageId(ctx context.Context, imageId string) (*Stats, error) {
+func FindStatsByImageId(ctx context.Context, imageId string) (*Stats, error) {
 	rows, err := db.QueryContext(ctx, `
 		SELECT
 			img.namespace_id,
@@ -150,4 +139,47 @@ func GetStatsByImageId(ctx context.Context, imageId string) (*Stats, error) {
 		return stats, nil
 	}
 	return nil, nil
+}
+
+func FindActualLayerCount(ctx context.Context, layerDigest string) (uint64, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT count(*) 
+		FROM image_layer 
+		WHERE layer_digest=$1
+	`, layerDigest)
+	if err != nil {
+		return 0, err
+	}
+
+	if rows.Next() {
+		var count uint64 = 0
+
+		if err := rows.Scan(&count); err != nil {
+			return 0, err
+		}
+
+		return count, nil
+	}
+	return 0, nil
+}
+
+func FindUnusedLayers(ctx context.Context, olderThan time.Duration, limit int64) ([]*Layer, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT * FROM layers WHERE count <= 0 AND updated_at <  now() - interval '`+olderThan.String()+`'
+		ORDER BY updated_at ASC
+		LIMIT $1
+	`, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var layers []*Layer
+	for rows.Next() {
+		layer := &Layer{}
+		if err := scanLayer(rows, layer); err != nil {
+			return nil, err
+		}
+		layers = append(layers, layer)
+	}
+	return layers, nil
 }

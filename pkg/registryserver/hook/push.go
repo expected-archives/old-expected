@@ -24,12 +24,12 @@ func onPush(ctx context.Context, event notifications.Event) error {
 	digest := event.Target.Digest.String()
 
 	log := logrus.NewEntry(logrus.StandardLogger()).
+		WithField("service", "registry-hook").
+		WithField("event", "push").
 		WithField("repo", fmt.Sprintf("%s/%s", namespaceId, name)).
-		WithField("tag", event.Target.Tag).
-		WithField("digest", digest).
-		WithField("event", "push")
+		WithField("digest", digest)
 
-	log.Info("layer is being push")
+	log.Info()
 
 	if err := defaultLayer(ctx, event, digest); err != nil {
 		log.WithField("err", err).Error("can't insert default layers")
@@ -37,6 +37,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 	}
 
 	if event.Target.Tag != "" {
+		log = log.WithField("tag", event.Target.Tag)
 
 		account, err := accounts.FindByID(ctx, namespaceId)
 		if err != nil {
@@ -46,7 +47,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 
 		image, err := images.FindImageByInfos(ctx, namespaceId, name, event.Target.Tag, digest)
 		if err != nil {
-			log.WithField("err", err).Error("can't find image by repo+tag with digest ", err)
+			log.WithError(err).Error("can't find image by repo+tag with digest ", err)
 			return err
 		}
 
@@ -60,7 +61,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 				event.Target.Tag,
 			)
 			if err != nil {
-				log.WithField("err", err).WithField("image", image).Error("can't create image")
+				log.WithError(err).WithField("image", image).Error("can't create image")
 				return err
 			}
 		}
@@ -70,14 +71,14 @@ func onPush(ctx context.Context, event notifications.Event) error {
 		// get layers by calling the registry manifest
 		layers := registrycli.GetLayers(event.Target.Repository, digest, event.Target.Size)
 		if layers == nil {
-			log.WithField("err", err).Error("can't get layers")
+			log.WithError(err).Error("can't get layers")
 			return fmt.Errorf("can't get layers with digest %s and repo %s", digest, event.Target.Repository)
 		}
 
 		// insert layers and many to many relation with image id <-> layer digest
 		err = insertLayers(layers, image.ID)
 		if err != nil {
-			log.WithField("err", err).Error("can't insert layers")
+			log.WithError(err).Error("can't insert layers")
 			return err
 		}
 	}
@@ -92,7 +93,7 @@ func defaultLayer(ctx context.Context, event notifications.Event, digest string)
 	if err != nil {
 		return err
 	} else if layer == nil {
-		_, err := images.CreateLayer(ctx, digest, event.Target.Size)
+		_, err := images.CreateLayer(ctx, event.Target.Repository, digest, event.Target.Size)
 		if err != nil {
 			return err
 		}

@@ -5,31 +5,17 @@ import (
 	"fmt"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/expectedsh/expected/pkg/images"
-	"github.com/expectedsh/expected/pkg/registryserver/auth"
-	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
-// todo change this in the future
-const registryUrl = "http://localhost:5000"
-
 // GetManifest return a manifest from a repo and digest.
 func GetManifest(repo, digest string) *schema2.Manifest {
 	manifest := &schema2.Manifest{}
-	tok, _ := token.Generate(auth.RequestFromDaemon{
-		Login:   "admin",
-		Service: "registry",
-	}, []auth.AuthorizedScope{
-		{
-			Scope: auth.Scope{
-				Type: "repository",
-				Name: repo,
-			},
-			AuthorizedActions: []string{"pull", "push", "delete"},
-		},
-	})
+
+	tok, _ := newToken(repo)
+
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/v2/%s/manifests/%s", registryUrl, repo, digest), nil)
 

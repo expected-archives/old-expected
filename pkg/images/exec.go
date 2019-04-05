@@ -24,17 +24,18 @@ func Create(ctx context.Context, name, digest, namespaceId, tag string) (*Image,
 	}, err
 }
 
-func CreateLayer(ctx context.Context, digest string, size int64) (*Layer, error) {
+func CreateLayer(ctx context.Context, repo, digest string, size int64) (*Layer, error) {
 	now := time.Now()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO layers (digest, size, created_at)
-		VALUES ($1, $2, $3)
-	`, digest, size, now)
+		INSERT INTO layers (origin_repo, digest, size, created_at)
+		VALUES ($1, $2, $3, $4)
+	`, repo, digest, size, now)
 	return &Layer{
-		Digest:    digest,
-		Size:      size,
-		CreatedAt: now,
-		UpdatedAt: now,
+		OriginRepo: repo,
+		Digest:     digest,
+		Size:       size,
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	}, err
 }
 
@@ -44,12 +45,12 @@ func CreateLayers(ctx context.Context, layers []Layer, imageId string) error {
 		return err
 	}
 	query := `
-		INSERT INTO layers (digest, size, count, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO layers (origin_repo, digest, size, count, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (digest)
 		DO UPDATE SET 
 			updated_at = now(), 
-			count = (SELECT count(*) FROM image_layer WHERE layer_digest=$1 AND image_id <> $6) + 1
+			count = (SELECT count(*) FROM image_layer WHERE layer_digest=$1 AND image_id <> $7) + 1
 	`
 
 	stmt, err := tx.PrepareContext(ctx, query)
@@ -60,7 +61,7 @@ func CreateLayers(ctx context.Context, layers []Layer, imageId string) error {
 	defer stmt.Close()
 
 	for _, layer := range layers {
-		if _, err := stmt.ExecContext(ctx, layer.Digest, layer.Size, layer.Count, layer.CreatedAt, layer.UpdatedAt, imageId); err != nil {
+		if _, err := stmt.ExecContext(ctx, layer.OriginRepo, layer.Digest, layer.Size, layer.Count, layer.CreatedAt, layer.UpdatedAt, imageId); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return err
 			}
@@ -116,4 +117,21 @@ func CreateImageLayer(ctx context.Context, layers []Layer, imageId string) error
 	}
 
 	return tx.Commit()
+}
+
+func UpdateLayer(ctx context.Context, digest string) error {
+	_, err := db.ExecContext(ctx, `
+		UPDATE layers 
+		SET updated_at = now(), 
+			count = (SELECT count(*) FROM image_layer WHERE layer_digest=$1)+1
+		WHERE digest = $2
+	`, digest)
+	return err
+}
+
+func DeleteLayer(ctx context.Context, digest string) error {
+	err := backoff.ExecContext(db, ctx, `
+		DELETE FROM layers WHERE digest = $1
+	`, digest)
+	return err
 }

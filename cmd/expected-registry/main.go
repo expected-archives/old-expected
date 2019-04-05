@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/containers"
 	"github.com/expectedsh/expected/pkg/images"
 	"github.com/expectedsh/expected/pkg/registryserver"
 	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
+	"github.com/expectedsh/expected/pkg/registryserver/gc"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/kelseyhightower/envconfig"
@@ -44,13 +46,17 @@ func initDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenCon
 }
 
 func main() {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableColors:   true,
+		FullTimestamp:   true,
+		TimestampFormat: time.RFC1123,
+	})
+
 	logrus.Infoln("processing environment configuration")
 	config := &Config{}
 	if err := envconfig.Process("", config); err != nil {
 		logrus.WithError(err).Fatalln("unable to parse environment variables")
 	}
-
-	logrus.SetFormatter(&logrus.TextFormatter{})
 
 	services.Register(postgres.NewFromEnv())
 	services.Start()
@@ -65,10 +71,16 @@ func main() {
 
 	token.Init(config.Certs.PublicKey, config.Certs.PrivateKey)
 
+	gc.New(context.Background(), &gc.Options{
+		OlderThan: time.Minute,
+		Interval:  time.Minute * 5,
+		Limit:     10,
+	}).Run()
+
 	logrus.Infoln("starting api server")
 	server := registryserver.New(config.Addr)
 
-	logrus.Infof("listening on %v\n", config.Addr)
+	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {
 		logrus.WithError(err).Fatalln("unable to start api server")
 	}

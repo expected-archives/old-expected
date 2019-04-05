@@ -20,11 +20,12 @@ type Image struct {
 // Layer is used by Image.
 // An image can contain X layers and a layer can be used by Y images.
 type Layer struct {
-	Digest    string    `json:"digest"`     // digest sha256 id of the layer
-	Size      int64     `json:"size"`       // size of the layer in bytes
-	Count     uint64    `json:"-"`          // count the number of image that use this layer
-	CreatedAt time.Time `json:"created_at"` // when the layer was first registered
-	UpdatedAt time.Time `json:"updated_at"` // the last time the layer was updated
+	OriginRepo string    `json:"-"`          // repo that first push this layer
+	Digest     string    `json:"digest"`     // digest sha256 id of the layer
+	Size       int64     `json:"size"`       // size of the layer in bytes
+	Count      uint64    `json:"-"`          // count the number of image that use this layer
+	CreatedAt  time.Time `json:"created_at"` // when the layer was first registered
+	UpdatedAt  time.Time `json:"updated_at"` // the last time the layer was updated
 }
 
 // ImageLayer represent the relation between an Image and X Layer.
@@ -61,6 +62,7 @@ func InitDB(database *sql.DB) error {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS layers (
 			digest TEXT NOT NULL PRIMARY KEY,
+			origin_repo TEXT NOT NULL,
 			size BIGINT NOT NULL,
 			count BIGINT NOT NULL DEFAULT 0,
 			created_at TIMESTAMP DEFAULT now(),
