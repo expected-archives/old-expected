@@ -12,11 +12,11 @@ import (
 	"strings"
 )
 
-// Push is idempotent.
+// onPush is idempotent.
 // It is not supposed to create edge effects by replaying the same event.
-func Push(ctx context.Context, event notifications.Event) error {
+func onPush(ctx context.Context, event notifications.Event) error {
 
-	namespaceID, name, err := parseRepository(event.Target.Repository)
+	namespaceId, name, err := parseRepository(event.Target.Repository)
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func Push(ctx context.Context, event notifications.Event) error {
 	digest := event.Target.Digest.String()
 
 	log := logrus.NewEntry(logrus.StandardLogger()).
-		WithField("repo", fmt.Sprintf("%s/%s", namespaceID, name)).
+		WithField("repo", fmt.Sprintf("%s/%s", namespaceId, name)).
 		WithField("tag", event.Target.Tag).
 		WithField("digest", digest).
 		WithField("event", "push")
@@ -38,13 +38,13 @@ func Push(ctx context.Context, event notifications.Event) error {
 
 	if event.Target.Tag != "" {
 
-		account, err := accounts.FindByID(ctx, namespaceID)
+		account, err := accounts.FindByID(ctx, namespaceId)
 		if err != nil {
 			log.Error("can't find account")
 			return err
 		}
 
-		image, err := images.FindImageByInfos(ctx, event.Target.Repository, event.Target.Tag, digest)
+		image, err := images.FindImageByInfos(ctx, namespaceId, name, event.Target.Tag, digest)
 		if err != nil {
 			log.WithField("err", err).Error("can't find image by repo+tag with digest ", err)
 			return err
@@ -77,7 +77,7 @@ func Push(ctx context.Context, event notifications.Event) error {
 		// insert layers and many to many relation with image id <-> layer digest
 		err = insertLayers(layers, image.ID)
 		if err != nil {
-			log.WithField("err", err).Error("can't insert layers", err)
+			log.WithField("err", err).Error("can't insert layers")
 			return err
 		}
 	}
@@ -103,12 +103,12 @@ func defaultLayer(ctx context.Context, event notifications.Event, digest string)
 // insertLayers will insert layers to table layers and image_layer.
 // This will set all layers to the normal count (old + 1).
 func insertLayers(layers []images.Layer, imageId string) error {
-	err := images.InsertLayers(context.Background(), layers, imageId)
+	err := images.CreateLayers(context.Background(), layers, imageId)
 	if err != nil {
 		return err
 	}
 
-	err = images.InsertImageLayer(context.Background(), layers, imageId)
+	err = images.CreateImageLayer(context.Background(), layers, imageId)
 	if err != nil {
 		return err
 	}

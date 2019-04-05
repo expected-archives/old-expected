@@ -38,15 +38,82 @@ func CreateLayer(ctx context.Context, digest string, size int64) (*Layer, error)
 	}, err
 }
 
-func CreateImageLayer(ctx context.Context, imageId, layerDigest string) (*ImageLayer, error) {
-	now := time.Now()
-	_, err := db.ExecContext(ctx, `
-		INSERT INTO image_layer (image_id, layer_digest, created_at)
-		VALUES ($1, $2, $3)
-	`, imageId, layerDigest, now)
-	return &ImageLayer{
-		ImageID:     imageId,
-		LayerDigest: layerDigest,
-		CreatedAt:   now,
-	}, err
+func CreateLayers(ctx context.Context, layers []Layer, imageId string) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	query := `
+		INSERT INTO layers (digest, size, count, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (digest)
+		DO UPDATE SET 
+			updated_at = now(), 
+			count = (SELECT count(*) FROM image_layer WHERE layer_digest=$1 AND image_id <> $6) + 1
+	`
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	for _, layer := range layers {
+		if _, err := stmt.ExecContext(ctx, layer.Digest, layer.Size, layer.Count, layer.CreatedAt, layer.UpdatedAt, imageId); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func CreateImageLayer(ctx context.Context, layers []Layer, imageId string) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	query := `
+		INSERT INTO image_layer (image_id, layer_digest)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING
+	`
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	for _, layer := range layers {
+
+		rows, err := tx.QueryContext(ctx, `
+			SELECT * FROM image_layer WHERE image_id = $1 AND layer_digest = $2
+		`, imageId, layer.Digest)
+		if err != nil {
+			return err
+		}
+
+		hasImageLayer := rows.Next()
+		if err := rows.Close(); err != nil {
+			return err
+		}
+
+		// insert into image_layer if there is no rows founded.
+		if !hasImageLayer {
+			if _, err := stmt.ExecContext(ctx, imageId, layer.Digest); err != nil {
+				if err := tx.Rollback(); err != nil {
+					return err
+				}
+				return err
+			}
+		}
+
+	}
+
+	return tx.Commit()
 }

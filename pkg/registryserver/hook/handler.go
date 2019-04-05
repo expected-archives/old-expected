@@ -9,7 +9,7 @@ import (
 func Handle(envelope notifications.Envelope) error {
 	for _, event := range envelope.Events {
 		if event.Action == "push" {
-			if err := Push(context.Background(), event); err != nil {
+			if err := onPush(context.Background(), event); err != nil {
 				return err
 			}
 		}
