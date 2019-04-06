@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3'
 services:
   postgres:
     image: postgres:alpine
@@ -7,25 +7,21 @@ services:
       - POSTGRES_USER=expected
       - POSTGRES_PASSWORD=expected
     volumes:
-      - data:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
     ports:
       - 5432:5432
-  registry:
-    network_mode: "host"
-    restart: always
-    image: registry:latest
-    ports:
-      - 5000:5000
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    restart: on-failure
     environment:
-      REGISTRY_STORAGE_DELETE_ENABLED: "true"
-      REGISTRY_AUTH: "token"
-      REGISTRY_AUTH_TOKEN_REALM: "http://localhost:3000/registry/auth"
-      REGISTRY_AUTH_TOKEN_SERVICE: "registry"
-      REGISTRY_AUTH_TOKEN_ISSUER: "auth_registry"
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: "/certs/server.crt"
-      REGISTRY_AUTH_TOKEN_AUTOREDIRECT: "false"
-      REGISTRY_NOTIFICATIONS_ENDPOINTS: "- name: expected-hook\n  url: http://localhost:3000/registry/hook\n  timeout: 5s\n  threshold: 8\n  backoff: 10s"
+      - RABBITMQ_DEFAULT_USER=expected
+      - RABBITMQ_DEFAULT_PASS=expected
+      - RABBITMQ_DEFAULT_VHOST=expected
     volumes:
-      - ./certs:/certs
+      - rabbitmq:/var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
 volumes:
-  data: {}
+  postgres: {}
+  rabbitmq: {}

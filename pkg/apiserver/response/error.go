@@ -6,11 +6,12 @@ import (
 )
 
 type errorMessage struct {
-	Message string `json:"message"`
+	Message string            `json:"message"`
+	Errors  map[string]string `json:"errors"`
 }
 
-func ErrorBadRequest(w http.ResponseWriter, message string) {
-	b, _ := json.Marshal(errorMessage{Message: message})
+func ErrorBadRequest(w http.ResponseWriter, message string, errors map[string]string) {
+	b, _ := json.Marshal(errorMessage{Message: message, Errors: errors})
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusBadRequest)
 	_, _ = w.Write(b)

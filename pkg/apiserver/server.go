@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 )
@@ -41,10 +40,12 @@ func (s *ApiServer) Start() error {
 	{
 		v1.Use(s.authMiddleware)
 		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
+		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
+		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 	}
-	if err := applyCORS(router); err != nil {
+	if err := corsMiddleware(router); err != nil {
 		return err
 	}
 	return http.ListenAndServe(s.Addr, router)

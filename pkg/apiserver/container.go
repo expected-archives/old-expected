@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/apiserver/session"
-	"github.com/expectedsh/expected/pkg/containers"
+	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -26,6 +26,9 @@ func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
+	if ctrs == nil {
+		ctrs = []*containers.Container{}
+	}
 	response.Resource(w, "containers", ctrs)
 }
 
@@ -38,7 +41,7 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = json.Unmarshal(b, form); err != nil {
-		response.ErrorBadRequest(w, "Invalid json payload.")
+		response.ErrorBadRequest(w, "Invalid json payload.", nil)
 		return
 	}
 	// todo check form

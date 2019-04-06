@@ -3,10 +3,23 @@ package containers
 import (
 	"context"
 	"encoding/json"
+	"github.com/expectedsh/expected/pkg/services"
 	"github.com/google/uuid"
 	"strings"
 	"time"
 )
+
+type Container struct {
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Image       string            `json:"image"`
+	Endpoint    string            `json:"endpoint"`
+	Memory      int               `json:"memory"`
+	Environment map[string]string `json:"environment"`
+	Tags        []string          `json:"tags"`
+	OwnerID     string            `json:"-"`
+	CreatedAt   time.Time         `json:"created_at"`
+}
 
 func Create(ctx context.Context, name, image string, memory int, environment map[string]string,
 	tags []string, ownerId string) (*Container, error) {
@@ -22,7 +35,7 @@ func Create(ctx context.Context, name, image string, memory int, environment map
 		return nil, err
 	}
 
-	_, err = db.ExecContext(ctx, `
+	_, err = services.Postgres().Client().ExecContext(ctx, `
 		INSERT INTO containers (id, name, image, endpoint, memory, environment, tags, owner_id, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`, id, name, image, endpoint, memory, string(jsonEnvironment), string(jsonTags), ownerId, createdAt)
@@ -50,7 +63,7 @@ func Update(ctx context.Context, container *Container) error {
 		return err
 	}
 
-	_, err = db.ExecContext(ctx, `
+	_, err = services.Postgres().Client().ExecContext(ctx, `
 		UPDATE containers SET name = $2, image = $3, endpoint = $4, memory = $5, environment = $6, tags = $7
 		WHERE id = $1
 	`, container.ID, container.Name, container.Image, container.Endpoint, container.Memory, string(jsonEnvironment),
@@ -60,7 +73,7 @@ func Update(ctx context.Context, container *Container) error {
 }
 
 func Delete(ctx context.Context, id string) error {
-	_, err := db.ExecContext(ctx, `
+	_, err := services.Postgres().Client().ExecContext(ctx, `
 		DELETE FROM containers WHERE id = $1
 	`, id)
 

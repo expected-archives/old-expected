@@ -1,18 +1,17 @@
 package apiserver
 
 import (
+	"github.com/expectedsh/expected/pkg/apiserver/response"
+	"github.com/expectedsh/expected/pkg/apiserver/session"
+	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
-
-	"github.com/expectedsh/expected/pkg/accounts"
-	"github.com/expectedsh/expected/pkg/apiserver/response"
-	"github.com/expectedsh/expected/pkg/apiserver/session"
+	"strings"
 )
 
-func applyCORS(router *mux.Router) error {
-	routes := make(map[string]string)
-
+func corsMiddleware(router *mux.Router) error {
+	routes := make(map[string][]string)
 	if err := router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		methods, _ := route.GetMethods()
 		if len(methods) == 0 {
@@ -22,13 +21,14 @@ func applyCORS(router *mux.Router) error {
 		if len(path) == 0 {
 			return nil
 		}
-		routes[path] = "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+		for _, method := range methods {
+			routes[path] = append(routes[path], method)
+		}
 		return nil
 	}); err != nil {
 		return err
 	}
 	for route := range routes {
-		logrus.Info(route)
 		router.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}).Methods("OPTIONS")
@@ -36,7 +36,7 @@ func applyCORS(router *mux.Router) error {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Access-Control-Allow-Origin", "*")
-			w.Header().Add("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+			w.Header().Add("Access-Control-Allow-Methods", strings.Join(routes[r.URL.Path], ","))
 			w.Header().Add("Access-Control-Allow-Headers", "authorization, origin, content-type, accept")
 			next.ServeHTTP(w, r)
 		})
@@ -53,6 +53,7 @@ func (s *ApiServer) authMiddleware(next http.Handler) http.Handler {
 		}
 		account, err := accounts.FindByAPIKey(r.Context(), header)
 		if err != nil {
+			logrus.WithField("header", header).WithError(err).Errorln("unable to find account")
 			response.ErrorInternal(w)
 			return
 		}
