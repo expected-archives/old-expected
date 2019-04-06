@@ -12,6 +12,7 @@ require (
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
+	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/uuid v1.1.0
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/mux v1.7.0
@@ -19,7 +20,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.8.5 // indirect
-	github.com/hashicorp/consul/api v1.0.1
 	github.com/jonboulle/clockwork v0.1.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/lib/pq v1.0.0
@@ -29,6 +29,7 @@ require (
 	github.com/prometheus/client_golang v0.9.2 // indirect
 	github.com/sirupsen/logrus v1.3.0
 	github.com/soheilhy/cmux v0.1.4 // indirect
+	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	github.com/ugorji/go/codec v0.0.0-20190320090025-2dc34c0b8780 // indirect
 	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
