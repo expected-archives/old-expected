@@ -36,7 +36,7 @@ func (s *ApiServer) SyncAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	account.Email = email.Email
 	if err = accounts.Update(r.Context(), account); err != nil {
-		logrus.WithField("account", account.ID).WithError(err).Errorln("unable to update your account")
+		logrus.WithField("account", account.ID).WithError(err).Errorln("unable to update an account")
 		response.ErrorInternal(w)
 		return
 	}
