@@ -1,10 +1,10 @@
-package registryserver
+package registryhook
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/registryserver/hook"
+	"github.com/expectedsh/expected/pkg/registryhook/hook"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )

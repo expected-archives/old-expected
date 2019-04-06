@@ -1,10 +1,10 @@
-package registryserver
+package registryhook
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/expectedsh/expected/pkg/registryserver/auth"
-	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
+	"github.com/expectedsh/expected/pkg/registryhook/auth"
+	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )

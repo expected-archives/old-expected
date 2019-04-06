@@ -1,4 +1,4 @@
-package registryserver
+package registryhook
 
 import (
 	"github.com/gorilla/mux"

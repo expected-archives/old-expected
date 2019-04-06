@@ -1,8 +1,8 @@
 package registrycli
 
 import (
-	"github.com/expectedsh/expected/pkg/registryserver/auth"
-	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
+	"github.com/expectedsh/expected/pkg/registryhook/auth"
+	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
 )
 
 // todo change this in the future

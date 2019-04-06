@@ -6,9 +6,9 @@ import (
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/containers"
 	"github.com/expectedsh/expected/pkg/images"
-	"github.com/expectedsh/expected/pkg/registryserver"
-	"github.com/expectedsh/expected/pkg/registryserver/auth/token"
-	"github.com/expectedsh/expected/pkg/registryserver/gc"
+	"github.com/expectedsh/expected/pkg/registryhook"
+	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
+	"github.com/expectedsh/expected/pkg/registryhook/gc"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/kelseyhightower/envconfig"
@@ -46,12 +46,6 @@ func initDB(addr string, connMaxLifetime time.Duration, maxIdleConns, maxOpenCon
 }
 
 func main() {
-	logrus.SetFormatter(&logrus.TextFormatter{
-		DisableColors:   true,
-		FullTimestamp:   true,
-		TimestampFormat: time.RFC1123,
-	})
-
 	logrus.Infoln("processing environment configuration")
 	config := &Config{}
 	if err := envconfig.Process("", config); err != nil {
@@ -78,7 +72,7 @@ func main() {
 	}).Run()
 
 	logrus.Infoln("starting api server")
-	server := registryserver.New(config.Addr)
+	server := registryhook.New(config.Addr)
 
 	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {
