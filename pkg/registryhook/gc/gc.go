@@ -67,7 +67,7 @@ func (gc *GarbageCollector) process() {
 			}
 
 			// the layer has not been deleted in the registry
-			if deleteStatus == registrycli.Unknown || deleteStatus == registrycli.NotFound {
+			if deleteStatus == registrycli.DeleteStatusUnknown || deleteStatus == registrycli.DeleteStatusNotFound {
 				logger.WithField("delete-status", deleteStatus.String()).
 					Warn("layer delete status is incoherent")
 			} else {
@@ -82,8 +82,13 @@ func (gc *GarbageCollector) process() {
 				logger.Info("layer deleted in postgres")
 			}
 
+			if err := images.DeleteImageByDigest(gc.ctx, layer.Digest); err != nil {
+				logger.WithError(err).Error("can't delete image by digest")
+				return
+			}
+
 			// layer has be delete at least in the database or in the registry
-			if err == nil || deleteStatus == registrycli.Deleted {
+			if err == nil || deleteStatus == registrycli.DeleteStatusDeleted {
 				layersDeleted++
 			}
 		}

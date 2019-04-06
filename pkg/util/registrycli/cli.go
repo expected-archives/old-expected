@@ -8,6 +8,24 @@ import (
 // todo change this in the future
 const registryUrl = "http://localhost:5000"
 
+type DeleteStatus int
+
+const (
+	DeleteStatusDeleted DeleteStatus = iota
+	DeleteStatusNotFound
+	DeleteStatusUnknown
+)
+
+func (d DeleteStatus) String() string {
+	switch d {
+	case DeleteStatusDeleted:
+		return "deleted"
+	case DeleteStatusNotFound:
+		return "not found"
+	}
+	return "unknown"
+}
+
 func newToken(repository string) (string, error) {
 	return token.Generate(auth.RequestFromDaemon{
 		Login:   "admin",

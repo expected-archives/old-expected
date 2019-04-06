@@ -2,14 +2,13 @@ package hook
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/docker/distribution/notifications"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/images"
 	"github.com/expectedsh/expected/pkg/util/registrycli"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strings"
 )
 
 // onPush is idempotent.
@@ -18,7 +17,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 
 	namespaceId, name, err := parseRepository(event.Target.Repository)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	digest := event.Target.Digest.String()
@@ -41,13 +40,18 @@ func onPush(ctx context.Context, event notifications.Event) error {
 
 		account, err := accounts.FindByID(ctx, namespaceId)
 		if err != nil {
-			log.Error("can't find account")
+			log.WithError(err).Error("finding account by id")
 			return err
+		}
+
+		if account == nil {
+			log.WithError(err).Error("can't find account")
+			return errors.New("can't find account")
 		}
 
 		image, err := images.FindImageByInfos(ctx, namespaceId, name, event.Target.Tag, digest)
 		if err != nil {
-			log.WithError(err).Error("can't find image by repo+tag with digest ", err)
+			log.WithError(err).Error("finding image by infos", err)
 			return err
 		}
 
@@ -61,7 +65,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 				event.Target.Tag,
 			)
 			if err != nil {
-				log.WithError(err).WithField("image", image).Error("can't create image")
+				log.WithError(err).WithField("image", image).Error("creating image")
 				return err
 			}
 		}
@@ -71,14 +75,14 @@ func onPush(ctx context.Context, event notifications.Event) error {
 		// get layers by calling the registry manifest
 		layers := registrycli.GetLayers(event.Target.Repository, digest, event.Target.Size)
 		if layers == nil {
-			log.WithError(err).Error("can't get layers")
+			log.WithError(err).Error("getting layers")
 			return fmt.Errorf("can't get layers with digest %s and repo %s", digest, event.Target.Repository)
 		}
 
 		// insert layers and many to many relation with image id <-> layer digest
 		err = insertLayers(layers, image.ID)
 		if err != nil {
-			log.WithError(err).Error("can't insert layers")
+			log.WithError(err).Error("inserting layers")
 			return err
 		}
 	}
@@ -109,19 +113,9 @@ func insertLayers(layers []images.Layer, imageId string) error {
 		return err
 	}
 
-	err = images.CreateImageLayer(context.Background(), layers, imageId)
+	err = images.CreateImageLayerRelations(context.Background(), layers, imageId)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-// parseRepository return the namespace id and the name of the image.
-// Can throw an error only if the repository is malformed.
-func parseRepository(repo string) (namespaceID, name string, err error) {
-	str := strings.Split(repo, "/")
-	if len(str) != 2 {
-		return "", "", errors.New("repository is malformed")
-	}
-	return str[0], str[1], nil
 }

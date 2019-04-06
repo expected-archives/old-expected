@@ -74,3 +74,26 @@ func GetLayers(repo, digest string, size int64) []images.Layer {
 	})
 	return layers
 }
+
+func DeleteManifest(namespaceId, name, digest string) (DeleteStatus, error) {
+	token, err := newToken(fmt.Sprintf("%s/%s", namespaceId, name))
+	if err != nil {
+		return DeleteStatusUnknown, err
+	}
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/%s/%s/manifests/%s",
+		registryUrl, namespaceId, name, digest), nil)
+
+	req.Header.Set("Authorization", "bearer "+token)
+	res, err := client.Do(req)
+
+	status := DeleteStatusUnknown
+	if res != nil && res.StatusCode >= 200 && res.StatusCode < 300 {
+		status = DeleteStatusDeleted
+	} else if res != nil && res.StatusCode >= 400 && res.StatusCode < 500 {
+		status = DeleteStatusNotFound
+	}
+
+	return status, err
+}

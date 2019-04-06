@@ -11,6 +11,7 @@ import (
 	"github.com/expectedsh/expected/pkg/registryhook/gc"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/util/registrycli"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -66,10 +67,16 @@ func main() {
 	token.Init(config.Certs.PublicKey, config.Certs.PrivateKey)
 
 	gc.New(context.Background(), &gc.Options{
-		OlderThan: time.Minute,
+		OlderThan: time.Second,
 		Interval:  time.Minute * 5,
 		Limit:     10,
 	}).Run()
+
+	status, e := registrycli.DeleteManifest(
+		"b431e1c9-3b04-42bd-83f5-47c05e49c70c",
+		"registry",
+		"sha256:b1165286043f2745f45ea637873d61939bff6d9a59f76539d6228abf79f87774")
+	logrus.Info("status", status.String(), e)
 
 	logrus.Infoln("starting api server")
 	server := registryhook.New(config.Addr)

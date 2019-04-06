@@ -3,6 +3,7 @@ package images
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -75,6 +76,28 @@ func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string
 	return nil, nil
 }
 
+func FindLayersByImageId(ctx context.Context, imageId string) ([]*Layer, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT
+    		layers.*
+		FROM image_layer
+    	LEFT JOIN layers ON image_layer.layer_digest = layers.digest
+		WHERE image_id = $1
+	`, imageId)
+	if err != nil {
+		return nil, err
+	}
+	var layers []*Layer
+	for rows.Next() {
+		layer := &Layer{}
+		if err := scanLayer(rows, layer); err != nil {
+			return nil, err
+		}
+		layers = append(layers, layer)
+	}
+	return layers, nil
+}
+
 func FindImageStatsByImageID(ctx context.Context, imageId string) (*Stats, error) {
 	rows, err := db.QueryContext(ctx, `
 		SELECT
@@ -130,6 +153,25 @@ func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*S
 		statsList = append(statsList, stats)
 	}
 	return statsList, nil
+}
+
+func FindLayerCountReferences(ctx context.Context, digest string) (int64, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT count(*) 
+		FROM image_layer 
+		WHERE layer_digest = $1
+	`, digest)
+	if err != nil {
+		return 0, err
+	}
+	if rows.Next() {
+		var count int64
+		if err := rows.Scan(&count); err != nil {
+			return 0, err
+		}
+		return count, nil
+	}
+	return 0, errors.New("unexpected error with psql in FindLayerCountReferences function")
 }
 
 func FindUnusedLayers(ctx context.Context, olderThan time.Duration, limit int64) ([]*Layer, error) {

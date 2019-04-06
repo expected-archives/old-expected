@@ -70,7 +70,7 @@ func CreateLayers(ctx context.Context, layers []Layer, imageId string) error {
 	return tx.Commit()
 }
 
-func CreateImageLayer(ctx context.Context, layers []Layer, imageId string) error {
+func CreateImageLayerRelations(ctx context.Context, layers []Layer, imageId string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -113,7 +113,6 @@ func CreateImageLayer(ctx context.Context, layers []Layer, imageId string) error
 		}
 
 	}
-
 	return tx.Commit()
 }
 
@@ -126,9 +125,54 @@ func UpdateLayer(ctx context.Context, digest string) error {
 	return err
 }
 
+func UpdateLayerRepository(ctx context.Context, digest string) error {
+	_, e := db.ExecContext(ctx, `
+			WITH res AS (
+			    SELECT i.namespace_id as namespace, i.name as name
+			    FROM public.image_layer
+			             LEFT JOIN public.images i on image_layer.image_id = i.id
+			    WHERE layer_digest = $1
+			)
+			UPDATE layers
+			SET repository = concat((SELECT namespace FROM res), '/', (SELECT name FROM res)),
+			    updated_at = now()
+			WHERE digest = $1
+		`, digest)
+	return e
+}
+
 func DeleteLayer(ctx context.Context, digest string) error {
 	err := backoff.ExecContext(db, ctx, `
 		DELETE FROM layers WHERE digest = $1
+	`, digest)
+	return err
+}
+
+func DeleteImageLayerByImageID(ctx context.Context, imageId string) error {
+	err := backoff.ExecContext(db, ctx, `
+		DELETE FROM image_layer WHERE image_id = $1
+	`, imageId)
+	return err
+}
+
+// DeleteImage delete an image only if there is no more relations
+// in table image_layer.
+func DeleteImage(ctx context.Context, imageId string) error {
+	err := backoff.ExecContext(db, ctx, `
+		DELETE FROM images 
+		WHERE id = $1 AND
+		      (SELECT count(*) FROM image_layer WHERE image_id = id) = 0
+	`, imageId)
+	return err
+}
+
+// DeleteImageByDigest delete an image only if there is no more relations
+// in table image_layer.
+func DeleteImageByDigest(ctx context.Context, digest string) error {
+	err := backoff.ExecContext(db, ctx, `
+		DELETE FROM images 
+		WHERE digest = $1 AND 
+		      (SELECT count(*) FROM image_layer WHERE image_id = id) = 0
 	`, digest)
 	return err
 }
