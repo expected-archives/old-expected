@@ -11,9 +11,9 @@ import (
 )
 
 type Options struct {
-	Interval  time.Duration // Interval define the interval between each run of the gc
-	Limit     int64         // Limit define how many element max the gc can handle per run
-	OlderThan time.Duration // OlderThan define since when the element should not be used
+	Interval  time.Duration // Interval between each run of the gc
+	Limit     int64         // Limit define how many layers the gc can handle per run
+	OlderThan time.Duration // OlderThan define since when the layers should not be used
 }
 
 type GarbageCollector struct {
@@ -49,7 +49,7 @@ func (gc *GarbageCollector) process() {
 	now := time.Now()
 	layersDeleted := 0
 
-	gc.logger.Info("starting garbage collection")
+	gc.logger.Info("start")
 
 	layers, err := images.FindUnusedLayers(gc.ctx, gc.Options.OlderThan, gc.Options.Limit)
 	if err != nil {
@@ -57,58 +57,34 @@ func (gc *GarbageCollector) process() {
 	} else {
 		for _, layer := range layers {
 
-			// re-compute manually the count to ensure the layer is unused
-			count, err := images.FindActualLayerCount(gc.ctx, layer.Digest)
+			logger := gc.logger.WithField("digest", layer.Digest)
+
+			// delete the layer by calling the registry
+			deleteStatus, err := registrycli.DeleteLayer(layer.Repository, layer.Digest)
 			if err != nil {
-				gc.logger.WithError(err).
-					WithField("digest", layer.Digest).
-					Error("layer count can't be computed, skip this layer")
+				logger.WithError(err).Error("layer can't be deleted with the registry")
 				continue
 			}
 
-			if count <= 0 {
-
-				// delete the layer by calling the registry
-				deleteStatus, err := registrycli.DeleteLayer(layer.OriginRepo, layer.Digest)
-				if err != nil {
-					gc.logger.
-						WithError(err).
-						WithField("digest", layer.Digest).
-						Error("layer can't be deleted with the registry")
-					continue
-				}
-
-				// the layer has not be delete in the registry
-				if deleteStatus == registrycli.Unknown || deleteStatus == registrycli.NotFound {
-					gc.logger.
-						WithField("digest", layer.Digest).
-						WithField("delete-status", deleteStatus.String()).
-						Warn("layer delete status is incoherent")
-				}
-
-				// delete the layer in the database
-				err = images.DeleteLayer(gc.ctx, layer.Digest)
-				if err != nil {
-					gc.logger.
-						WithField("digest", layer.Digest).
-						WithField("delete-status", deleteStatus.String()).
-						Error("can't delete layer in postgres")
-				}
-
-				// layer has be delete at least in the database or in the registry
-				if err == nil || deleteStatus == registrycli.Deleted {
-					gc.logger.WithField("digest", layer.Digest).Info("layer deleted")
-					layersDeleted++
-				}
-
+			// the layer has not been deleted in the registry
+			if deleteStatus == registrycli.Unknown || deleteStatus == registrycli.NotFound {
+				logger.WithField("delete-status", deleteStatus.String()).
+					Warn("layer delete status is incoherent")
 			} else {
+				logger.WithField("delete-status", deleteStatus.String()).Info("layer deleted in the registry")
+			}
 
-				// incoherence founded, update the count attribute of the layer
-				if err := images.UpdateLayer(gc.ctx, layer.Digest); err != nil {
-					gc.logger.WithField("err", err).
-						WithField("digest", layer.Digest).
-						Warn("layer can't be updated")
-				}
+			// deleting the layer in the database
+			err = images.DeleteLayer(gc.ctx, layer.Digest)
+			if err != nil {
+				logger.WithError(err).Error("can't delete layer in postgres")
+			} else {
+				logger.Info("layer deleted in postgres")
+			}
+
+			// layer has be delete at least in the database or in the registry
+			if err == nil || deleteStatus == registrycli.Deleted {
+				layersDeleted++
 			}
 		}
 	}
@@ -116,5 +92,5 @@ func (gc *GarbageCollector) process() {
 	gc.logger.
 		WithField("gc-duration", time.Now().Sub(now).String()).
 		WithField("layers-deleted", fmt.Sprintf("%d/%d", layersDeleted, len(layers))).
-		Info("end of garbage collection")
+		Info("end")
 }

@@ -54,7 +54,6 @@ func GetLayers(repo, digest string, size int64) []images.Layer {
 		layers = append(layers, images.Layer{
 			Digest:    layer.Digest.String(),
 			Size:      layer.Size,
-			Count:     1,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		})
@@ -63,7 +62,6 @@ func GetLayers(repo, digest string, size int64) []images.Layer {
 	layers = append(layers, images.Layer{
 		Digest:    digest,
 		Size:      size,
-		Count:     1,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
@@ -71,7 +69,6 @@ func GetLayers(repo, digest string, size int64) []images.Layer {
 	layers = append(layers, images.Layer{
 		Digest:    manifest.Config.Digest.String(),
 		Size:      manifest.Config.Size,
-		Count:     1,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
