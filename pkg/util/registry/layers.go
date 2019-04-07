@@ -1,4 +1,4 @@
-package registrycli
+package registry
 
 import (
 	"fmt"

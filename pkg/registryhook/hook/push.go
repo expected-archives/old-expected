@@ -7,7 +7,7 @@ import (
 	"github.com/docker/distribution/notifications"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/expectedsh/expected/pkg/images"
-	"github.com/expectedsh/expected/pkg/util/registrycli"
+	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/sirupsen/logrus"
 )
 
@@ -73,7 +73,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 		log = log.WithField("image", image)
 
 		// get layers by calling the registry manifest
-		layers := registrycli.GetLayers(event.Target.Repository, digest, event.Target.Size)
+		layers := registry.GetLayers(event.Target.Repository, digest, event.Target.Size)
 		if layers == nil {
 			log.WithError(err).Error("getting layers")
 			return fmt.Errorf("can't get layers with digest %s and repo %s", digest, event.Target.Repository)

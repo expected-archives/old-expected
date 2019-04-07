@@ -1,4 +1,4 @@
-package registrycli
+package registry
 
 import (
 	"github.com/expectedsh/expected/pkg/registryhook/auth"

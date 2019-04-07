@@ -15,11 +15,6 @@ func Handle(envelope notifications.Envelope) error {
 				return err
 			}
 		}
-		if event.Action == notifications.EventActionDelete {
-			if err := onDelete(context.Background(), event); err != nil {
-				return err
-			}
-		}
 	}
 	return nil
 }

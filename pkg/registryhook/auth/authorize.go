@@ -30,7 +30,6 @@ func Authorize(account accounts.Account, scopes []Scope) ([]AuthorizedScope, err
 		// check if namespace is an UUID
 		_, err = uuid.Parse(namespace)
 		if err != nil {
-			fmt.Println("error not an uuid", namespace)
 			continue
 		}
 

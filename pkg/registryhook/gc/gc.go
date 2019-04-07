@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/expectedsh/expected/pkg/images"
-	"github.com/expectedsh/expected/pkg/util/registrycli"
+	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -60,14 +60,14 @@ func (gc *GarbageCollector) process() {
 			logger := gc.logger.WithField("digest", layer.Digest)
 
 			// delete the layer by calling the registry
-			deleteStatus, err := registrycli.DeleteLayer(layer.Repository, layer.Digest)
+			deleteStatus, err := registry.DeleteLayer(layer.Repository, layer.Digest)
 			if err != nil {
 				logger.WithError(err).Error("layer can't be deleted with the registry")
 				continue
 			}
 
 			// the layer has not been deleted in the registry
-			if deleteStatus == registrycli.DeleteStatusUnknown || deleteStatus == registrycli.DeleteStatusNotFound {
+			if deleteStatus == registry.DeleteStatusUnknown || deleteStatus == registry.DeleteStatusNotFound {
 				logger.WithField("delete-status", deleteStatus.String()).
 					Warn("layer delete status is incoherent")
 			} else {
@@ -88,7 +88,7 @@ func (gc *GarbageCollector) process() {
 			}
 
 			// layer has be delete at least in the database or in the registry
-			if err == nil || deleteStatus == registrycli.DeleteStatusDeleted {
+			if err == nil || deleteStatus == registry.DeleteStatusDeleted {
 				layersDeleted++
 			}
 		}

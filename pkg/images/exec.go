@@ -120,7 +120,7 @@ func UpdateLayer(ctx context.Context, digest string) error {
 	_, err := db.ExecContext(ctx, `
 		UPDATE layers 
 		SET updated_at = now()
-		WHERE digest = $2
+		WHERE digest = $1
 	`, digest)
 	return err
 }

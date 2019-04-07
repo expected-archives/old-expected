@@ -13,7 +13,7 @@ services:
     ports:
       - 5432:5432
   registry:
-    container_name: expected-registry
+    container_name: expected-registryhook
     network_mode: host
     restart: always
     image: registry:latest
