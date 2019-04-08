@@ -11,6 +11,7 @@ docker-compose up
 | Nom | Description | Valeur par défaut |
 | --- | --- | --- |
 | POSTGRES_ADDR | Permet de changer l'adresse de postgres | postgres://expected:expected@postgres/expected?sslmode=disable |
+| RABBITMQ_ADDR | Permet de changer l'adresse de rabbitmq | amqp://expected:expected@rabbitmq/expected |
 | GITHUB_CLIENT_ID | Défini le client id pour l'oauth avec github |  |
 | GITHUB_CLIENT_SECRET | Défini le client secret pour l'oauth avec github |  |
 | ADMIN | Défini les administrateurs |  |
