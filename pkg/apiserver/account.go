@@ -2,7 +2,7 @@ package apiserver
 
 import (
 	"github.com/expectedsh/expected/pkg/apiserver/response"
-	"github.com/expectedsh/expected/pkg/apiserver/session"
+	"github.com/expectedsh/expected/pkg/apiserver/request"
 	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/sirupsen/logrus"
@@ -11,11 +11,11 @@ import (
 )
 
 func (s *ApiServer) GetAccount(w http.ResponseWriter, r *http.Request) {
-	response.Resource(w, "account", session.GetAccount(r))
+	response.Resource(w, "account", request.GetAccount(r))
 }
 
 func (s *ApiServer) SyncAccount(w http.ResponseWriter, r *http.Request) {
-	account := session.GetAccount(r)
+	account := request.GetAccount(r)
 	token := &oauth2.Token{
 		AccessToken: account.GithubAccessToken,
 		TokenType:   "bearer",
@@ -44,7 +44,7 @@ func (s *ApiServer) SyncAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *ApiServer) RegenerateAPIKeyAccount(w http.ResponseWriter, r *http.Request) {
-	account := session.GetAccount(r)
+	account := request.GetAccount(r)
 	account.RegenerateAPIKey()
 	if err := accounts.Update(r.Context(), account); err != nil {
 		logrus.WithField("account", account.ID).WithError(err).Errorln("unable to regenerate api key")

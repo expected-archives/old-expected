@@ -2,7 +2,7 @@ package apiserver
 
 import (
 	"github.com/expectedsh/expected/pkg/apiserver/response"
-	"github.com/expectedsh/expected/pkg/apiserver/session"
+	"github.com/expectedsh/expected/pkg/apiserver/request"
 	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -61,7 +61,7 @@ func (s *ApiServer) authMiddleware(next http.Handler) http.Handler {
 			response.ErrorForbidden(w)
 			return
 		}
-		session.SetAccount(r, account)
+		request.SetAccount(r, account)
 		next.ServeHTTP(w, r)
 	})
 }

@@ -31,7 +31,7 @@ func NewFromEnv() *Service {
 }
 
 func (srv *Service) Name() string {
-	return "postgres"
+	return "rabbitmq"
 }
 
 func (srv *Service) Start() error {

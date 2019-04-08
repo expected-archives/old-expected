@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/expectedsh/expected/pkg/services/etcd"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
 )
@@ -48,4 +49,8 @@ func Postgres() *postgres.Service {
 
 func Etcd() *etcd.Service {
 	return Get("etcd").(*etcd.Service)
+}
+
+func RabbitMQ() *rabbitmq.Service {
+	return Get("rabbitmq").(*rabbitmq.Service)
 }
