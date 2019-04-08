@@ -13,12 +13,11 @@ import (
 type ApiServer struct {
 	Addr         string
 	Secret       string
-	Admin        string
 	DashboardURL string
 	OAuth        *oauth2.Config
 }
 
-func New(addr, secret, admin, dashboardUrl string, githubConfig github.Config) *ApiServer {
+func New(addr, secret, dashboardUrl string, githubConfig github.Config) *ApiServer {
 	return &ApiServer{
 		Addr:         addr,
 		Secret:       secret,
@@ -29,7 +28,6 @@ func New(addr, secret, admin, dashboardUrl string, githubConfig github.Config) *
 			Endpoint:     gh.Endpoint,
 			Scopes:       []string{"user", "user:email"},
 		},
-		Admin: admin,
 	}
 }
 

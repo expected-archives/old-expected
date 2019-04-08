@@ -7,4 +7,4 @@ ENV GO111MODULE=on
 RUN go mod download
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o expected-authserver cmd/expected-authserver/main.go
 
-ENTRYPOINT ["/app/expected-authservice"]
+ENTRYPOINT ["/app/expected-authserver"]

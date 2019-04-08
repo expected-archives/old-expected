@@ -11,10 +11,9 @@ import (
 )
 
 type Config struct {
-	DashboardURL string   `envconfig:"dashboard_url"`
-	Secret       string   `envconfig:"secret" default:"changeme"`
-	Admins       []string `envconfig:"admin"`
-	Addr         string   `envconfig:"addr" default:":3000"`
+	DashboardURL string `envconfig:"dashboard_url"`
+	Secret       string `envconfig:"secret" default:"changeme"`
+	Addr         string `envconfig:"addr" default:":3000"`
 
 	Github github.Config
 	Certs  certs.Config
@@ -36,7 +35,7 @@ func main() {
 
 	logrus.Infoln("starting auth server")
 	//
-	server := authserver.New(config.Addr, config.Secret, config.DashboardURL, config.Github, config.Admins)
+	server := authserver.New(config.Addr, config.Secret, config.DashboardURL, config.Github)
 
 	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {

@@ -17,7 +17,7 @@ type AuthServer struct {
 	OAuth        *oauth2.Config
 }
 
-func New(addr, secret, dashboardUrl string, githubConfig github.Config, admin []string) *AuthServer {
+func New(addr, secret, dashboardUrl string, githubConfig github.Config) *AuthServer {
 	return &AuthServer{
 		Addr:         addr,
 		Secret:       secret,
@@ -28,7 +28,7 @@ func New(addr, secret, dashboardUrl string, githubConfig github.Config, admin []
 			Endpoint:     gh.Endpoint,
 			Scopes:       []string{"user", "user:email"},
 		},
-		Admins: admin,
+		Admins: []string{"remicaumette", "alexisvisco"},
 	}
 }
 
