@@ -1,24 +1,23 @@
 package main
 
 import (
-	"context"
-	"github.com/expectedsh/expected/pkg/registryhook"
-	"github.com/expectedsh/expected/pkg/registryhook/gc"
+	"github.com/expectedsh/expected/pkg/authserver"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/certs"
-	"github.com/expectedsh/expected/pkg/util/registry"
+	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/kelseyhightower/envconfig"
-	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
-	Addr        string `envconfig:"addr" default:":3000"`
-	RegistryUrl string `envconfig:"registry_url" default:"http://localhost:5000"`
+	DashboardURL string   `envconfig:"dashboard_url"`
+	Secret       string   `envconfig:"secret" default:"changeme"`
+	Admins       []string `envconfig:"admin"`
+	Addr         string   `envconfig:"addr" default:":3000"`
 
-	Certs certs.Config
-	Gc    gc.Config
+	Github github.Config
+	Certs  certs.Config
 }
 
 func main() {
@@ -28,24 +27,19 @@ func main() {
 		logrus.WithError(err).Fatalln("unable to parse environment variables")
 	}
 
+	logrus.Infoln("initializing services")
 	services.Register(postgres.NewFromEnv())
 	services.Start()
 	defer services.Stop()
 
 	certs.Init(config.Certs)
-	registry.Init(config.RegistryUrl)
 
-	gc.New(context.Background(), &gc.Config{
-		OlderThan: config.Gc.OlderThan,
-		Interval:  config.Gc.Interval,
-		Limit:     config.Gc.Limit,
-	}).Run()
-
-	logrus.Infoln("starting api server")
-	server := registryhook.New(config.Addr)
+	logrus.Infoln("starting auth server")
+	//
+	server := authserver.New(config.Addr, config.Secret, config.DashboardURL, config.Github, config.Admins)
 
 	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {
-		logrus.WithError(err).Fatalln("unable to start api server")
+		logrus.WithError(err).Fatal("unable to start auth server")
 	}
 }

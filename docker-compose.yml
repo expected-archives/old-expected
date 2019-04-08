@@ -1,91 +1,50 @@
-version: "3.4"
-
+version: '3.4'
 services:
-  apiserver:
-    container_name: expected-apiserver
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: cmd/expected-apiserver/Dockerfile
-    environment:
-      - "ADDR=:3000"
-      - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
-      - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
-      - "ADMIN=${ADMIN}"
-      - "DASHBOARD_URL=${DASHBOARD_URL:-http://localhost:8080}"
-    depends_on:
-      - postgres
-      - rabbitmq
-    ports:
-      - 3000:3000
-
-  registryhook:
-    container_name: expected-registryhook
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: cmd/expected-registryhook/Dockerfile
-    environment:
-      - "ADDR=:3001"
-      - "REGISTRY_URL=http://registry:5000"
-      - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "CERTS_PUBLIC_KEY=/certs/server.crt"
-      - "CERTS_PRIVATE_KEY=/certs/server.key"
-    depends_on:
-      - postgres
-      - rabbitmq
-    ports:
-      - 3001:3001
-    volumes:
-      - ./certs:/certs
-
-  registry:
-    container_name: expected-registry
-    restart: on-failure
-    image: registry:latest
-    environment:
-      - "REGISTRY_STORAGE_DELETE_ENABLED=true"
-      - "REGISTRY_AUTH=token"
-      - "REGISTRY_AUTH_TOKEN_REALM=${REGISTRY_AUTH_TOKEN_REALM:-http://localhost:3001/registry/auth}"
-      - "REGISTRY_AUTH_TOKEN_SERVICE=registry"
-      - "REGISTRY_AUTH_TOKEN_ISSUER=auth_registry"
-      - "REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/server.crt"
-      - "REGISTRY_AUTH_TOKEN_AUTOREDIRECT=false"
-      - "REGISTRY_NOTIFICATIONS_ENDPOINTS=- name: expected-hook\n  url: ${REGISTRY_AUTH_SERVER:-http://registryhook:3001/registry/hook}\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
-    depends_on:
-      - registryhook
-    ports:
-      - 5000:5000
-    volumes:
-      - ./certs:/certs
-
   postgres:
     container_name: expected-postgres
     image: postgres:alpine
     restart: on-failure
     environment:
-      - "POSTGRES_USER=expected"
-      - "POSTGRES_PASSWORD=expected"
-      - "TZ=Europe/Paris"
-    ports:
-      - 5432:5432
+      - POSTGRES_USER=expected
+      - POSTGRES_PASSWORD=expected
+      - TZ=Europe/Paris
     volumes:
       - postgres:/var/lib/postgresql/data
+      - ./migrations/001_create_tables.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5432:5432
+
+  registry:
+    container_name: expected-registryhook
+    network_mode: host
+    restart: always
+    image: registry:latest
+    ports:
+      - 5000:5000
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_AUTH: "token"
+      REGISTRY_AUTH_TOKEN_REALM: "http://localhost:3000/auth/registry"
+      REGISTRY_AUTH_TOKEN_SERVICE: "registry"
+      REGISTRY_AUTH_TOKEN_ISSUER: "auth_registry"
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: "/certs/server.crt"
+      REGISTRY_AUTH_TOKEN_AUTOREDIRECT: "false"
+      REGISTRY_NOTIFICATIONS_ENDPOINTS: "- name: expected-hook\n  url: http://localhost:3000/hook\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
+    volumes:
+      - ./certs:/certs
 
   rabbitmq:
-    container_name: expected-rabbitmq
     image: rabbitmq:management-alpine
     restart: on-failure
     environment:
-      - "RABBITMQ_DEFAULT_USER=expected"
-      - "RABBITMQ_DEFAULT_PASS=expected"
-      - "RABBITMQ_DEFAULT_VHOST=expected"
+      - RABBITMQ_DEFAULT_USER=expected
+      - RABBITMQ_DEFAULT_PASS=expected
+      - RABBITMQ_DEFAULT_VHOST=expected
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
     ports:
       - 5672:5672
       - 15672:15672
-    volumes:
-      - rabbitmq:/var/lib/rabbitmq
 volumes:
   postgres: {}
   rabbitmq: {}
