@@ -26,14 +26,17 @@ func New(addr, secret, dashboardUrl string) *ApiServer {
 func (s *ApiServer) Start() error {
 	router := mux.NewRouter()
 
-	router.Use(s.authMiddleware)
+	v1 := router.PathPrefix("/v1").Subrouter()
+	{
+		v1.Use(s.authMiddleware)
 
-	router.HandleFunc("/v1/account", s.GetAccount).Methods("GET")
-	router.HandleFunc("/v1/account/sync", s.SyncAccount).Methods("POST")
-	router.HandleFunc("/v1/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
+		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
+		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
+		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
 
-	router.HandleFunc("/v1/containers", s.GetContainers).Methods("GET")
-	router.HandleFunc("/v1/containers", s.CreateContainer).Methods("POST")
+		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
+		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+	}
 
 	if err := cors.ApplyMiddleware(router); err != nil {
 		return err
