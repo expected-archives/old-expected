@@ -5,8 +5,11 @@ import (
 	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
 )
 
-// todo change this in the future
-const registryUrl = "http://localhost:5000"
+var registryUrl = "http://localhost:5000"
+
+func Init(url string) {
+	registryUrl = url
+}
 
 type DeleteStatus int
 

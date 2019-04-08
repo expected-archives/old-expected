@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"github.com/expectedsh/expected/pkg/accounts"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
