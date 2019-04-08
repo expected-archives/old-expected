@@ -1,8 +1,7 @@
 package registry
 
 import (
-	"github.com/expectedsh/expected/pkg/registryhook/auth"
-	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
+	"github.com/expectedsh/expected/pkg/authserver/authregistry"
 )
 
 var registryUrl = "http://localhost:5000"
@@ -30,12 +29,12 @@ func (d DeleteStatus) String() string {
 }
 
 func newToken(repository string) (string, error) {
-	return token.Generate(auth.RequestFromDaemon{
+	return authregistry.Generate(authregistry.RequestFromDaemon{
 		Login:   "admin",
 		Service: "registry",
-	}, []auth.AuthorizedScope{
+	}, []authregistry.AuthorizedScope{
 		{
-			Scope: auth.Scope{
+			Scope: authregistry.Scope{
 				Type: "repository",
 				Name: repository,
 			},

@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-type Options struct {
-	Interval  time.Duration // Interval between each run of the gc
-	Limit     int64         // Limit define how many layers the gc can handle per run
-	OlderThan time.Duration // OlderThan define since when the layers should not be used
+type Config struct {
+	Interval  time.Duration `envconfig:"older_than" default:"1h"` // Interval between each run of the gc
+	OlderThan time.Duration `envconfig:"limit" default:"1h"`      // OlderThan define since when the layers should not be used
+	Limit     int64         `envconfig:"interval" default:"100"`  // Limit define how many layers the gc can handle per run
 }
 
 type GarbageCollector struct {
@@ -21,15 +21,15 @@ type GarbageCollector struct {
 	logger *logrus.Entry
 	ctx    context.Context
 
-	Options *Options
+	Config *Config
 }
 
-func New(ctx context.Context, options *Options) *GarbageCollector {
+func New(ctx context.Context, config *Config) *GarbageCollector {
 	return &GarbageCollector{
-		ctx:     ctx,
-		mutex:   sync.Mutex{},
-		Options: options,
-		logger:  logrus.WithField("service", "garbage-collector"),
+		ctx:    ctx,
+		mutex:  sync.Mutex{},
+		Config: config,
+		logger: logrus.WithField("service", "garbage-collector"),
 	}
 }
 
@@ -37,7 +37,7 @@ func (gc *GarbageCollector) Run() {
 	go func() {
 		for {
 			gc.process()
-			time.Sleep(gc.Options.Interval)
+			time.Sleep(gc.Config.Interval)
 		}
 	}()
 }
@@ -51,7 +51,7 @@ func (gc *GarbageCollector) process() {
 
 	gc.logger.Info("start")
 
-	layers, err := images.FindUnusedLayers(gc.ctx, gc.Options.OlderThan, gc.Options.Limit)
+	layers, err := images.FindUnusedLayers(gc.ctx, gc.Config.OlderThan, gc.Config.Limit)
 	if err != nil {
 		gc.logger.WithError(err).Error("can't find unused layers, skip this garbage collector")
 	} else {

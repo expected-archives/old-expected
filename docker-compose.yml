@@ -13,7 +13,6 @@ services:
       - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
       - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
       - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
-      - "ADMIN=${ADMIN}"
       - "DASHBOARD_URL=${DASHBOARD_URL:-http://localhost:8080}"
     depends_on:
       - postgres
@@ -41,6 +40,27 @@ services:
     volumes:
       - ./certs:/certs
 
+  authserver:
+    container_name: expected-authserver
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: cmd/expected-authserver/Dockerfile
+    environment:
+      - "ADDR=:3002"
+      - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
+      - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
+      - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
+      - "CERTS_PUBLIC_KEY=/certs/server.crt"
+      - "CERTS_PRIVATE_KEY=/certs/server.key"
+      - "DASHBOARD_URL=${DASHBOARD_URL:-http://localhost:8080}"
+    depends_on:
+      - postgres
+    ports:
+      - 3002:3002
+    volumes:
+      - ./certs:/certs
+
   registry:
     container_name: expected-registry
     restart: on-failure
@@ -48,7 +68,7 @@ services:
     environment:
       - "REGISTRY_STORAGE_DELETE_ENABLED=true"
       - "REGISTRY_AUTH=token"
-      - "REGISTRY_AUTH_TOKEN_REALM=${REGISTRY_AUTH_TOKEN_REALM:-http://localhost:3001/registry/auth}"
+      - "REGISTRY_AUTH_TOKEN_REALM=${REGISTRY_AUTH_TOKEN_REALM:-http://localhost:3002/auth/registry}"
       - "REGISTRY_AUTH_TOKEN_SERVICE=registry"
       - "REGISTRY_AUTH_TOKEN_ISSUER=auth_registry"
       - "REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/server.crt"

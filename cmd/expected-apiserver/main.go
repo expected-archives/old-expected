@@ -4,7 +4,7 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
-	"github.com/expectedsh/expected/pkg/services/rabbitmq"
+	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -13,12 +13,8 @@ import (
 type Config struct {
 	Addr         string `envconfig:"addr" default:":3000"`
 	Secret       string `envconfig:"secret" default:"changeme"`
-	Admin        string `envconfig:"admin"`
 	DashboardURL string `envconfig:"dashboard_url"`
-	Github       struct {
-		ClientID     string `envconfig:"client_id"`
-		ClientSecret string `envconfig:"client_secret"`
-	}
+	Github       github.Config
 }
 
 func main() {
@@ -30,13 +26,11 @@ func main() {
 
 	logrus.Infoln("initializing services")
 	services.Register(postgres.NewFromEnv())
-	services.Register(rabbitmq.NewFromEnv())
 	services.Start()
 	defer services.Stop()
 
 	logrus.Infoln("starting api server")
-	server := apiserver.New(config.Addr, config.Secret, config.Admin,
-		config.DashboardURL, config.Github.ClientID, config.Github.ClientSecret)
+	server := apiserver.New(config.Addr, config.Secret, config.DashboardURL, config.Github)
 
 	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {
