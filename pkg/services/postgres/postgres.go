@@ -1,7 +1,9 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"github.com/sirupsen/logrus"
 	"time"
 
@@ -62,4 +64,18 @@ func (srv *Service) Started() bool {
 
 func (srv *Service) Client() *sql.DB {
 	return srv.db
+}
+
+func (srv *Service) Exec(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	if srv.db == nil {
+		return nil, errors.New("postgres database is not started")
+	}
+	return srv.db.ExecContext(ctx, query, args...)
+}
+
+func (srv *Service) Query(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	if srv.db == nil {
+		return nil, errors.New("postgres database is not started")
+	}
+	return srv.db.QueryContext(ctx, query, args...)
 }

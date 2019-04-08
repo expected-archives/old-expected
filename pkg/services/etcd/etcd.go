@@ -6,9 +6,8 @@ import (
 )
 
 type Service struct {
-	config *Config
-	client *clientv3.Client
-
+	config  *Config
+	client  *clientv3.Client
 	stopped bool
 }
 
