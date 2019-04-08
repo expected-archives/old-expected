@@ -36,7 +36,7 @@ func main() {
 	server := apiserver.New(config.Addr, config.Secret, config.Admin,
 		config.DashboardURL, config.Github.ClientID, config.Github.ClientSecret)
 
-	logrus.Infof("listening on %v\n", config.Addr)
+	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {
 		logrus.WithError(err).Fatalln("unable to start api server")
 	}
