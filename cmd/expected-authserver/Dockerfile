@@ -10,7 +10,7 @@ COPY vendor ./vendor/
 COPY go.mod .
 COPY go.sum .
 
-RUN GOOS=linux GOARCH=amd64 go build -mod vendor -o /go/bin/expected-authserver cmd/expected-authserver/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod vendor -o /go/bin/expected-authserver cmd/expected-authserver/main.go
 
 FROM alpine
 
