@@ -1,12 +1,12 @@
-# expected
+# Expected
 
-### installation
+### Installation
 
 ```
 docker-compose up
 ```
 
-#### configuration du dockercompose
+#### Configuration du docker-compose
 
 | Nom | Description | Valeur par défaut |
 | --- | --- | --- |
@@ -18,7 +18,7 @@ docker-compose up
 | REGISTRY_AUTH_TOKEN_REALM | L'adresse du serveur d'authentification de la registry qui sera donné au client | http://localhost:3001/registry/auth |
 | REGISTRY_AUTH_SERVER | L'adresse du serveur qui recoit les events de la registry | http://registryhook:3001/registry/hook |
 
-### lancer les migrations
+### Lancer les migrations
 
 Il faut installer le tool [disponible ici](https://github.com/golang-migrate/migrate/tree/master/cli).
 Puis executer la commande :

@@ -1,10 +1,10 @@
-FROM golang:1.12
+FROM golang:1.12 AS builder
 
 WORKDIR /app
 COPY . .
 
 ENV GO111MODULE=on
 RUN go mod download
-RUN go build -o expected-registryhook cmd/expected-registryhook/main.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o expected-registryhook cmd/expected-registryhook/main.go
 
-CMD ["/app/expected-registryhook"]
+ENTRYPOINT ["/app/expected-registryhook"]

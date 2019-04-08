@@ -5,6 +5,6 @@ COPY . .
 
 ENV GO111MODULE=on
 RUN go mod download
-RUN go build -o expected-apiserver cmd/expected-apiserver/main.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o expected-apiserver cmd/expected-apiserver/main.go
 
-CMD ["/app/expected-apiserver"]
+ENTRYPOINT ["/app/expected-apiserver"]
