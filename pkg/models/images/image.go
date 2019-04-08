@@ -34,6 +34,7 @@ type ImageLayer struct {
 
 // Stats get statistic about an image.
 type Stats struct {
+	ImageID     string    `json:"image_id"`     // uuid of the image
 	NamespaceID string    `json:"namespace_id"` // uuid of the namespace
 	Digest      string    `json:"digest"`       // digest of the image
 	Name        string    `json:"name"`         // name of the image
@@ -41,4 +42,10 @@ type Stats struct {
 	Layers      int       `json:"layers"`       // number of layers
 	Size        int64     `json:"size"`         // total size of the image in bytes
 	CreatedAt   time.Time `json:"created_at"`   // creation date of the image
+}
+
+// ImageDetail give all informations about an image.
+type ImageDetail struct {
+	*Image
+	Layers []*Layer `json:"layers"`
 }

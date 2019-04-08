@@ -19,7 +19,7 @@ func scanLayer(rows *sql.Rows, layer *Layer) error {
 }
 
 func scanStats(rows *sql.Rows, stats *Stats) error {
-	return rows.Scan(&stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag, &stats.Layers, &stats.Size)
+	return rows.Scan(&stats.ImageID, &stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag, &stats.Layers, &stats.Size)
 }
 
 func Create(ctx context.Context, name, digest, namespaceId, tag string) (*Image, error) {
@@ -42,8 +42,8 @@ func Create(ctx context.Context, name, digest, namespaceId, tag string) (*Image,
 func CreateLayer(ctx context.Context, repo, digest string, size int64) (*Layer, error) {
 	now := time.Now()
 	_, err := services.Postgres().Client().ExecContext(ctx, `
-		INSERT INTO layers (repository, digest, size)
-		VALUES ($1, $2, $3)
+		INSERT INTO layers (repository, digest, size, created_at, updated_at)
+		VALUES ($1, $2, $3, now(), now())
 	`, repo, digest, size)
 	return &Layer{
 		Repository: repo,
@@ -54,14 +54,14 @@ func CreateLayer(ctx context.Context, repo, digest string, size int64) (*Layer, 
 	}, err
 }
 
-func CreateLayers(ctx context.Context, layers []Layer, imageId string) error {
+func CreateLayers(ctx context.Context, layers []Layer) error {
 	tx, err := services.Postgres().Client().Begin()
 	if err != nil {
 		return err
 	}
 	query := `
-		INSERT INTO layers (repository, digest, size)
-		VALUES ($1, $2, $3)
+		INSERT INTO layers (repository, digest, size, created_at, updated_at)
+		VALUES ($1, $2, $3, now(), now())
 		ON CONFLICT (digest)
 		DO UPDATE SET updated_at = now()
 	`
@@ -274,6 +274,7 @@ func FindLayersByImageId(ctx context.Context, imageId string) ([]*Layer, error) 
 func FindImageStatsByImageID(ctx context.Context, imageId string) (*Stats, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT
+			img.id,
 			img.namespace_id,
        		img.digest,
        		img.name,
@@ -284,7 +285,7 @@ func FindImageStatsByImageID(ctx context.Context, imageId string) (*Stats, error
        		LEFT JOIN layers ON image_layer.layer_digest = layers.digest
        		LEFT JOIN images img on image_layer.image_id = img.id
 		WHERE image_id = $1
-		GROUP BY img.name, img.digest, img.tag, img.namespace_id;
+		GROUP BY img.name, img.digest, img.tag, img.namespace_id, img.id;
 	`, imageId)
 	if err != nil {
 		return nil, err
@@ -302,6 +303,7 @@ func FindImageStatsByImageID(ctx context.Context, imageId string) (*Stats, error
 func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*Stats, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT
+		    img.id,
 			img.namespace_id,
        		img.digest,
        		img.name,
@@ -312,13 +314,13 @@ func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*S
        		LEFT JOIN layers ON image_layer.layer_digest = layers.digest
        		LEFT JOIN images img on image_layer.image_id = img.id
 		WHERE namespace_id = $1
-		GROUP BY img.name, img.digest, img.tag, img.namespace_id;
+		GROUP BY img.name, img.digest, img.tag, img.namespace_id, img.id;
 	`, namespaceId)
 	if err != nil {
 		return nil, err
 	}
 	var statsList []*Stats
-	if rows.Next() {
+	for rows.Next() {
 		stats := &Stats{}
 		if err := scanStats(rows, stats); err != nil {
 			return nil, err

@@ -42,8 +42,13 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
 		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
 		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
+
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+
+		v1.HandleFunc("/images", s.GetImages).Methods("GET")
+		v1.HandleFunc("/images/{id}", s.GetImage).Methods("GET")
+		//v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE") // todo use rabbitmq
 	}
 	if err := corsMiddleware(router); err != nil {
 		return err
