@@ -1,13 +1,13 @@
 package etcd
 
 import (
-	"github.com/coreos/etcd/clientv3"
+	client "github.com/coreos/etcd/clientv3"
 	"google.golang.org/grpc/connectivity"
 )
 
 type Service struct {
 	config  *Config
-	client  *clientv3.Client
+	client  *client.Client
 	stopped bool
 }
 
@@ -21,11 +21,11 @@ func (s *Service) Name() string {
 }
 
 func (s *Service) Start() error {
-	client, err := clientv3.New(clientv3.Config{Endpoints: s.config.Addresses})
+	etcd, err := client.New(client.Config{Endpoints: s.config.Addresses})
 	if err != nil {
 		return err
 	}
-	s.client = client
+	s.client = etcd
 	return nil
 }
 
@@ -37,7 +37,7 @@ func (s *Service) Started() bool {
 	return s.client != nil && s.client.ActiveConnection().GetState() == connectivity.Ready
 }
 
-func (s *Service) Client() *clientv3.Client {
+func (s *Service) Client() *client.Client {
 	return s.client
 }
 
