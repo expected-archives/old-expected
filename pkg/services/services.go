@@ -5,6 +5,7 @@ import (
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 var registeredServices = map[string]Service{}
@@ -48,4 +49,12 @@ func Postgres() *postgres.Service {
 
 func Etcd() *etcd.Service {
 	return Get("etcd").(*etcd.Service)
+}
+
+func init() {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableColors:   true,
+		FullTimestamp:   true,
+		TimestampFormat: time.RFC1123,
+	})
 }

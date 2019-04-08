@@ -3,8 +3,8 @@ package apiserver
 import (
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/apiserver/session"
-	"github.com/expectedsh/expected/pkg/github"
 	"github.com/expectedsh/expected/pkg/models/accounts"
+	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"net/http"

@@ -2,7 +2,8 @@ package auth
 
 import (
 	"errors"
-	"github.com/expectedsh/expected/pkg/accounts"
+	"github.com/expectedsh/expected/pkg/models/accounts"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"strings"
 )
@@ -19,8 +20,22 @@ func Authorize(account accounts.Account, scopes []Scope) ([]AuthorizedScope, err
 		logrus.Infof("authorization for %s actions: %v type: %v", scope.Name, scope.Actions, scope.Type)
 
 		namespace, _, err := resource(scope.Name)
-		if err != nil || namespace != account.ID {
+
+		// check the semantic of the repository
+		if err != nil {
 			continue
+		}
+
+		// check if namespace is an UUID
+		_, err = uuid.Parse(namespace)
+		if err != nil {
+			continue
+		}
+
+		if !account.Admin {
+			if namespace != account.ID {
+				continue
+			}
 		}
 
 		authorizedScopes = append(authorizedScopes, AuthorizedScope{

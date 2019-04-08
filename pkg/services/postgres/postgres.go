@@ -15,10 +15,10 @@ type Service struct {
 }
 
 type Config struct {
-	Addr            string        `envconfig:"addr" default:"postgres://postgres:postgres@localhost/postgres?sslmode=disable"`
-	ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"10m"`
-	MaxIdleConns    int           `envconfig:"maxidleconns" default:"1"`
-	MaxOpenConns    int           `envconfig:"maxopenconns" default:"2"`
+	Addr            string        `envconfig:"addr" default:"postgres://expected:expected@localhost/expected?sslmode=disable"`
+	ConnMaxLifetime time.Duration `envconfig:"connmaxlifetime" default:"5m"`
+	MaxIdleConns    int           `envconfig:"maxidleconns" default:"4"`
+	MaxOpenConns    int           `envconfig:"maxopenconns" default:"100"`
 }
 
 func New(config *Config) *Service {

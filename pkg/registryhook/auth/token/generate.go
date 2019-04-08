@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/distribution/registry/auth/token"
-	"github.com/expectedsh/expected/pkg/registryserver/auth"
+	"github.com/expectedsh/expected/pkg/registryhook/auth"
 	"math/rand"
 	"sort"
 	"strings"
