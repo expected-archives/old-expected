@@ -1,11 +1,8 @@
 package images
 
 import (
-	"database/sql"
 	"time"
 )
-
-var db *sql.DB
 
 // Image is represented by a Manifest in the registry.
 type Image struct {
@@ -44,35 +41,4 @@ type Stats struct {
 	Layers      int       `json:"layers"`       // number of layers
 	Size        int64     `json:"size"`         // total size of the image in bytes
 	CreatedAt   time.Time `json:"created_at"`   // creation date of the image
-}
-
-func InitDB(database *sql.DB) error {
-	db = database
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS images (
-			id UUID NOT NULL PRIMARY KEY,
-			namespace_id UUID NOT NULL,
-			digest TEXT NOT NULL,
-			name VARCHAR(255) NOT NULL,
-			tag VARCHAR(255) NOT NULL,
-			created_at TIMESTAMP DEFAULT now()
-		);
-	`)
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS layers (
-			digest TEXT NOT NULL PRIMARY KEY,
-			repository TEXT NOT NULL,
-			size BIGINT NOT NULL,
-			created_at TIMESTAMP DEFAULT now(),
-			updated_at TIMESTAMP DEFAULT now()
-		);
-	`)
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS image_layer (
-			image_id UUID NOT NULL REFERENCES images (id),
-			layer_digest TEXT NOT NULL REFERENCES layers (digest),
-			created_at TIMESTAMP DEFAULT now()
-		);
-	`)
-	return err
 }

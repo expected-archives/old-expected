@@ -3,7 +3,7 @@ package session
 import (
 	"net/http"
 
-	"github.com/expectedsh/expected/pkg/accounts"
+	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/gorilla/context"
 )
 

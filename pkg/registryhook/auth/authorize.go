@@ -2,7 +2,7 @@ package auth
 
 import (
 	"errors"
-	"github.com/expectedsh/expected/pkg/accounts"
+	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"strings"

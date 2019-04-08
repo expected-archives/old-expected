@@ -7,11 +7,13 @@ services:
     environment:
       - POSTGRES_USER=expected
       - POSTGRES_PASSWORD=expected
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Paris
     volumes:
-      - data:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
+      - ./migrations/001_create_tables.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5432:5432
+
   registry:
     container_name: expected-registryhook
     network_mode: host
@@ -27,8 +29,22 @@ services:
       REGISTRY_AUTH_TOKEN_ISSUER: "auth_registry"
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: "/certs/server.crt"
       REGISTRY_AUTH_TOKEN_AUTOREDIRECT: "false"
-      REGISTRY_NOTIFICATIONS_ENDPOINTS: "- name: expected-hook\n  url: http://localhost:3001/registry/hook\n  timeout: 5s\n  threshold: 8\n  backoff: 10s"
+      REGISTRY_NOTIFICATIONS_ENDPOINTS: "- name: expected-hook\n  url: http://localhost:3001/registry/hook\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
     volumes:
       - ./certs:/certs
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    restart: on-failure
+    environment:
+      - RABBITMQ_DEFAULT_USER=expected
+      - RABBITMQ_DEFAULT_PASS=expected
+      - RABBITMQ_DEFAULT_VHOST=expected
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
 volumes:
-  data: {}
+  postgres: {}
+  rabbitmq: {}

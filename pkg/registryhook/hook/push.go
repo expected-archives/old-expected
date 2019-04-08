@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/accounts"
-	"github.com/expectedsh/expected/pkg/images"
+	"github.com/expectedsh/expected/pkg/models/accounts"
+	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/sirupsen/logrus"
 )

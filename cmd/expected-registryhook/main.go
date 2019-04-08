@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/expectedsh/expected/pkg/accounts"
-	"github.com/expectedsh/expected/pkg/images"
 	"github.com/expectedsh/expected/pkg/registryhook"
 	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
 	"github.com/expectedsh/expected/pkg/registryhook/gc"
@@ -41,13 +39,6 @@ func main() {
 	services.Register(postgres.NewFromEnv())
 	services.Start()
 	defer services.Stop()
-
-	if err := accounts.InitDB(services.Postgres().Client()); err != nil {
-		logrus.Fatal(err)
-	}
-	if err := images.InitDB(services.Postgres().Client()); err != nil {
-		logrus.Fatal(err)
-	}
 
 	token.Init(config.Certs.PublicKey, config.Certs.PrivateKey)
 	registry.Init(config.RegistryUrl)

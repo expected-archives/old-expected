@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
-	"github.com/expectedsh/expected/pkg/accounts"
+	"github.com/expectedsh/expected/pkg/models/accounts"
 	"strings"
 )
 

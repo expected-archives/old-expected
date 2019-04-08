@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/distribution/manifest/schema2"
-	"github.com/expectedsh/expected/pkg/images"
+	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
