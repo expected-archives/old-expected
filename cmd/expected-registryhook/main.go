@@ -3,30 +3,22 @@ package main
 import (
 	"context"
 	"github.com/expectedsh/expected/pkg/registryhook"
-	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
 	"github.com/expectedsh/expected/pkg/registryhook/gc"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 type Config struct {
 	Addr        string `envconfig:"addr" default:":3000"`
 	RegistryUrl string `envconfig:"registry_url" default:"http://localhost:5000"`
 
-	Certs struct {
-		PublicKey  string `envconfig:"public_key" default:"./certs/server.crt"`
-		PrivateKey string `envconfig:"private_key" default:"./certs/server.key"`
-	}
-	Gc struct {
-		OlderThan time.Duration `envconfig:"older_than" default:"1h"`
-		Interval  time.Duration `envconfig:"interval" default:"1h"`
-		Limit     int64         `envconfig:"limit" default:"100"`
-	}
+	Certs certs.Config
+	Gc    gc.Config
 }
 
 func main() {
@@ -40,10 +32,10 @@ func main() {
 	services.Start()
 	defer services.Stop()
 
-	token.Init(config.Certs.PublicKey, config.Certs.PrivateKey)
+	certs.Init(config.Certs)
 	registry.Init(config.RegistryUrl)
 
-	gc.New(context.Background(), &gc.Options{
+	gc.New(context.Background(), &gc.Config{
 		OlderThan: config.Gc.OlderThan,
 		Interval:  config.Gc.Interval,
 		Limit:     config.Gc.Limit,

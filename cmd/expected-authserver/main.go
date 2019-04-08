@@ -4,6 +4,8 @@ import (
 	"github.com/expectedsh/expected/pkg/authserver"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/util/certs"
+	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 )
@@ -14,15 +16,8 @@ type Config struct {
 	Admins       []string `envconfig:"admin"`
 	Addr         string   `envconfig:"addr" default:":3000"`
 
-	Certs struct {
-		PublicKey  string `envconfig:"public_key" default:"./certs/server.crt"`
-		PrivateKey string `envconfig:"private_key" default:"./certs/server.key"`
-	}
-
-	Github struct {
-		ClientID     string `envconfig:"client_id"`
-		ClientSecret string `envconfig:"client_secret"`
-	}
+	Github github.Config
+	Certs  certs.Config
 }
 
 func main() {
@@ -37,8 +32,14 @@ func main() {
 	services.Start()
 	defer services.Stop()
 
+	certs.Init(config.Certs)
+
 	logrus.Infoln("starting auth server")
 	//
-	authserver.New(config.Addr, config.Secret,
-		config.DashboardURL, config.Github.ClientID, config.Github.ClientSecret, config.Admins)
+	server := authserver.New(config.Addr, config.Secret, config.DashboardURL, config.Github, config.Admins)
+
+	logrus.Infof("listening on %v", config.Addr)
+	if err := server.Start(); err != nil {
+		logrus.WithError(err).Fatal("unable to start auth server")
+	}
 }

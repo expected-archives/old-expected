@@ -10,11 +10,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func (s *ApiServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
+func (s *AuthServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, s.OAuth.AuthCodeURL("", oauth2.AccessTypeOnline), http.StatusTemporaryRedirect)
 }
 
-func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
+func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
 	token, err := s.OAuth.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
 		response.ErrorBadRequest(w, "Invalid oauth code.", nil)

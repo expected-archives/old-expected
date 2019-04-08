@@ -1,11 +1,13 @@
 package apiserver
 
 import (
+	"github.com/expectedsh/expected/pkg/util/cors"
+	"github.com/expectedsh/expected/pkg/util/github"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/github"
+	gh "golang.org/x/oauth2/github"
 )
 
 type ApiServer struct {
@@ -16,15 +18,15 @@ type ApiServer struct {
 	OAuth        *oauth2.Config
 }
 
-func New(addr, secret, admin, dashboardUrl, githubClientId, githubClientSecret string) *ApiServer {
+func New(addr, secret, admin, dashboardUrl string, githubConfig github.Config) *ApiServer {
 	return &ApiServer{
 		Addr:         addr,
 		Secret:       secret,
 		DashboardURL: dashboardUrl,
 		OAuth: &oauth2.Config{
-			ClientID:     githubClientId,
-			ClientSecret: githubClientSecret,
-			Endpoint:     github.Endpoint,
+			ClientID:     githubConfig.ClientID,
+			ClientSecret: githubConfig.ClientSecret,
+			Endpoint:     gh.Endpoint,
 			Scopes:       []string{"user", "user:email"},
 		},
 		Admin: admin,
@@ -43,7 +45,7 @@ func (s *ApiServer) Start() error {
 	router.HandleFunc("v1/containers", s.GetContainers).Methods("GET")
 	router.HandleFunc("v1/containers", s.CreateContainer).Methods("POST")
 
-	if err := corsMiddleware(router); err != nil {
+	if err := cors.ApplyMiddleware(router); err != nil {
 		return err
 	}
 	return http.ListenAndServe(s.Addr, router)
