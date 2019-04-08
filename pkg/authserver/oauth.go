@@ -1,4 +1,4 @@
-package apiserver
+package authserver
 
 import (
 	"github.com/expectedsh/expected/pkg/util/github"
@@ -41,7 +41,7 @@ func (s *ApiServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		if account, err = accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
-			token.AccessToken, s.Admin == user.Login); err != nil {
+			token.AccessToken, s.isAdmin(user.Login)); err != nil {
 			logrus.WithError(err).Errorln("unable to create your account")
 			response.ErrorInternal(w)
 			return
