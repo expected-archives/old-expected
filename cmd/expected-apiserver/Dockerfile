@@ -1,10 +1,19 @@
-FROM golang:1.12
+FROM golang:latest AS builder
+ENV GO111MODULE=on
 
 WORKDIR /app
-COPY . .
 
-ENV GO111MODULE=on
-RUN go mod download
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o expected-apiserver cmd/expected-apiserver/main.go
+COPY cmd ./cmd/
+COPY pkg ./pkg/
 
-ENTRYPOINT ["/app/expected-apiserver"]
+COPY vendor ./vendor/
+COPY go.mod .
+COPY go.sum .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod vendor -o /go/bin/expected-apiserver cmd/expected-apiserver/main.go
+
+FROM alpine
+
+COPY --from=builder /go/bin/expected-apiserver /go/bin/
+
+ENTRYPOINT ["/go/bin/expected-apiserver"]
