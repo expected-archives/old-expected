@@ -1,32 +1,35 @@
 package election
 
 import (
-	"context"
 	"fmt"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/expectedsh/expected/pkg/services/etcd"
+	"github.com/expectedsh/expected/pkg/services/consul"
+	"github.com/hashicorp/consul/api"
 	"time"
 )
 
-const TTL = time.Second * 10
+const TTL = "10s"
 
 // Election represent a way to elect 1 master over multiple nodes.
 type Election struct {
-	appName string
-	session *concurrency.Session
-	client  *clientv3.Client
-	key     string
+	CheckInterval time.Duration
+	ServiceName   string
+
+	sessionID string
+	client    *api.Client
+	key       string
+	doneChan  chan struct{}
 }
 
 // NewElection create an instance of Election.
-func NewElection(service etcd.Service) *Election {
+func NewElection(service consul.Service) (*Election, error) {
 	return &Election{
-		appName: service.Config().AppName,
-		session: nil,
-		client:  service.Client(),
-		key:     fmt.Sprintf("service/%s/leader", service.Config().AppName),
-	}
+		CheckInterval: time.Second * 2,
+		ServiceName:   service.Config().AppName,
+		sessionID:     "",
+		client:        service.Client(),
+		key:           fmt.Sprintf("service/%s/leader", service.Config().AppName),
+		doneChan:      make(chan struct{}),
+	}, err
 }
 
 // ElectLeader check with consul if the current session (with the serviceName)
@@ -40,6 +43,7 @@ func (e *Election) ElectLeader(lock bool) bool {
 	}
 	isLeader, err := e.acquireSession()
 	if isLeader || !lock {
+		go e.renewSession()
 		return isLeader
 	} else {
 		for {
@@ -52,35 +56,54 @@ func (e *Election) ElectLeader(lock bool) bool {
 				continue
 			}
 			if isLeader {
+				go e.renewSession()
 				return isLeader
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(e.CheckInterval)
 		}
 	}
 }
 
 // newSession creates a newSession in consul with a TTL and behavior set to delete
 func (e *Election) newSession() error {
-	session, err := concurrency.NewSession(e.client, concurrency.WithTTL(int(TTL.Seconds())))
+	sessionEntry := &api.SessionEntry{
+		TTL:      TTL,
+		Behavior: api.SessionBehaviorDelete,
+	}
+	sessionID, _, err := e.client.Session().Create(sessionEntry, nil)
 	if err != nil {
 		return err
 	}
-	e.session = session
+	e.sessionID = sessionID
 
 	return nil
+}
+
+func (e *Election) renewSession() error {
+	return e.client.Session().RenewPeriodic(TTL, e.sessionID, nil, e.doneChan)
 }
 
 // acquireSession try to acquire a session.
 // Return a bool which is the representation if it is the leader.
 func (e *Election) acquireSession() (bool, error) {
-	elect := concurrency.NewElection(e.session, e.key)
-	if err := elect.Campaign(context.Background(), e.appName); err != nil {
-		return false, err
+	pair := &api.KVPair{
+		Key:     e.key,
+		Value:   []byte(e.sessionID),
+		Session: e.sessionID,
 	}
-	return true, nil
+
+	acquired, _, err := e.client.KV().Acquire(pair, nil)
+
+	return acquired, err
 }
 
 // Close gracefully destroy the session.
 func (e *Election) Close() error {
-	return e.session.Close()
+	close(e.doneChan)
+	_, err := e.client.Session().Destroy(e.sessionID, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
