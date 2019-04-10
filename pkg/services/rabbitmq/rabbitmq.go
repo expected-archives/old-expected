@@ -54,3 +54,11 @@ func (srv *Service) Started() bool {
 func (srv *Service) Client() *amqp.Connection {
 	return srv.conn
 }
+
+func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, publishing amqp.Publishing) error {
+	return ch.Publish(exchange, routingKey, false, false, publishing)
+}
+
+func (srv *Service) Subscribe() {
+
+}
