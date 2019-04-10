@@ -17,6 +17,8 @@ func (s *AuthServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
+
+	// todo remove/improve this
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
