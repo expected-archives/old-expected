@@ -47,8 +47,8 @@ func Postgres() *postgres.Service {
 	return Get("postgres").(*postgres.Service)
 }
 
-func Etcd() *consul.Service {
-	return Get("etcd").(*consul.Service)
+func Consul() *consul.Service {
+	return Get("consul").(*consul.Service)
 }
 
 func init() {

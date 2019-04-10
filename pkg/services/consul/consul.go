@@ -17,7 +17,7 @@ type Config struct {
 }
 
 func (s *Service) Name() string {
-	return "etcd"
+	return "consul"
 }
 
 func (s *Service) Start() error {
