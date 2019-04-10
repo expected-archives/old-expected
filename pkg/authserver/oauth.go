@@ -1,6 +1,8 @@
 package authserver
 
 import (
+	"context"
+	"crypto/tls"
 	"github.com/expectedsh/expected/pkg/util/github"
 	"net/http"
 
@@ -15,12 +17,19 @@ func (s *AuthServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
-	token, err := s.OAuth.Exchange(r.Context(), r.FormValue("code"))
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	sslcli := &http.Client{Transport: tr}
+	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, sslcli)
+
+	token, err := s.OAuth.Exchange(ctx, r.FormValue("code"))
 	if err != nil {
+		logrus.WithError(err).Error()
 		response.ErrorBadRequest(w, "Invalid oauth code.", nil)
 		return
 	}
-	user, err := github.GetUser(r.Context(), token)
+	user, err := github.GetUser(ctx, token)
 	if err != nil {
 		logrus.WithError(err).Errorln("unable to retrieve your github data")
 		response.ErrorInternal(w)
