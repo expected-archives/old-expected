@@ -2,12 +2,10 @@ package apiserver
 
 import (
 	"github.com/expectedsh/expected/pkg/util/cors"
-	"github.com/expectedsh/expected/pkg/util/github"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
-	gh "golang.org/x/oauth2/github"
 )
 
 type ApiServer struct {
@@ -17,31 +15,28 @@ type ApiServer struct {
 	OAuth        *oauth2.Config
 }
 
-func New(addr, secret, dashboardUrl string, githubConfig github.Config) *ApiServer {
+func New(addr, secret, dashboardUrl string) *ApiServer {
 	return &ApiServer{
 		Addr:         addr,
 		Secret:       secret,
 		DashboardURL: dashboardUrl,
-		OAuth: &oauth2.Config{
-			ClientID:     githubConfig.ClientID,
-			ClientSecret: githubConfig.ClientSecret,
-			Endpoint:     gh.Endpoint,
-			Scopes:       []string{"user", "user:email"},
-		},
 	}
 }
 
 func (s *ApiServer) Start() error {
 	router := mux.NewRouter()
 
-	router.Use(s.authMiddleware)
+	v1 := router.PathPrefix("/v1").Subrouter()
+	{
+		v1.Use(s.authMiddleware)
 
-	router.HandleFunc("v1/account", s.GetAccount).Methods("GET")
-	router.HandleFunc("v1/account/sync", s.SyncAccount).Methods("POST")
-	router.HandleFunc("v1/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
+		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
+		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
+		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
 
-	router.HandleFunc("v1/containers", s.GetContainers).Methods("GET")
-	router.HandleFunc("v1/containers", s.CreateContainer).Methods("POST")
+		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
+		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+	}
 
 	if err := cors.ApplyMiddleware(router); err != nil {
 		return err
