@@ -17,20 +17,19 @@ func (s *AuthServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
-
 	// todo remove/improve this
-	tr := &http.Transport{
+	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	sslcli := &http.Client{Transport: tr}
-	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, sslcli)
+	client := &http.Client{Transport: transport}
+	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, client)
 
 	token, err := s.OAuth.Exchange(ctx, r.FormValue("code"))
 	if err != nil {
-		logrus.WithError(err).Error()
 		response.ErrorBadRequest(w, "Invalid oauth code.", nil)
 		return
 	}
+
 	user, err := github.GetUser(ctx, token)
 	if err != nil {
 		logrus.WithError(err).Errorln("unable to retrieve your github data")
@@ -44,13 +43,16 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 		response.ErrorInternal(w)
 		return
 	}
+
 	if account == nil {
-		email, err := github.GetPrimaryEmail(r.Context(), token)
+		email, err := github.GetPrimaryEmail(ctx, token)
+
 		if err != nil {
 			logrus.WithError(err).Errorln("unable to retrieve your github data")
 			response.ErrorInternal(w)
 			return
 		}
+
 		if account, err = accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
 			token.AccessToken, s.isAdmin(user.Login)); err != nil {
 			logrus.WithError(err).Errorln("unable to create your account")
@@ -59,6 +61,7 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 		}
 	} else {
 		account.GithubAccessToken = token.AccessToken
+
 		if err = accounts.Update(r.Context(), account); err != nil {
 			logrus.WithField("account", account.ID).WithError(err).Errorln("unable to update your account")
 			response.ErrorInternal(w)
