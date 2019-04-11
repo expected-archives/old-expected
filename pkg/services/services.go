@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/expectedsh/expected/pkg/services/consul"
+	"github.com/expectedsh/expected/pkg/services/docker"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/expectedsh/expected/pkg/util/backoff"
@@ -53,4 +54,8 @@ func Consul() *consul.Service {
 
 func RabbitMQ() *rabbitmq.Service {
 	return Get("rabbitmq").(*rabbitmq.Service)
+}
+
+func Docker() *docker.Service {
+	return Get("docker").(*docker.Service)
 }
