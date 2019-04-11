@@ -58,20 +58,18 @@ func (srv *Service) Client() *amqp.Connection {
 }
 
 type Message struct {
-	// Properties
-	DeliveryMode  uint8     // Transient (0 or 1) or Persistent (2)
-	Priority      uint8     // 0 to 9
-	CorrelationId string    // correlation identifier
-	ReplyTo       string    // address to to reply to (ex: RPC)
-	Expiration    string    // message expiration spec
-	MessageId     string    // message identifier
-	Timestamp     time.Time // message timestamp
-	Type          string    // message type name
-	UserId        string    // creating user id - ex: "guest"
-	AppId         string    // creating application id
-
-	// The application specific payload of the message
-	Body proto.Message
+	Headers       amqp.Table    // Application or header exchange table
+	DeliveryMode  uint8         // Transient (0 or 1) or Persistent (2)
+	Priority      uint8         // 0 to 9
+	CorrelationId string        // Correlation identifier
+	ReplyTo       string        // Address to to reply to (ex: RPC)
+	Expiration    string        // Message expiration spec
+	MessageId     string        // Message identifier
+	Timestamp     time.Time     // Message timestamp
+	Type          string        // Message type name
+	UserId        string        // Creating user id - ex: "guest"
+	AppId         string        // Creating application id
+	Body          proto.Message // Application specific payload of the message
 }
 
 func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, message Message) error {
@@ -81,6 +79,7 @@ func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, messa
 	}
 	return ch.Publish(exchange, routingKey, false, false, amqp.Publishing{
 		ContentType:   "application/vnd.google.protobuf",
+		Headers:       message.Headers,
 		DeliveryMode:  message.DeliveryMode,
 		Priority:      message.Priority,
 		CorrelationId: message.CorrelationId,

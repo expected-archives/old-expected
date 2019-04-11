@@ -31,6 +31,9 @@ func RequestDeployment(id string) error {
 	}
 	return services.RabbitMQ().Publish(ch, "", queue.Name, rabbitmq.Message{
 		DeliveryMode: amqp.Persistent,
+		Headers: amqp.Table{
+			"Message-Type": "ContainerDeploymentRequest",
+		},
 		Body: &protocol.ContainerDeploymentRequest{
 			Id: id,
 		},

@@ -2,10 +2,20 @@ package accounts
 
 import (
 	"context"
+	"database/sql"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/google/uuid"
 	"time"
 )
+
+func accountFromRows(rows *sql.Rows) (*Account, error) {
+	account := &Account{}
+	if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
+		&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
+		return nil, err
+	}
+	return account, nil
+}
 
 func Create(ctx context.Context, name, email, avatarUrl string, githubId int64,
 	githubAccessToken string, admin bool) (*Account, error) {
@@ -56,12 +66,7 @@ func FindByID(ctx context.Context, id string) (*Account, error) {
 	}
 	defer rows.Close()
 	if rows.Next() {
-		account := &Account{}
-		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
-			&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
-			return nil, err
-		}
-		return account, nil
+		return accountFromRows(rows)
 	}
 	return nil, nil
 }
@@ -76,12 +81,7 @@ func FindByGithubID(ctx context.Context, id int64) (*Account, error) {
 	}
 	defer rows.Close()
 	if rows.Next() {
-		account := &Account{}
-		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
-			&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
-			return nil, err
-		}
-		return account, nil
+		return accountFromRows(rows)
 	}
 	return nil, nil
 }
@@ -96,12 +96,7 @@ func FindByAPIKey(ctx context.Context, apiKey string) (*Account, error) {
 	}
 	defer rows.Close()
 	if rows.Next() {
-		account := &Account{}
-		if err := rows.Scan(&account.ID, &account.Name, &account.Email, &account.AvatarURL, &account.GithubID,
-			&account.GithubAccessToken, &account.APIKey, &account.Admin, &account.CreatedAt); err != nil {
-			return nil, err
-		}
-		return account, nil
+		return accountFromRows(rows)
 	}
 	return nil, nil
 }
