@@ -14,7 +14,6 @@ docker-compose up
 | RABBITMQ_ADDR | Permet de changer l'adresse de rabbitmq | amqp://expected:expected@rabbitmq/expected |
 | GITHUB_CLIENT_ID | Défini le client id pour l'oauth avec github |  |
 | GITHUB_CLIENT_SECRET | Défini le client secret pour l'oauth avec github |  |
-| ADMIN | Défini les administrateurs |  |
 | DASHBOARD_URL | L'url du dashboard (utilisé pour definir le cookie d'authentification et rediriger l'utilisateur) | http://localhost:8080 |
 | REGISTRY_AUTH_TOKEN_REALM | L'adresse du serveur d'authentification de la registry qui sera donné au client | http://localhost:3001/registry/auth |
 | REGISTRY_AUTH_SERVER | L'adresse du serveur qui recoit les events de la registry | http://registryhook:3001/registry/hook |

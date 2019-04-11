@@ -34,7 +34,6 @@ func main() {
 	certs.Init(config.Certs)
 
 	logrus.Infoln("starting auth server")
-	//
 	server := authserver.New(config.Addr, config.Secret, config.DashboardURL, config.Github)
 
 	logrus.Infof("listening on %v", config.Addr)
