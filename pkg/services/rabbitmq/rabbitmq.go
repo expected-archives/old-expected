@@ -1,9 +1,11 @@
 package rabbitmq
 
 import (
+	"github.com/golang/protobuf/proto"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"time"
 )
 
 type Service struct {
@@ -55,10 +57,40 @@ func (srv *Service) Client() *amqp.Connection {
 	return srv.conn
 }
 
-func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, publishing amqp.Publishing) error {
-	return ch.Publish(exchange, routingKey, false, false, publishing)
+type Message struct {
+	// Properties
+	DeliveryMode  uint8     // Transient (0 or 1) or Persistent (2)
+	Priority      uint8     // 0 to 9
+	CorrelationId string    // correlation identifier
+	ReplyTo       string    // address to to reply to (ex: RPC)
+	Expiration    string    // message expiration spec
+	MessageId     string    // message identifier
+	Timestamp     time.Time // message timestamp
+	Type          string    // message type name
+	UserId        string    // creating user id - ex: "guest"
+	AppId         string    // creating application id
+
+	// The application specific payload of the message
+	Body proto.Message
 }
 
-func (srv *Service) Subscribe() {
-
+func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, message Message) error {
+	b, err := proto.Marshal(message.Body)
+	if err != nil {
+		return err
+	}
+	return ch.Publish(exchange, routingKey, false, false, amqp.Publishing{
+		ContentType:   "application/vnd.google.protobuf",
+		DeliveryMode:  message.DeliveryMode,
+		Priority:      message.Priority,
+		CorrelationId: message.CorrelationId,
+		ReplyTo:       message.ReplyTo,
+		Expiration:    message.Expiration,
+		MessageId:     message.MessageId,
+		Timestamp:     message.Timestamp,
+		Type:          message.Type,
+		UserId:        message.UserId,
+		AppId:         message.AppId,
+		Body:          b,
+	})
 }

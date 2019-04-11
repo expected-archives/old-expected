@@ -1,7 +1,7 @@
 ### Create new container
 POST http://localhost:3000/v1/containers
 Content-Type: application/json
-Authorization: a52cb0872b2c41d48244c930162143d8
+Authorization: ce41f7ca970745409a47079c2ebd62f2
 
 {
   "name": "hello",
