@@ -11,7 +11,7 @@ import (
 )
 
 func scanImage(rows *sql.Rows, image *Image) error {
-	return rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt)
+	return rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt, &image.DeleteMode)
 }
 
 func scanLayer(rows *sql.Rows, layer *Layer) error {
@@ -156,6 +156,15 @@ func UpdateLayerRepository(ctx context.Context, digest string) error {
 	return e
 }
 
+func UpdateImageDeleteMode(ctx context.Context, imageId string) error {
+	_, err := services.Postgres().Client().ExecContext(ctx, `
+		UPDATE images 
+		SET delete_mode = TRUE
+		WHERE id = $1
+	`, imageId)
+	return err
+}
+
 func DeleteLayer(ctx context.Context, digest string) error {
 	err := backoff.ExecContext(services.Postgres().Client(), ctx, `
 		DELETE FROM layers WHERE digest = $1
@@ -213,7 +222,7 @@ func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 
 func FindImageByID(ctx context.Context, id string) (*Image, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, namespace_id, digest, tag, name, created_at
+		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
 		FROM images
 		WHERE id = $1
 	`, id)
@@ -232,7 +241,7 @@ func FindImageByID(ctx context.Context, id string) (*Image, error) {
 
 func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string) (*Image, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, namespace_id, digest, tag, name, created_at
+		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
 		FROM images
 		WHERE namespace_id=$1 AND name=$2 AND tag=$3 AND digest = $4
 	`, namespaceId, name, tag, digest)
