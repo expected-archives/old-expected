@@ -1,4 +1,4 @@
-package token
+package certs
 
 import (
 	"crypto/tls"
@@ -8,13 +8,20 @@ import (
 	"os"
 )
 
-var publicKey libtrust.PublicKey
-var privateKey libtrust.PrivateKey
+type Config struct {
+	PublicKey  string `envconfig:"public_key" default:"./certs/server.crt"`
+	PrivateKey string `envconfig:"private_key" default:"./certs/server.key"`
+}
 
-func Init(publicK string, privateK string) {
+var (
+	publicKey  libtrust.PublicKey
+	privateKey libtrust.PrivateKey
+)
+
+func Init(config Config) {
 	var err error
 
-	publicKey, privateKey, err = loadCertAndKey(publicK, privateK)
+	publicKey, privateKey, err = loadCertAndKey(config.PublicKey, config.PrivateKey)
 	if err != nil {
 		dir, _ := os.Getwd()
 		logrus.
@@ -41,4 +48,12 @@ func loadCertAndKey(certFile, keyFile string) (pk libtrust.PublicKey, prk libtru
 	}
 	prk, err = libtrust.FromCryptoPrivateKey(cert.PrivateKey)
 	return
+}
+
+func GetPublicKey() libtrust.PublicKey {
+	return publicKey
+}
+
+func GetPrivateKey() libtrust.PrivateKey {
+	return privateKey
 }

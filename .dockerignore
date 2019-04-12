@@ -4,4 +4,4 @@
 /.vscode
 /.env
 /certs
-/vendor
+/migrations

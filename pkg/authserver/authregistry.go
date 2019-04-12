@@ -1,38 +1,37 @@
-package registryhook
+package authserver
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/expectedsh/expected/pkg/registryhook/auth"
-	"github.com/expectedsh/expected/pkg/registryhook/auth/token"
+	"github.com/expectedsh/expected/pkg/authserver/authregistry"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func Auth(response http.ResponseWriter, request *http.Request) {
-	req, err := auth.ParseRequest(request)
+func (AuthServer) AuthRegistry(response http.ResponseWriter, request *http.Request) {
+	req, err := authregistry.ParseRequest(request)
 	if err != nil {
 		logrus.WithField("Parsing request fail", err).Error()
 		http.Error(response, fmt.Sprintf("Bad request: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	account, err := auth.Authenticate(req.Login, req.Token)
+	account, err := authregistry.Authenticate(req.Login, req.Token)
 	if account == nil || err != nil {
 		logrus.WithField("Authenticate fail", err).Error()
 		http.Error(response, fmt.Sprintf("Authentication failed: %s", err), http.StatusUnauthorized)
-		response.Header()["WWW-Authenticate"] = []string{fmt.Sprintf(`Basic realm="%s"`, token.Issuer)}
+		response.Header()["WWW-Authenticate"] = []string{fmt.Sprintf(`Basic realm="%s"`, authregistry.Issuer)}
 		return
 	}
 
-	authorizedScopes, err := auth.Authorize(*account, req.Scopes)
+	authorizedScopes, err := authregistry.Authorize(*account, req.Scopes)
 	if err != nil {
 		logrus.WithField("Authorize fail", err).Error()
 		http.Error(response, fmt.Sprintf("Authorization failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	tok, err := token.Generate(*req, authorizedScopes)
+	tok, err := authregistry.Generate(*req, authorizedScopes)
 	if err != nil {
 		logrus.WithField("Generating token fail", err).Error()
 		http.Error(response, fmt.Sprintf("Token generation failed: %s", err), http.StatusInternalServerError)

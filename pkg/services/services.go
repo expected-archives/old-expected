@@ -1,11 +1,11 @@
 package services
 
 import (
-	"github.com/expectedsh/expected/pkg/services/etcd"
+	"github.com/expectedsh/expected/pkg/services/consul"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 var registeredServices = map[string]Service{}
@@ -47,14 +47,10 @@ func Postgres() *postgres.Service {
 	return Get("postgres").(*postgres.Service)
 }
 
-func Etcd() *etcd.Service {
-	return Get("etcd").(*etcd.Service)
+func Consul() *consul.Service {
+	return Get("consul").(*consul.Service)
 }
 
-func init() {
-	logrus.SetFormatter(&logrus.TextFormatter{
-		DisableColors:   true,
-		FullTimestamp:   true,
-		TimestampFormat: time.RFC1123,
-	})
+func RabbitMQ() *rabbitmq.Service {
+	return Get("rabbitmq").(*rabbitmq.Service)
 }

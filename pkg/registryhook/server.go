@@ -1,6 +1,7 @@
 package registryhook
 
 import (
+	"github.com/expectedsh/expected/pkg/util/cors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -18,8 +19,10 @@ func New(addr string) *RegistryServer {
 func (s *RegistryServer) Start() error {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/registry/auth", Auth).Methods("GET")
-	router.HandleFunc("/registry/hook", Hook)
+	router.HandleFunc("/hook", Hook)
 
+	if err := cors.ApplyMiddleware(router); err != nil {
+		return err
+	}
 	return http.ListenAndServe(s.Addr, router)
 }

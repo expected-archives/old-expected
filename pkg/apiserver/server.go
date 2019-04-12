@@ -1,44 +1,35 @@
 package apiserver
 
 import (
+	"github.com/expectedsh/expected/pkg/util/cors"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/github"
 )
 
 type ApiServer struct {
 	Addr         string
 	Secret       string
-	Admin        string
 	DashboardURL string
 	OAuth        *oauth2.Config
 }
 
-func New(addr, secret, admin, dashboardUrl, githubClientId, githubClientSecret string) *ApiServer {
+func New(addr, secret, dashboardUrl string) *ApiServer {
 	return &ApiServer{
 		Addr:         addr,
 		Secret:       secret,
 		DashboardURL: dashboardUrl,
-		OAuth: &oauth2.Config{
-			ClientID:     githubClientId,
-			ClientSecret: githubClientSecret,
-			Endpoint:     github.Endpoint,
-			Scopes:       []string{"user", "user:email"},
-		},
-		Admin: admin,
 	}
 }
 
 func (s *ApiServer) Start() error {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/oauth/github", s.OAuthGithub).Methods("GET")
-	router.HandleFunc("/oauth/github/callback", s.OAuthGithubCallback).Methods("GET")
 	v1 := router.PathPrefix("/v1").Subrouter()
 	{
 		v1.Use(s.authMiddleware)
+
 		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
 		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
 		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
@@ -50,7 +41,8 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/images/{id}", s.GetImage).Methods("GET")
 		//v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE") // todo use rabbitmq
 	}
-	if err := corsMiddleware(router); err != nil {
+
+	if err := cors.ApplyMiddleware(router); err != nil {
 		return err
 	}
 	return http.ListenAndServe(s.Addr, router)

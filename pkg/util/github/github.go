@@ -8,6 +8,11 @@ import (
 	"io/ioutil"
 )
 
+type Config struct {
+	ClientID     string `envconfig:"client_id"`
+	ClientSecret string `envconfig:"client_secret"`
+}
+
 type User struct {
 	ID        int64  `json:"id"`
 	Login     string `json:"login"`
@@ -22,9 +27,11 @@ type Email struct {
 	Visibility string `json:"visibility"`
 }
 
+const githubURL = "https://api.github.com"
+
 func GetUser(ctx context.Context, token *oauth2.Token) (*User, error) {
 	client := oauth2.NewClient(ctx, oauth2.StaticTokenSource(token))
-	resp, err := client.Get("https://api.github.com/user")
+	resp, err := client.Get(githubURL + "/user")
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +51,7 @@ func GetUser(ctx context.Context, token *oauth2.Token) (*User, error) {
 
 func GetEmails(ctx context.Context, token *oauth2.Token) (*[]Email, error) {
 	client := oauth2.NewClient(ctx, oauth2.StaticTokenSource(token))
-	resp, err := client.Get("https://api.github.com/user/emails")
+	resp, err := client.Get(githubURL + "/user/emails")
 	if err != nil {
 		return nil, err
 	}
