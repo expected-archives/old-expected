@@ -155,16 +155,16 @@ func UpdateLayer(ctx context.Context, digest string) error {
 
 func UpdateLayerRepository(ctx context.Context, digest string) error {
 	_, e := services.Postgres().Client().ExecContext(ctx, `
-			WITH res AS (
-			    SELECT i.namespace_id as namespace, i.name as name
-			    FROM public.image_layer
-			             LEFT JOIN public.images i on image_layer.image_id = i.id
-			    WHERE layer_digest = $1
-			)
-			UPDATE layers
-			SET repository = concat((SELECT namespace FROM res), '/', (SELECT name FROM res)),
-			    updated_at = now()
-			WHERE digest = $1
+		WITH res AS (
+		    SELECT i.namespace_id as namespace, i.name as name
+		    FROM public.image_layer
+		             LEFT JOIN public.images i on image_layer.image_id = i.id
+		    WHERE layer_digest = $1
+		)
+		UPDATE layers
+		SET repository = concat((SELECT namespace FROM res), '/', (SELECT name FROM res)),
+		    updated_at = now()
+		WHERE digest = $1
 		`, digest)
 	return e
 }
