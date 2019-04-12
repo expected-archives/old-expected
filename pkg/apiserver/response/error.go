@@ -37,3 +37,10 @@ func ErrorForbidden(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusForbidden)
 	_, _ = w.Write(b)
 }
+
+func Error(w http.ResponseWriter, message string, statusCode int) {
+	b, _ := json.Marshal(errorMessage{Message: message})
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
+	_, _ = w.Write(b)
+}

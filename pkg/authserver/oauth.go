@@ -37,7 +37,7 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	account, err := accounts.FindByGithubID(r.Context(), user.ID)
+	account, err := accounts.FindByGithubID(ctx, user.ID)
 	if err != nil {
 		logrus.WithError(err).Errorln("unable to retrieve your account")
 		response.ErrorInternal(w)
@@ -53,7 +53,7 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
-		if account, err = accounts.Create(r.Context(), user.Name, email.Email, user.AvatarUrl, user.ID,
+		if account, err = accounts.Create(ctx, user.Name, email.Email, user.AvatarUrl, user.ID,
 			token.AccessToken, s.isAdmin(user.Login)); err != nil {
 			logrus.WithError(err).Errorln("unable to create your account")
 			response.ErrorInternal(w)
@@ -62,7 +62,7 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 	} else {
 		account.GithubAccessToken = token.AccessToken
 
-		if err = accounts.Update(r.Context(), account); err != nil {
+		if err = accounts.Update(ctx, account); err != nil {
 			logrus.WithField("account", account.ID).WithError(err).Errorln("unable to update your account")
 			response.ErrorInternal(w)
 			return
