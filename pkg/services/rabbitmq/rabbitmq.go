@@ -72,6 +72,11 @@ type Message struct {
 	Body          proto.Message // Application specific payload of the message
 }
 
+type MessageHandler interface {
+	Name() string
+	Handle(msg amqp.Delivery) error
+}
+
 func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, message Message) error {
 	b, err := proto.Marshal(message.Body)
 	if err != nil {

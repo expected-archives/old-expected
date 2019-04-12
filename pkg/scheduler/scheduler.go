@@ -3,16 +3,17 @@ package scheduler
 import (
 	"github.com/expectedsh/expected/pkg/scheduler/handler"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/sirupsen/logrus"
 )
 
 type MessageHandler func(msg []byte) error
 
-var handlers = []handler.MessageHandler{
+var handlers = []rabbitmq.MessageHandler{
 	&handler.DeploymentHandler{},
 }
 
-func findHandler(name string) handler.MessageHandler {
+func findHandler(name string) rabbitmq.MessageHandler {
 	for _, h := range handlers {
 		if h.Name() == name {
 			return h
@@ -53,7 +54,7 @@ func Start() error {
 			}
 			continue
 		}
-		if err = h.Handle(message.Body); err != nil {
+		if err = h.Handle(message); err != nil {
 			logrus.
 				WithField("message-type", messageType.(string)).
 				WithError(err).

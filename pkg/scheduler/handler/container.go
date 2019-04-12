@@ -9,6 +9,7 @@ import (
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 )
 
 type DeploymentHandler struct{}
@@ -17,9 +18,9 @@ func (DeploymentHandler) Name() string {
 	return "ContainerDeploymentRequest"
 }
 
-func (DeploymentHandler) Handle(b []byte) error {
+func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	message := &protocol.ContainerDeploymentRequest{}
-	if err := proto.Unmarshal(b, message); err != nil {
+	if err := proto.Unmarshal(m.Body, message); err != nil {
 		return err
 	}
 	container, err := containers.FindByID(context.Background(), message.Id)
