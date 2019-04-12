@@ -23,7 +23,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 	digest := event.Target.Digest.String()
 
 	log := logrus.NewEntry(logrus.StandardLogger()).
-		WithField("service", "registry-hook").
+		WithField("task", "registry-hook").
 		WithField("event", "push").
 		WithField("repo", fmt.Sprintf("%s/%s", namespaceId, name)).
 		WithField("digest", digest)
@@ -108,7 +108,7 @@ func defaultLayer(ctx context.Context, event notifications.Event, digest string)
 // insertLayers will insert layers to table layers and image_layer.
 // This will set all layers to the normal count (old + 1).
 func insertLayers(layers []images.Layer, imageId string) error {
-	err := images.CreateLayers(context.Background(), layers, imageId)
+	err := images.CreateLayers(context.Background(), layers)
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,7 @@ func New(ctx context.Context, config *Config) *GarbageCollector {
 		ctx:    ctx,
 		mutex:  sync.Mutex{},
 		Config: config,
-		logger: logrus.WithField("service", "garbage-collector"),
+		logger: logrus.WithField("task", "garbage-collector"),
 	}
 }
 
