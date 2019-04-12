@@ -40,6 +40,11 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 		response, err := services.Docker().Client().ServiceCreate(context.Background(), swarm.ServiceSpec{
 			Annotations: swarm.Annotations{
 				Name: container.ID,
+				Labels: map[string]string{
+					//"traefik.enable": "true",
+					//"traefik.port":   "80",
+					//"traefik.docker.network": "private",
+				},
 			},
 			TaskTemplate: swarm.TaskSpec{
 				ContainerSpec: swarm.ContainerSpec{
@@ -56,14 +61,9 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 					Replicas: &replicas,
 				},
 			},
-			EndpointSpec: &swarm.EndpointSpec{
-				Ports: []swarm.PortConfig{
-					{
-						Name:        "http",
-						Protocol:    "tcp",
-						TargetPort:  80,
-						PublishMode: "ingress",
-					},
+			Networks: []swarm.NetworkAttachmentConfig{
+				{
+					Target: "eweww",
 				},
 			},
 		}, types.ServiceCreateOptions{})
