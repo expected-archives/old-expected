@@ -24,12 +24,12 @@ Content-Type: application/json
 Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
 
 ### Detail image
-GET http://localhost:3000/v1/images/8b013f86-a1de-438b-80b3-461a88ddfab5
+GET http://localhost:3000/v1/images/b0cf079a-7504-419e-870b-2c01f7e6f2a1
 Content-Type: application/json
 Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
 
 ### Delete image
-DELETE http://localhost:3000/v1/images/8b013f86-a1de-438b-80b3-461a88ddfab5
+DELETE http://localhost:3000/v1/images/b0cf079a-7504-419e-870b-2c01f7e6f2a1
 Content-Type: application/json
 Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
 

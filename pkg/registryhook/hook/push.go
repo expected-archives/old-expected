@@ -23,7 +23,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 	digest := event.Target.Digest.String()
 
 	log := logrus.NewEntry(logrus.StandardLogger()).
-		WithField("service", "registry-hook").
+		WithField("task", "registry-hook").
 		WithField("event", "push").
 		WithField("repo", fmt.Sprintf("%s/%s", namespaceId, name)).
 		WithField("digest", digest)

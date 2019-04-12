@@ -27,6 +27,7 @@ services:
       - "ADDR=:3001"
       - "REGISTRY_URL=http://registry:5000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
+      - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
       - "CERTS_PUBLIC_KEY=/certs/server.crt"
       - "CERTS_PRIVATE_KEY=/certs/server.key"
     depends_on:

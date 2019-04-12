@@ -1,14 +1,14 @@
-package scheduler
+package registryhook
 
 import (
-	"github.com/expectedsh/expected/pkg/scheduler/handler"
+	"github.com/expectedsh/expected/pkg/registryhook/handler"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/sirupsen/logrus"
 )
 
 var handlers = []rabbitmq.MessageHandler{
-	&handler.DeploymentHandler{},
+	&handler.ImageDletete{Logger: logrus.WithField("task", "image-delete")},
 }
 
 func findHandler(name string) rabbitmq.MessageHandler {

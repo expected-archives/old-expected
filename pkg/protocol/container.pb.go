@@ -6,9 +6,11 @@ Package protocol is a generated protocol buffer package.
 
 It is generated from these files:
 	container.proto
+	image.proto
 
 It has these top-level messages:
 	ContainerDeploymentRequest
+	ImageDeleteRequest
 */
 package protocol
 
