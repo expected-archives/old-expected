@@ -10,16 +10,29 @@ import (
 	"time"
 )
 
-func scanImage(rows *sql.Rows, image *Image) error {
-	return rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt, &image.DeleteMode)
+func imageFromRows(rows *sql.Rows) (*Image, error) {
+	image := &Image{}
+	if err := rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt, &image.DeleteMode); err != nil {
+		return nil, err
+	}
+	return image, nil
 }
 
-func scanLayer(rows *sql.Rows, layer *Layer) error {
-	return rows.Scan(&layer.Digest, &layer.Repository, &layer.Size, &layer.CreatedAt, &layer.UpdatedAt)
+func layerFromRows(rows *sql.Rows) (*Layer, error) {
+	layer := &Layer{}
+	if err := rows.Scan(&layer.Digest, &layer.Repository, &layer.Size, &layer.CreatedAt, &layer.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return layer, nil
 }
 
-func scanStats(rows *sql.Rows, stats *Stats) error {
-	return rows.Scan(&stats.ImageID, &stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag, &stats.Layers, &stats.Size)
+func statsFromRows(rows *sql.Rows) (*Stats, error) {
+	stats := &Stats{}
+	if err := rows.Scan(&stats.ImageID, &stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag,
+		&stats.Layers, &stats.Size); err != nil {
+		return nil, err
+	}
+	return stats, nil
 }
 
 func Create(ctx context.Context, name, digest, namespaceId, tag string) (*Image, error) {
@@ -211,11 +224,7 @@ func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 		return nil, err
 	}
 	if rows.Next() {
-		layer := &Layer{}
-		if err := scanLayer(rows, layer); err != nil {
-			return nil, err
-		}
-		return layer, nil
+		return layerFromRows(rows)
 	}
 	return nil, nil
 }
@@ -230,11 +239,7 @@ func FindImageByID(ctx context.Context, id string) (*Image, error) {
 		return nil, err
 	}
 	if rows.Next() {
-		image := &Image{}
-		if err := scanImage(rows, image); err != nil {
-			return nil, err
-		}
-		return image, nil
+		return imageFromRows(rows)
 	}
 	return nil, nil
 }
@@ -249,11 +254,7 @@ func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string
 		return nil, err
 	}
 	if rows.Next() {
-		image := &Image{}
-		if err := scanImage(rows, image); err != nil {
-			return nil, err
-		}
-		return image, nil
+		return imageFromRows(rows)
 	}
 	return nil, nil
 }
@@ -271,42 +272,13 @@ func FindLayersByImageId(ctx context.Context, imageId string) ([]*Layer, error) 
 	}
 	var layers []*Layer
 	for rows.Next() {
-		layer := &Layer{}
-		if err := scanLayer(rows, layer); err != nil {
+		if layer, err := layerFromRows(rows); err != nil {
 			return nil, err
+		} else {
+			layers = append(layers, layer)
 		}
-		layers = append(layers, layer)
 	}
 	return layers, nil
-}
-
-func FindImageStatsByImageID(ctx context.Context, imageId string) (*Stats, error) {
-	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT
-			img.id,
-			img.namespace_id,
-       		img.digest,
-       		img.name,
-       		img.tag,
-       		count(layers.created_at) AS layers,
-       		sum(layers.size)         AS size
-		FROM image_layer
-       		LEFT JOIN layers ON image_layer.layer_digest = layers.digest
-       		LEFT JOIN images img on image_layer.image_id = img.id
-		WHERE image_id = $1
-		GROUP BY img.name, img.digest, img.tag, img.namespace_id, img.id;
-	`, imageId)
-	if err != nil {
-		return nil, err
-	}
-	if rows.Next() {
-		stats := &Stats{}
-		if err := scanStats(rows, stats); err != nil {
-			return nil, err
-		}
-		return stats, nil
-	}
-	return nil, nil
 }
 
 func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*Stats, error) {
@@ -330,11 +302,11 @@ func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*S
 	}
 	var statsList []*Stats
 	for rows.Next() {
-		stats := &Stats{}
-		if err := scanStats(rows, stats); err != nil {
+		if stats, err := statsFromRows(rows); err != nil {
 			return nil, err
+		} else {
+			statsList = append(statsList, stats)
 		}
-		statsList = append(statsList, stats)
 	}
 	return statsList, nil
 }
@@ -373,11 +345,11 @@ func FindUnusedLayers(ctx context.Context, olderThan time.Duration, limit int64)
 
 	var layers []*Layer
 	for rows.Next() {
-		layer := &Layer{}
-		if err := scanLayer(rows, layer); err != nil {
+		if layer, err := layerFromRows(rows); err != nil {
 			return nil, err
+		} else {
+			layers = append(layers, layer)
 		}
-		layers = append(layers, layer)
 	}
 	return layers, nil
 }
