@@ -1,9 +1,11 @@
 package rabbitmq
 
 import (
+	"github.com/golang/protobuf/proto"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"time"
 )
 
 type Service struct {
@@ -55,10 +57,44 @@ func (srv *Service) Client() *amqp.Connection {
 	return srv.conn
 }
 
-func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, publishing amqp.Publishing) error {
-	return ch.Publish(exchange, routingKey, false, false, publishing)
+type Message struct {
+	Headers       amqp.Table    // Application or header exchange table
+	DeliveryMode  uint8         // Transient (0 or 1) or Persistent (2)
+	Priority      uint8         // 0 to 9
+	CorrelationId string        // Correlation identifier
+	ReplyTo       string        // Address to to reply to (ex: RPC)
+	Expiration    string        // Message expiration spec
+	MessageId     string        // Message identifier
+	Timestamp     time.Time     // Message timestamp
+	Type          string        // Message type name
+	UserId        string        // Creating user id - ex: "guest"
+	AppId         string        // Creating application id
+	Body          proto.Message // Application specific payload of the message
 }
 
-func (srv *Service) Subscribe() {
+type MessageHandler interface {
+	Name() string
+	Handle(msg amqp.Delivery) error
+}
 
+func (srv *Service) Publish(ch *amqp.Channel, exchange, routingKey string, message Message) error {
+	b, err := proto.Marshal(message.Body)
+	if err != nil {
+		return err
+	}
+	return ch.Publish(exchange, routingKey, false, false, amqp.Publishing{
+		ContentType:   "application/vnd.google.protobuf",
+		Headers:       message.Headers,
+		DeliveryMode:  message.DeliveryMode,
+		Priority:      message.Priority,
+		CorrelationId: message.CorrelationId,
+		ReplyTo:       message.ReplyTo,
+		Expiration:    message.Expiration,
+		MessageId:     message.MessageId,
+		Timestamp:     message.Timestamp,
+		Type:          message.Type,
+		UserId:        message.UserId,
+		AppId:         message.AppId,
+		Body:          b,
+	})
 }

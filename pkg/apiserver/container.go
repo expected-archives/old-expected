@@ -4,6 +4,7 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
+	"github.com/expectedsh/expected/pkg/scheduler"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -42,6 +43,11 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		form.Environment, form.Tags, account.ID)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to create container")
+		response.ErrorInternal(w)
+		return
+	}
+	if err = scheduler.RequestDeployment(container.ID); err != nil {
+		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to send container deployment request")
 		response.ErrorInternal(w)
 		return
 	}
