@@ -1,4 +1,4 @@
-package scheduler
+package handler
 
 import (
 	"context"
@@ -11,15 +11,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func convertEnv(env map[string]string) []string {
-	var converted []string
-	for k, v := range env {
-		converted = append(converted, k+"="+v)
-	}
-	return converted
+type DeploymentHandler struct{}
+
+func (DeploymentHandler) Name() string {
+	return "ContainerDeploymentRequest"
 }
 
-func ContainerDeploymentHandler(b []byte) error {
+func (DeploymentHandler) Handle(b []byte) error {
 	message := &protocol.ContainerDeploymentRequest{}
 	if err := proto.Unmarshal(b, message); err != nil {
 		return err

@@ -5,7 +5,7 @@ Authorization: ce41f7ca970745409a47079c2ebd62f2
 
 {
   "name": "hello",
-  "image": "hello-world",
+  "image": "google/golang-hello",
   "memory": 64,
   "tags": ["expectedsh", "test"],
   "environment": {

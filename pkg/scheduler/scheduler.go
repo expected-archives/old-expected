@@ -1,14 +1,24 @@
 package scheduler
 
 import (
+	"github.com/expectedsh/expected/pkg/scheduler/handler"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/sirupsen/logrus"
 )
 
 type MessageHandler func(msg []byte) error
 
-var handlers = map[string]MessageHandler{
-	"ContainerDeploymentRequest": ContainerDeploymentHandler,
+var handlers = []handler.MessageHandler{
+	&handler.DeploymentHandler{},
+}
+
+func findHandler(name string) handler.MessageHandler {
+	for _, h := range handlers {
+		if h.Name() == name {
+			return h
+		}
+	}
+	return nil
 }
 
 func Start() error {
@@ -33,8 +43,8 @@ func Start() error {
 			}
 			continue
 		}
-		handler := handlers[messageType.(string)]
-		if handler == nil {
+		h := findHandler(messageType.(string))
+		if h == nil {
 			logrus.
 				WithField("message-type", messageType.(string)).
 				Warningln("unhandled message type")
@@ -43,7 +53,7 @@ func Start() error {
 			}
 			continue
 		}
-		if err = handler(message.Body); err != nil {
+		if err = h.Handle(message.Body); err != nil {
 			logrus.
 				WithField("message-type", messageType.(string)).
 				WithError(err).
