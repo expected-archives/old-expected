@@ -7,19 +7,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var queue *amqp.Queue
-
-func initQueue(ch *amqp.Channel) error {
-	if queue == nil {
-		q, err := ch.QueueDeclare("containers", true, false, false, false, nil)
-		if err != nil {
-			return err
-		}
-		queue = &q
-	}
-	return nil
-}
-
 func RequestDeployment(id string) error {
 	ch, err := services.RabbitMQ().Client().Channel()
 	if err != nil {

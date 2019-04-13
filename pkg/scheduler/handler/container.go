@@ -2,11 +2,10 @@ package handler
 
 import (
 	"context"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/protocol"
-	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/scheduler/docker"
 	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -27,7 +26,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	if err != nil || container == nil {
 		return err
 	}
-	service, err := services.Docker().FindService(context.Background(), container.ID)
+	service, err := docker.FindServiceByName(container.ID)
 	if err != nil {
 		return err
 	}
@@ -37,7 +36,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 			MemoryBytes: int64(container.Memory * 1024 * 1024),
 			NanoCPUs:    int64(100000000 * 2),
 		}
-		response, err := services.Docker().Client().ServiceCreate(context.Background(), swarm.ServiceSpec{
+		response, err := docker.CreateService(swarm.ServiceSpec{
 			Annotations: swarm.Annotations{
 				Name: container.ID,
 				Labels: map[string]string{
@@ -66,7 +65,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 					Target: "eweww",
 				},
 			},
-		}, types.ServiceCreateOptions{})
+		})
 		if err != nil {
 			return err
 		}
