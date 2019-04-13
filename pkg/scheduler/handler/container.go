@@ -5,6 +5,7 @@ import (
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/scheduler/aws"
 	"github.com/expectedsh/expected/pkg/scheduler/docker"
 	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
@@ -26,7 +27,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	if err != nil || container == nil {
 		return err
 	}
-	service, err := docker.FindServiceByName(container.ID)
+	service, err := docker.ServiceFindByName(container.ID)
 	if err != nil {
 		return err
 	}
@@ -36,12 +37,14 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 			MemoryBytes: int64(container.Memory * 1024 * 1024),
 			NanoCPUs:    int64(100000000 * 2),
 		}
-		response, err := docker.CreateService(swarm.ServiceSpec{
+		response, err := docker.ServiceCreate(swarm.ServiceSpec{
 			Annotations: swarm.Annotations{
 				Name: container.ID,
 				Labels: map[string]string{
-					//"traefik.enable": "true",
-					//"traefik.port":   "80",
+					"traefik.enable":        "true",
+					"traefik.domain":        "expected.sh",
+					//"traefik.frontend.rule": "Host:hello.expected.sh",
+					"traefik.port":          "80",
 					//"traefik.docker.network": "private",
 				},
 			},
@@ -62,10 +65,14 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 			},
 			Networks: []swarm.NetworkAttachmentConfig{
 				{
-					Target: "eweww",
+					Target: "traefik-net",
 				},
 			},
 		})
+		if err != nil {
+			return err
+		}
+		err = aws.Route53AddRecord("Z2MP7C8I98E8MT", "CNAME", container.ID +".expected.sh", []string{"prod.expected.sh"})
 		if err != nil {
 			return err
 		}

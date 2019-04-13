@@ -13,8 +13,7 @@ func Route53AddRecord(hostedZoneId, recordType, recordName string, values []stri
 			Value: aws.String(value),
 		})
 	}
-	client := route53.New(sess)
-	_, err := client.ChangeResourceRecordSets(&route53.ChangeResourceRecordSetsInput{
+	_, err := route53client.ChangeResourceRecordSets(&route53.ChangeResourceRecordSetsInput{
 		HostedZoneId: aws.String(hostedZoneId),
 		ChangeBatch: &route53.ChangeBatch{
 			Changes: []*route53.Change{
@@ -25,6 +24,24 @@ func Route53AddRecord(hostedZoneId, recordType, recordName string, values []stri
 						Name:            aws.String(recordName),
 						TTL:             aws.Int64(60),
 						ResourceRecords: records,
+					},
+				},
+			},
+		},
+	})
+	return err
+}
+
+func Route53DelRecord(hostedZoneId, recordType, recordName string) error {
+	_, err := route53client.ChangeResourceRecordSets(&route53.ChangeResourceRecordSetsInput{
+		HostedZoneId: aws.String(hostedZoneId),
+		ChangeBatch: &route53.ChangeBatch{
+			Changes: []*route53.Change{
+				{
+					Action: aws.String("DELETE"),
+					ResourceRecordSet: &route53.ResourceRecordSet{
+						Type: aws.String(recordType),
+						Name: aws.String(recordName),
 					},
 				},
 			},
