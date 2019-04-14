@@ -15,3 +15,12 @@ type Container struct {
 	OwnerID     string            `json:"-"`
 	CreatedAt   time.Time         `json:"created_at"`
 }
+
+type Plan struct {
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Price     float32 `json:"price"`
+	CPU       int     `json:"cpu"`
+	Memory    int     `json:"memory"`
+	Available bool    `json:"available"`
+}
