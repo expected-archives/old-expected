@@ -38,7 +38,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 	if event.Target.Tag != "" {
 		log = log.WithField("tag", event.Target.Tag)
 
-		account, err := accounts.FindByID(ctx, namespaceId)
+		account, err := accounts.FindAccountByID(ctx, namespaceId)
 		if err != nil {
 			log.WithError(err).Error("finding account by id")
 			return err
@@ -57,7 +57,7 @@ func onPush(ctx context.Context, event notifications.Event) error {
 
 		// insert image if not exist
 		if image == nil {
-			image, err = images.Create(
+			image, err = images.CreateImage(
 				ctx,
 				name,
 				digest,
@@ -113,7 +113,7 @@ func insertLayers(layers []images.Layer, imageId string) error {
 		return err
 	}
 
-	err = images.CreateImageLayerRelations(context.Background(), layers, imageId)
+	err = images.CreateImageLayer(context.Background(), layers, imageId)
 	if err != nil {
 		return err
 	}

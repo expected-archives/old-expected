@@ -17,7 +17,7 @@ func accountFromRows(rows *sql.Rows) (*Account, error) {
 	return account, nil
 }
 
-func Create(ctx context.Context, name, email, avatarUrl string, githubId int64,
+func CreateAccount(ctx context.Context, name, email, avatarUrl string, githubId int64,
 	githubAccessToken string, admin bool) (*Account, error) {
 	account := &Account{
 		ID:                uuid.New().String(),
@@ -38,7 +38,7 @@ func Create(ctx context.Context, name, email, avatarUrl string, githubId int64,
 	return account, err
 }
 
-func Update(ctx context.Context, account *Account) error {
+func UpdateAccount(ctx context.Context, account *Account) error {
 	_, err := services.Postgres().Client().ExecContext(ctx, `
 		UPDATE accounts SET name = $2, email = $3, avatar_url = $4, github_id = $5, github_access_token = $6,
 		api_key = $7, admin = $8 WHERE id = $1
@@ -48,7 +48,7 @@ func Update(ctx context.Context, account *Account) error {
 	return err
 }
 
-func Delete(ctx context.Context, id string) error {
+func DeleteAccount(ctx context.Context, id string) error {
 	_, err := services.Postgres().Client().ExecContext(ctx, `
 		DELETE FROM accounts WHERE id = $1
 	`, id)
@@ -56,7 +56,7 @@ func Delete(ctx context.Context, id string) error {
 	return err
 }
 
-func FindByID(ctx context.Context, id string) (*Account, error) {
+func FindAccountByID(ctx context.Context, id string) (*Account, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
 		FROM accounts WHERE id = $1
@@ -71,7 +71,7 @@ func FindByID(ctx context.Context, id string) (*Account, error) {
 	return nil, nil
 }
 
-func FindByGithubID(ctx context.Context, id int64) (*Account, error) {
+func FindAccountByGithubID(ctx context.Context, id int64) (*Account, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
 		FROM accounts WHERE github_id = $1
@@ -86,7 +86,7 @@ func FindByGithubID(ctx context.Context, id int64) (*Account, error) {
 	return nil, nil
 }
 
-func FindByAPIKey(ctx context.Context, apiKey string) (*Account, error) {
+func FindAccountByAPIKey(ctx context.Context, apiKey string) (*Account, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, email, avatar_url, github_id, github_access_token, api_key, admin, created_at
 		FROM accounts WHERE api_key = $1

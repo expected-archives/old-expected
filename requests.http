@@ -29,7 +29,7 @@ Content-Type: application/json
 Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
 
 ### Delete image
-DELETE http://localhost:3000/v1/images/b0cf079a-7504-419e-870b-2c01f7e6f2a1
+DELETE http://localhost:3000/v1/images/0afe88e4-941d-44e7-9850-de7c7709e90c
 Content-Type: application/json
 Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
 

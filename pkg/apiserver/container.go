@@ -19,7 +19,7 @@ type createContainer struct {
 
 func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	ctrs, err := containers.FindByOwnerID(r.Context(), account.ID)
+	ctrs, err := containers.FindContainerByOwnerID(r.Context(), account.ID)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get containers")
 		response.ErrorInternal(w)
@@ -49,7 +49,7 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// todo check form
-	container, err := containers.Create(r.Context(), form.Name, form.Image, form.Memory,
+	container, err := containers.CreateContainer(r.Context(), form.Name, form.Image, form.Memory,
 		form.Environment, form.Tags, account.ID)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to create container")
