@@ -6,6 +6,7 @@ import (
 	"github.com/expectedsh/expected/pkg/registryhook/gc"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/kelseyhightower/envconfig"
@@ -29,6 +30,7 @@ func main() {
 	}
 
 	services.Register(postgres.NewFromEnv())
+	services.Register(rabbitmq.NewFromEnv())
 	services.Start()
 	defer services.Stop()
 
@@ -41,6 +43,7 @@ func main() {
 		Limit:     config.Gc.Limit,
 	}).Run()
 
+	go registryhook.Start()
 	logrus.Infoln("starting api server")
 	server := registryhook.New(config.Addr)
 
