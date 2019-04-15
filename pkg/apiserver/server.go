@@ -36,6 +36,7 @@ func (s *ApiServer) Start() error {
 
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+		v1.HandleFunc("/containers/plans", s.GetContainerPlans).Methods("GET")
 	}
 
 	if err := cors.ApplyMiddleware(router); err != nil {

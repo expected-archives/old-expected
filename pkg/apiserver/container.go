@@ -31,6 +31,16 @@ func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "containers", ctrs)
 }
 
+func (s *ApiServer) GetContainerPlans(w http.ResponseWriter, r *http.Request) {
+	plans, err := containers.FindPlans(r.Context())
+	if err != nil {
+		logrus.WithError(err).Errorln("unable to get container plans")
+		response.ErrorInternal(w)
+		return
+	}
+	response.Resource(w, "plans", plans)
+}
+
 func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 	form := &createContainer{}
 	account := request.GetAccount(r)
