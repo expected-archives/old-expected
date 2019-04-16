@@ -1,14 +1,33 @@
 package scheduler
 
 import (
+	"github.com/expectedsh/expected/pkg/scheduler/aws"
+	"github.com/expectedsh/expected/pkg/scheduler/docker"
 	"github.com/expectedsh/expected/pkg/scheduler/handler"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 )
 
-var handlers = []rabbitmq.MessageHandler{
-	&handler.DeploymentHandler{},
+type MessageHandler func(msg []byte) error
+
+var (
+	handlers = []rabbitmq.MessageHandler{
+		&handler.DeploymentHandler{},
+	}
+	queue *amqp.Queue
+)
+
+func initQueue(ch *amqp.Channel) error {
+	if queue == nil {
+		q, err := ch.QueueDeclare("containers", true, false, false, false, nil)
+		if err != nil {
+			return err
+		}
+		queue = &q
+	}
+	return nil
 }
 
 func findHandler(name string) rabbitmq.MessageHandler {
@@ -21,6 +40,12 @@ func findHandler(name string) rabbitmq.MessageHandler {
 }
 
 func Start() error {
+	if err := docker.Init(); err != nil {
+		return err
+	}
+	if err := aws.Init(); err != nil {
+		return err
+	}
 	ch, err := services.RabbitMQ().Client().Channel()
 	if err != nil {
 		return err

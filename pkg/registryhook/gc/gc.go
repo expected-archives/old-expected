@@ -75,7 +75,7 @@ func (gc *GarbageCollector) process() {
 			}
 
 			// deleting the layer in the database
-			err = images.DeleteLayer(gc.ctx, layer.Digest)
+			err = images.DeleteLayerByDigest(gc.ctx, layer.Digest)
 			if err != nil {
 				logger.WithError(err).Error("can't delete layer in postgres")
 			} else {

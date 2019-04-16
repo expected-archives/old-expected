@@ -2,11 +2,11 @@ package handler
 
 import (
 	"context"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/protocol"
-	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/scheduler/aws"
+	"github.com/expectedsh/expected/pkg/scheduler/docker"
 	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -23,11 +23,11 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	if err := proto.Unmarshal(m.Body, message); err != nil {
 		return err
 	}
-	container, err := containers.FindByID(context.Background(), message.Id)
+	container, err := containers.FindContainerByID(context.Background(), message.Id)
 	if err != nil || container == nil {
 		return err
 	}
-	service, err := services.Docker().FindService(context.Background(), container.ID)
+	service, err := docker.ServiceFindByName(container.ID)
 	if err != nil {
 		return err
 	}
@@ -37,9 +37,16 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 			MemoryBytes: int64(container.Memory * 1024 * 1024),
 			NanoCPUs:    int64(100000000 * 2),
 		}
-		response, err := services.Docker().Client().ServiceCreate(context.Background(), swarm.ServiceSpec{
+		response, err := docker.ServiceCreate(swarm.ServiceSpec{
 			Annotations: swarm.Annotations{
 				Name: container.ID,
+				Labels: map[string]string{
+					"traefik.enable": "true",
+					"traefik.domain": "expected.sh",
+					//"traefik.frontend.rule": "Host:hello.expected.sh",
+					"traefik.port": "80",
+					//"traefik.docker.network": "private",
+				},
 			},
 			TaskTemplate: swarm.TaskSpec{
 				ContainerSpec: swarm.ContainerSpec{
@@ -56,17 +63,16 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 					Replicas: &replicas,
 				},
 			},
-			EndpointSpec: &swarm.EndpointSpec{
-				Ports: []swarm.PortConfig{
-					{
-						Name:        "http",
-						Protocol:    "tcp",
-						TargetPort:  80,
-						PublishMode: "ingress",
-					},
+			Networks: []swarm.NetworkAttachmentConfig{
+				{
+					Target: "traefik-net",
 				},
 			},
-		}, types.ServiceCreateOptions{})
+		})
+		if err != nil {
+			return err
+		}
+		err = aws.Route53AddRecord("Z2MP7C8I98E8MT", "CNAME", container.ID+".expected.sh", []string{"prod.expected.sh"})
 		if err != nil {
 			return err
 		}

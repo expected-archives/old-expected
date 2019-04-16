@@ -33,20 +33,17 @@ type ImageLayer struct {
 	CreatedAt   time.Time `json:"created_at"`   // date the image id was linked to the layer digest
 }
 
-// Stats get statistic about an image.
-type Stats struct {
-	ImageID     string    `json:"image_id"`     // uuid of the image
+// ImageSummary get summary about an image group by id, namespaceId, name and tag.
+type ImageSummary struct {
 	NamespaceID string    `json:"namespace_id"` // uuid of the namespace
-	Digest      string    `json:"digest"`       // digest of the image
 	Name        string    `json:"name"`         // name of the image
 	Tag         string    `json:"tag"`          // name of the tag
-	Layers      int       `json:"layers"`       // number of layers
-	Size        int64     `json:"size"`         // total size of the image in bytes
-	CreatedAt   time.Time `json:"created_at"`   // creation date of the image
+	LastPushAt  time.Time `json:"last_push"`    // last push layer
 }
 
 // ImageDetail give all informations about an image.
+// An image can have multiple tags so multiple images.
 type ImageDetail struct {
-	*Image
+	Image  *Image   `json:"image"`
 	Layers []*Layer `json:"layers"`
 }

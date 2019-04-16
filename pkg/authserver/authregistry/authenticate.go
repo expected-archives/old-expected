@@ -8,7 +8,7 @@ import (
 )
 
 func Authenticate(login, token string) (*accounts.Account, error) {
-	account, e := accounts.FindByAPIKey(context.Background(), token)
+	account, e := accounts.FindAccountByAPIKey(context.Background(), token)
 	if e != nil {
 		return account, e
 	}
