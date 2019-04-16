@@ -28,7 +28,7 @@ func layerFromRows(rows *sql.Rows) (*Layer, error) {
 
 func statsFromRows(rows *sql.Rows) (*Stats, error) {
 	stats := &Stats{}
-	if err := rows.Scan(&stats.ImageID, &stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag,
+	if err := rows.Scan(&stats.ImageID, &stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag, &stats.CreatedAt,
 		&stats.Layers, &stats.Size); err != nil {
 		return nil, err
 	}
@@ -289,13 +289,14 @@ func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*S
        		img.digest,
        		img.name,
        		img.tag,
+       		img.created_at,
        		count(layers.created_at) AS layers,
        		sum(layers.size)         AS size
 		FROM image_layer
        		LEFT JOIN layers ON image_layer.layer_digest = layers.digest
        		LEFT JOIN images img on image_layer.image_id = img.id
 		WHERE namespace_id = $1
-		GROUP BY img.name, img.digest, img.tag, img.namespace_id, img.id;
+		GROUP BY img.name, img.digest, img.tag, img.namespace_id, img.id, img.created_at;
 	`, namespaceId)
 	if err != nil {
 		return nil, err
