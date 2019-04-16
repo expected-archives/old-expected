@@ -23,7 +23,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	if err := proto.Unmarshal(m.Body, message); err != nil {
 		return err
 	}
-	container, err := containers.FindByID(context.Background(), message.Id)
+	container, err := containers.FindContainerByID(context.Background(), message.Id)
 	if err != nil || container == nil {
 		return err
 	}
@@ -41,10 +41,10 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 			Annotations: swarm.Annotations{
 				Name: container.ID,
 				Labels: map[string]string{
-					"traefik.enable":        "true",
-					"traefik.domain":        "expected.sh",
+					"traefik.enable": "true",
+					"traefik.domain": "expected.sh",
 					//"traefik.frontend.rule": "Host:hello.expected.sh",
-					"traefik.port":          "80",
+					"traefik.port": "80",
 					//"traefik.docker.network": "private",
 				},
 			},
@@ -72,7 +72,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 		if err != nil {
 			return err
 		}
-		err = aws.Route53AddRecord("Z2MP7C8I98E8MT", "CNAME", container.ID +".expected.sh", []string{"prod.expected.sh"})
+		err = aws.Route53AddRecord("Z2MP7C8I98E8MT", "CNAME", container.ID+".expected.sh", []string{"prod.expected.sh"})
 		if err != nil {
 			return err
 		}

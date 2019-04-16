@@ -1,8 +1,8 @@
 package apiserver
 
 import (
-	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/apiserver/request"
+	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/sirupsen/logrus"
@@ -35,7 +35,7 @@ func (s *ApiServer) SyncAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	account.Email = email.Email
-	if err = accounts.Update(r.Context(), account); err != nil {
+	if err = accounts.UpdateAccount(r.Context(), account); err != nil {
 		logrus.WithField("account", account.ID).WithError(err).Errorln("unable to update an account")
 		response.ErrorInternal(w)
 		return
@@ -46,7 +46,7 @@ func (s *ApiServer) SyncAccount(w http.ResponseWriter, r *http.Request) {
 func (s *ApiServer) RegenerateAPIKeyAccount(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	account.RegenerateAPIKey()
-	if err := accounts.Update(r.Context(), account); err != nil {
+	if err := accounts.UpdateAccount(r.Context(), account); err != nil {
 		logrus.WithField("account", account.ID).WithError(err).Errorln("unable to regenerate api key")
 		response.ErrorInternal(w)
 		return

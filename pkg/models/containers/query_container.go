@@ -34,16 +34,7 @@ func containerFromRows(rows *sql.Rows) (*Container, error) {
 	return container, nil
 }
 
-func planFromRows(rows *sql.Rows) (*Plan, error) {
-	plan := &Plan{}
-	if err := rows.Scan(&plan.ID, &plan.Name, &plan.Price, &plan.CPU, &plan.Memory,
-		&plan.Available); err != nil {
-		return nil, err
-	}
-	return plan, nil
-}
-
-func Create(ctx context.Context, name, image string, memory int, environment map[string]string,
+func CreateContainer(ctx context.Context, name, image string, memory int, environment map[string]string,
 	tags []string, ownerId string) (*Container, error) {
 	id := uuid.New().String()
 	endpoint := strings.Replace(id, "-", "", -1) + ".ctr.expected.sh"
@@ -75,7 +66,7 @@ func Create(ctx context.Context, name, image string, memory int, environment map
 	}, err
 }
 
-func Update(ctx context.Context, container *Container) error {
+func UpdateContainer(ctx context.Context, container *Container) error {
 	jsonEnvironment, err := json.Marshal(container.Environment)
 	if err != nil {
 		return err
@@ -94,7 +85,7 @@ func Update(ctx context.Context, container *Container) error {
 	return err
 }
 
-func Delete(ctx context.Context, id string) error {
+func DeleteContainer(ctx context.Context, id string) error {
 	_, err := services.Postgres().Client().ExecContext(ctx, `
 		DELETE FROM containers WHERE id = $1
 	`, id)
@@ -102,7 +93,7 @@ func Delete(ctx context.Context, id string) error {
 	return err
 }
 
-func FindByID(ctx context.Context, id string) (*Container, error) {
+func FindContainerByID(ctx context.Context, id string) (*Container, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, image, endpoint, memory, environment, tags, owner_id, created_at FROM containers
 		WHERE id = $1
@@ -119,7 +110,7 @@ func FindByID(ctx context.Context, id string) (*Container, error) {
 	return nil, nil
 }
 
-func FindByOwnerID(ctx context.Context, id string) ([]*Container, error) {
+func FindContainerByOwnerID(ctx context.Context, id string) ([]*Container, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, image, endpoint, memory, environment, tags, owner_id, created_at FROM containers
 		WHERE owner_id = $1
@@ -139,42 +130,4 @@ func FindByOwnerID(ctx context.Context, id string) ([]*Container, error) {
 	}
 
 	return containers, nil
-}
-
-func FindPlans(ctx context.Context) ([]*Plan, error) {
-	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, name, price, cpu, memory, available FROM container_plans
-	`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var plans []*Plan
-	for rows.Next() {
-		plan, err := planFromRows(rows)
-		if err != nil {
-			return nil, err
-		}
-		plans = append(plans, plan)
-	}
-
-	return plans, nil
-}
-
-func FindPlanByID(ctx context.Context, id string) (*Plan, error) {
-	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, name, price, cpu, memory, available FROM container_plans
-		WHERE id = $1
-	`, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		return planFromRows(rows)
-	}
-
-	return nil, nil
 }

@@ -80,7 +80,7 @@ func (i ImageDletete) Handle(msg amqp.Delivery) error {
 		return err
 	}
 	// deleting the img at the end to be sure all actions above has been executed
-	if err := images.DeleteImage(ctx, img.ID); err != nil {
+	if err := images.DeleteImageByID(ctx, img.ID); err != nil {
 		logger.WithError(err).Error("deleting image")
 		return err
 	}
