@@ -8,13 +8,12 @@ import (
 	"github.com/expectedsh/expected/pkg/util/backoff"
 )
 
-func statsFromRows(rows *sql.Rows) (*Stats, error) {
-	stats := &Stats{}
-	if err := rows.Scan(&stats.ImageID, &stats.NamespaceID, &stats.Digest, &stats.Name, &stats.Tag,
-		&stats.Layers, &stats.Size); err != nil {
+func imageSummaryFromRows(rows *sql.Rows) (*ImageSummary, error) {
+	summary := &ImageSummary{}
+	if err := rows.Scan(&summary.NamespaceID, &summary.Name, &summary.Tag, &summary.LastPushAt); err != nil {
 		return nil, err
 	}
-	return stats, nil
+	return summary, nil
 }
 
 func CreateImageLayer(ctx context.Context, layers []Layer, imageId string) error {
@@ -70,28 +69,30 @@ func DeleteImageLayerByImageID(ctx context.Context, imageId string) error {
 	return err
 }
 
-func FindImagesStatsByNamespaceID(ctx context.Context, namespaceId string) ([]*Stats, error) {
+func FindImagesSummariesByNamespaceID(ctx context.Context, namespaceId string) ([]*ImageSummary, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT
-		    img.id,
-			img.namespace_id,
-       		img.digest,
-       		img.name,
-       		img.tag,
-       		count(layers.created_at) AS layers,
-       		sum(layers.size)         AS size
+		SELECT 
+		    img.namespace_id,
+      		img.name,
+      		img.tag,
+      		(
+      		    SELECT layers.created_at
+      		    FROM layers
+      		    WHERE repository = concat(img.namespace_id, concat('/', img.name))
+      		    ORDER BY layers.created_at DESC
+      		    LIMIT 1
+      		) AS last_push
 		FROM image_layer
-       		LEFT JOIN layers ON image_layer.layer_digest = layers.digest
-       		LEFT JOIN images img on image_layer.image_id = img.id
+		         LEFT OUTER JOIN images img on image_layer.image_id = img.id
 		WHERE namespace_id = $1
-		GROUP BY img.name, img.digest, img.tag, img.namespace_id, img.id;
+		GROUP BY img.name, img.tag, img.namespace_id;
 	`, namespaceId)
 	if err != nil {
 		return nil, err
 	}
-	var statsList []*Stats
+	var statsList []*ImageSummary
 	for rows.Next() {
-		if stats, err := statsFromRows(rows); err != nil {
+		if stats, err := imageSummaryFromRows(rows); err != nil {
 			return nil, err
 		} else {
 			statsList = append(statsList, stats)

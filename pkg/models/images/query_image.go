@@ -94,3 +94,28 @@ func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string
 	}
 	return nil, nil
 }
+
+func FindImageDetail(ctx context.Context, namespaceId, name, tag string) ([]*ImageDetail, error) {
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
+		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
+		FROM images
+		WHERE namespace_id=$1 AND name=$2 AND tag=$3
+	`, namespaceId, name, tag)
+	if err != nil {
+		return nil, err
+	}
+	var list []*ImageDetail
+
+	for rows.Next() {
+		if img, err := imageFromRows(rows); err != nil {
+			return nil, err
+		} else {
+			if layers, err := FindLayersByImageId(ctx, img.ID); err != nil {
+				return nil, err
+			} else {
+				list = append(list, &ImageDetail{Image: img, Layers: layers})
+			}
+		}
+	}
+	return list, nil
+}

@@ -13,42 +13,32 @@ import (
 
 func (s *ApiServer) GetImages(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	imagesStats, err := images.FindImagesStatsByNamespaceID(r.Context(), account.ID)
+	imagesStats, err := images.FindImagesSummariesByNamespaceID(r.Context(), account.ID)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Error("unable to get images list")
 		response.ErrorInternal(w)
 		return
 	}
 	if imagesStats == nil {
-		imagesStats = []*images.Stats{}
+		imagesStats = []*images.ImageSummary{}
 	}
 	response.Resource(w, "images", imagesStats)
 }
 
-func (s *ApiServer) GetImage(w http.ResponseWriter, r *http.Request) {
+func (s *ApiServer) DetailImages(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	imageId := mux.Vars(r)["id"]
-	image, err := images.FindImageByID(r.Context(), imageId)
+
+	name := mux.Vars(r)["name"]
+	tag := mux.Vars(r)["tag"]
+
+	imageDetail, err := images.FindImageDetail(r.Context(), account.ID, name, tag)
 	if err != nil {
-		logrus.WithError(err).WithField("account", account.ID).Error("unable find image")
+		logrus.WithError(err).WithField("account", account.ID).Error("unable find image detail")
 		response.ErrorInternal(w)
 		return
 	}
-	if image == nil {
-		response.ErrorNotFound(w)
-		return
-	}
-	if image.NamespaceID != account.ID {
-		response.ErrorForbidden(w)
-		return
-	}
-	layers, err := images.FindLayersByImageId(r.Context(), imageId)
-	if err != nil {
-		logrus.WithError(err).WithField("account", account.ID).Error("get image: unable find layers of images")
-		response.ErrorInternal(w)
-		return
-	}
-	response.Resource(w, "image", images.ImageDetail{Image: image, Layers: layers})
+
+	response.Resource(w, "image", imageDetail)
 }
 
 func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request) {

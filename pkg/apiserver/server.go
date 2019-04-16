@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"fmt"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"net/http"
 
@@ -24,6 +25,8 @@ func New(addr, secret, dashboardUrl string) *ApiServer {
 }
 
 func (s *ApiServer) Start() error {
+
+	fmt.Println("hello world")
 	router := mux.NewRouter()
 
 	v1 := router.PathPrefix("/v1").Subrouter()
@@ -39,7 +42,7 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/containers/plans", s.GetContainerPlans).Methods("GET")
 
 		v1.HandleFunc("/images", s.GetImages).Methods("GET")
-		v1.HandleFunc("/images/{id}", s.GetImage).Methods("GET")
+		v1.HandleFunc("/images/{name}/{tag}", s.DetailImages).Methods("GET")
 		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
 	}
 

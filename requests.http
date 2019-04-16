@@ -21,16 +21,14 @@ Authorization: c2e827438b6a4a26b8262d89e2673ed0
 ### List images
 GET http://localhost:3000/v1/images
 Content-Type: application/json
-Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
+Authorization: 958f414e1d504bd58608caac95f082b1
 
 ### Detail image
-GET http://localhost:3000/v1/images/b0cf079a-7504-419e-870b-2c01f7e6f2a1
+GET http://localhost:3000/v1/images/apiserver/latest
 Content-Type: application/json
-Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
+Authorization: 958f414e1d504bd58608caac95f082b1
 
 ### Delete image
 DELETE http://localhost:3000/v1/images/0afe88e4-941d-44e7-9850-de7c7709e90c
 Content-Type: application/json
-Authorization: 61cc0ffbdc2f4dde98690689f6966c2f
-
-###
+Authorization: 958f414e1d504bd58608caac95f082b1
