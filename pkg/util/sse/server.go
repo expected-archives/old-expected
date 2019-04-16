@@ -56,14 +56,10 @@ func (s *Server) CreateStream(id string) *Stream {
 		return s.Streams[id]
 	}
 
-	fmt.Println("STREAM CREATION BEFORE")
-
 	str := newStream(s.BufferSize, s.AutoReplay)
 	str.run()
 
 	s.Streams[id] = str
-
-	fmt.Println("STREAM CREATION ", s.Streams[id])
 
 	return str
 }
@@ -74,7 +70,7 @@ func (s *Server) RemoveStream(id string) bool {
 	defer s.mu.Unlock()
 
 	if s.Streams[id] != nil {
-		if len(s.Streams[id].subscribers) == 1 {
+		if len(s.Streams[id].subscribers) == 0 {
 			s.Streams[id].close()
 			delete(s.Streams, id)
 			return true
@@ -95,9 +91,7 @@ func (s *Server) StreamExists(id string) bool {
 func (s *Server) Publish(id string, event *Event) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	fmt.Println("STREAM", s.Streams[id])
 	if s.Streams[id] != nil {
-		fmt.Println("____ PUBLISH ____")
 		s.Streams[id].event <- s.process(event)
 	}
 }

@@ -61,8 +61,6 @@ func (s *Server) HTTPHandler(streamID string, w http.ResponseWriter, r *http.Req
 				continue
 			}
 
-			fmt.Println("_______ BONJOUR ______")
-
 			fmt.Fprintf(w, "id: %s\n", ev.ID)
 			fmt.Fprintf(w, "data: %s\n", ev.Data)
 			if len(ev.Event) > 0 {
