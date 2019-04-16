@@ -24,9 +24,23 @@ func ErrorInternal(w http.ResponseWriter) {
 	_, _ = w.Write(b)
 }
 
+func ErrorNotFound(w http.ResponseWriter) {
+	b, _ := json.Marshal(errorMessage{Message: "Resource not found."})
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusNotFound)
+	_, _ = w.Write(b)
+}
+
 func ErrorForbidden(w http.ResponseWriter) {
 	b, _ := json.Marshal(errorMessage{Message: "You do not have access for the attempted action."})
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusForbidden)
+	_, _ = w.Write(b)
+}
+
+func Error(w http.ResponseWriter, message string, statusCode int) {
+	b, _ := json.Marshal(errorMessage{Message: message})
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
 	_, _ = w.Write(b)
 }
