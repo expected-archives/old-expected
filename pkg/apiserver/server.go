@@ -44,6 +44,7 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/images", s.GetImages).Methods("GET")
 		v1.HandleFunc("/images/{name}/{tag}", s.DetailImages).Methods("GET")
 		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
+
 	}
 
 	if err := cors.ApplyMiddleware(router); err != nil {
