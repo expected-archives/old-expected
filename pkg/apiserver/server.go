@@ -36,10 +36,12 @@ func (s *ApiServer) Start() error {
 
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+		v1.HandleFunc("/containers/log/test", s.LogContainer)
 
 		v1.HandleFunc("/images", s.GetImages).Methods("GET")
 		v1.HandleFunc("/images/{id}", s.GetImage).Methods("GET")
 		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
+
 	}
 
 	if err := cors.ApplyMiddleware(router); err != nil {
