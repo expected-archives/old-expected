@@ -44,29 +44,36 @@ func (s createContainer) validate() (errors map[string]string) {
 	}
 
 	if !reference.ReferenceRegexp.MatchString(s.Image) {
-		errors["image "] = "Invalid image name."
+		errors["image"] = "Invalid image name."
 	}
 
-	for _, tag := range s.Tags {
-		if !tagRegexp.MatchString(tag) {
-			errors["tags"] = "Tags must start with alpha characters and can contain numbers, dot, dash or underscore."
-		}
-		if len(tag) == 0 || len(tag) > 127 {
-			errors["tags"] = "Tags must be between 1 and 217 characters."
+	if len(s.Tags) > 100 {
+		errors["tags"] = "Number of tags must be lesser than 100."
+	} else {
+		for _, tag := range s.Tags {
+			if !tagRegexp.MatchString(tag) {
+				errors["tags"] = "Tags must start with alpha characters and can contain numbers, dot, dash or underscore."
+			}
+			if len(tag) == 0 || len(tag) > 127 {
+				errors["tags"] = "Tags must be between 1 and 217 characters."
+			}
 		}
 	}
 
-	for key, value := range s.Environment {
-		if !environementKeyRegexp.MatchString(key) {
-			errors["environment"] = "Environment key must start with alpha characters or underscore and can contain " +
-				"numericals values."
-		}
-		if len(key) == 0 || len(key) > 1024 {
-			errors["environment"] = "Environment key must be between 1 and 1024 characters."
-		}
-
-		if len(value) > 32768 {
-			errors["environment"] = "Environment value must be lesser than 32768 characters."
+	if len(s.Environment) > 100 {
+		errors["environment"] = "Number of environments variables must be lesser than 100."
+	} else {
+		for key, value := range s.Environment {
+			if !environementKeyRegexp.MatchString(key) {
+				errors["environment"] = "Environment key must start with alpha characters or underscore and can " +
+					"contain numericals values."
+			}
+			if len(key) == 0 || len(key) > 1024 {
+				errors["environment"] = "Environment key must be between 1 and 1024 characters."
+			}
+			if len(value) > 32768 {
+				errors["environment"] = "Environment value must be lesser than 32768 characters."
+			}
 		}
 	}
 
