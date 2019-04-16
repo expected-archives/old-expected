@@ -18,7 +18,7 @@ var (
 
 	// tagRegexp define the tag constaint. Must start with alpha
 	// char, can numericals character and contain . - _ characters.
-	tagRegexp = regexp.MustCompile(`^[\w][\w0-9.-_]$`)
+	tagRegexp = regexp.MustCompile(`^[\w]+[\w0-9.-_]$`)
 
 	// environementKeyRegexp define the shell posix standart to accept environement
 	// key variable.
@@ -55,7 +55,7 @@ func (s createContainer) validate() (errors map[string]string) {
 				errors["tags"] = "Tags must start with alpha characters and can contain numbers, dot, dash or underscore."
 			}
 			if len(tag) == 0 || len(tag) > 127 {
-				errors["tags"] = "Tags must be between 1 and 217 characters."
+				errors["tags"] = "Tags must be between 2 and 217 characters."
 			}
 		}
 	}
