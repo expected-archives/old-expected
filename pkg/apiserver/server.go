@@ -1,7 +1,6 @@
 package apiserver
 
 import (
-	"fmt"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"net/http"
 
@@ -25,10 +24,7 @@ func New(addr, secret, dashboardUrl string) *ApiServer {
 }
 
 func (s *ApiServer) Start() error {
-
-	fmt.Println("hello world")
 	router := mux.NewRouter()
-
 	v1 := router.PathPrefix("/v1").Subrouter()
 	{
 		v1.Use(s.authMiddleware)
@@ -46,7 +42,6 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
 
 	}
-
 	if err := cors.ApplyMiddleware(router); err != nil {
 		return err
 	}
