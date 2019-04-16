@@ -8,7 +8,6 @@ vendorize:
 		go mod tidy ; \
 		go mod vendor
 
-
 protocol:
 	docker run --rm 													\
 		-v $$(pwd):$$(pwd)												\
