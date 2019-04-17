@@ -11,7 +11,7 @@ import (
 )
 
 func planFromRows(rows *sql.Rows) (*Plan, error) {
-	var met Metadata
+	var metadata Metadata
 	var planType, planMetadata string
 
 	plan := &Plan{}
@@ -21,16 +21,16 @@ func planFromRows(rows *sql.Rows) (*Plan, error) {
 		return nil, err
 	}
 	plan.Type = Type(planType)
-	err = json.Unmarshal([]byte(planMetadata), &met)
+	err = json.Unmarshal([]byte(planMetadata), &metadata)
 	if err != nil {
 		return nil, err
 	}
-	plan.Metadata = met
+	plan.Metadata = metadata
 	return plan, nil
 }
 
-func CreatePlan(ctx context.Context, name string, planType Type, price float32, met Metadata, public bool) (*Plan, error) {
-	strMet, err := json.Marshal(met)
+func CreatePlan(ctx context.Context, name string, planType Type, price float32, metadata Metadata, public bool) (*Plan, error) {
+	strMet, err := json.Marshal(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func CreatePlan(ctx context.Context, name string, planType Type, price float32, 
 		Name:      name,
 		Type:      planType,
 		Price:     price,
-		Metadata:  met,
+		Metadata:  metadata,
 		Public:    public,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
