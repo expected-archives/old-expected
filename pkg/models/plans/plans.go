@@ -6,7 +6,7 @@ type Type string
 
 const (
 	Container Type = "container"
-	Image          = "registry"
+	Image          = "image"
 )
 
 type Metadata map[string]interface{}
@@ -14,7 +14,7 @@ type Metadata map[string]interface{}
 type Plan struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	Type      string    `json:"type"`
+	Type      Type      `json:"type"`
 	Price     float32   `json:"price"`
 	Metadata  Metadata  `json:"metadata"`
 	Public    bool      `json:"public"`

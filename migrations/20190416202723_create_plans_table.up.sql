@@ -14,6 +14,6 @@ CREATE TABLE plans
 
 CREATE TABLE custom_plans
 (
-    plan_id      UUID NOT NULL NOT REFERENCES plans (id),
+    plan_id      UUID NOT NULL REFERENCES plans (id),
     namespace_id UUID NOT NULL REFERENCES accounts (id)
 )
