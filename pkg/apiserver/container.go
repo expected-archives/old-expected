@@ -20,9 +20,9 @@ var (
 	// char, can numericals character and contain . - _ characters.
 	tagRegexp = regexp.MustCompile(`^[\w]+[\w0-9.-_]$`)
 
-	// environementKeyRegexp define the shell posix standart to accept environement
+	// environmentKeyRegexp define the shell posix standard to accept environment
 	// key variable.
-	environementKeyRegexp = regexp.MustCompile(`^[a-zA-Z_]+[a-zA-Z0-9_]$`)
+	environmentKeyRegexp = regexp.MustCompile(`^[a-zA-Z_]+[a-zA-Z0-9_]$`)
 )
 
 type createContainer struct {
@@ -64,7 +64,7 @@ func (s createContainer) validate() (errors map[string]string) {
 		errors["environment"] = "Number of environments variables must be lesser than 100."
 	} else {
 		for key, value := range s.Environment {
-			if !environementKeyRegexp.MatchString(key) {
+			if !environmentKeyRegexp.MatchString(key) {
 				errors["environment"] = "Environment key must start with alpha characters or underscore and can " +
 					"contain numericals values."
 			}
@@ -92,16 +92,6 @@ func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
 		ctrs = []*containers.Container{}
 	}
 	response.Resource(w, "containers", ctrs)
-}
-
-func (s *ApiServer) GetContainerPlans(w http.ResponseWriter, r *http.Request) {
-	plans, err := containers.FindPlans(r.Context())
-	if err != nil {
-		logrus.WithError(err).Errorln("unable to get container plans")
-		response.ErrorInternal(w)
-		return
-	}
-	response.Resource(w, "plans", plans)
 }
 
 func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
