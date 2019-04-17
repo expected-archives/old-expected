@@ -27,17 +27,14 @@ func (s *ApiServer) GetImages(w http.ResponseWriter, r *http.Request) {
 
 func (s *ApiServer) DetailImages(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-
 	name := mux.Vars(r)["name"]
 	tag := mux.Vars(r)["tag"]
-
 	imageDetail, err := images.FindImageDetail(r.Context(), account.ID, name, tag)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Error("unable find image detail")
 		response.ErrorInternal(w)
 		return
 	}
-
 	response.Resource(w, "image", imageDetail)
 }
 
@@ -62,21 +59,18 @@ func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		WithField("task", "api-delete-image").
 		WithField("repo", fmt.Sprintf("%s/%s", img.NamespaceID, img.Name)).
 		WithField("digest", img.Digest).
+		WithField("tag", img.Tag).
+		WithField("id", img.ID).
 		WithField("tag", img.Tag)
-	log = log.WithField("id", img.ID).WithField("tag", img.Tag)
-	log.Info()
-
 	if img.DeleteMode {
 		response.Error(w, "The image is being deleted", http.StatusConflict)
 		return
 	}
-
 	if err := images.UpdateImageDeleteMode(r.Context(), img.ID); err != nil {
 		log.WithError(err).Error("can't update image into delete mode")
 		response.ErrorInternal(w)
 		return
 	}
-
 	if err := registryhook.RequestDeleteImage(imageId); err != nil {
 		log.WithError(err).Error("can't publish delete message to rabbit")
 		response.ErrorInternal(w)
