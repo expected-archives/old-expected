@@ -82,3 +82,39 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	}
 	return nil
 }
+
+type StartHandler struct{}
+
+func (StartHandler) Name() string {
+	return "ContainerStartRequest"
+}
+
+func (StartHandler) Handle(m amqp.Delivery) error {
+	//message := &protocol.ContainerStartRequest{}
+	//if err := proto.Unmarshal(m.Body, message); err != nil {
+	//	return err
+	//}
+	//container, err := containers.FindContainerByID(context.Background(), message.Id)
+	//if err != nil || container == nil {
+	//	return err
+	//}
+	return nil
+}
+
+type StopHandler struct{}
+
+func (StopHandler) Name() string {
+	return "ContainerStopRequest"
+}
+
+func (StopHandler) Handle(m amqp.Delivery) error {
+	//message := &protocol.ContainerStopRequest{}
+	//if err := proto.Unmarshal(m.Body, message); err != nil {
+	//	return err
+	//}
+	//container, err := containers.FindContainerByID(context.Background(), message.Id)
+	//if err != nil || container == nil {
+	//	return err
+	//}
+	return nil
+}

@@ -15,6 +15,8 @@ type MessageHandler func(msg []byte) error
 var (
 	handlers = []rabbitmq.MessageHandler{
 		&handler.DeploymentHandler{},
+		&handler.StartHandler{},
+		&handler.StopHandler{},
 	}
 	queue *amqp.Queue
 )
