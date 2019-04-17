@@ -80,6 +80,20 @@ func (s createContainer) validate() (errors map[string]string) {
 	return errors
 }
 
+func (s *ApiServer) GetTags(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	tags, err := containers.FindTagsByOwnerID(r.Context(), account.ID)
+	if err != nil {
+		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get tags by owner id")
+		response.ErrorInternal(w)
+		return
+	}
+	if tags == nil {
+		tags = []string{}
+	}
+	response.Resource(w, "tags", tags)
+}
+
 func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	ctrs, err := containers.FindContainerByOwnerID(r.Context(), account.ID)
