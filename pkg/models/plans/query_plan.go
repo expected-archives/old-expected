@@ -92,10 +92,10 @@ func FindPlanByID(ctx context.Context, id string) (*Plan, error) {
 	return nil, errors.New("plan not found")
 }
 
-func FindPlansByType(ctx context.Context, planType string) ([]*Plan, error) {
+func FindPlansByType(ctx context.Context, planType string, public bool) ([]*Plan, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT * FROM  plans WHERE type = $1
-	`, planType)
+		SELECT * FROM  plans WHERE type = $1 AND public = $2
+	`, planType, public)
 	if err != nil {
 		return nil, err
 	}

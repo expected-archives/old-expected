@@ -5,8 +5,8 @@ import "time"
 type Type string
 
 const (
-	Container Type = "container"
-	Image          = "image"
+	TypeContainer Type = "container"
+	TypeImage          = "image"
 )
 
 type Metadata map[string]interface{}
