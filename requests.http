@@ -1,17 +1,21 @@
 ### Create new container
 POST http://localhost:3000/v1/containers
 Content-Type: application/json
-Authorization: ce41f7ca970745409a47079c2ebd62f2
+Authorization: d3f5108487d742a59cdc2d831475ae13
 
 {
-  "name": "hello",
+  "name": "hello3",
   "image": "google/golang-hello",
   "memory": 64,
-  "tags": ["expectedsh", "test"],
+  "tags": ["123", "test"],
   "environment": {
     "PORT": "80"
   }
 }
+
+### Get list of all tags for owner id
+GET http://localhost:3000/v1/containers/tags
+Authorization: d3f5108487d742a59cdc2d831475ae13
 
 ### List containers
 GET http://localhost:3000/v1/containers

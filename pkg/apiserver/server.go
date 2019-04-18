@@ -34,6 +34,7 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
 
 		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
+		v1.HandleFunc("/containers/tags", s.GetTags).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 
 		v1.HandleFunc("/images", s.GetImages).Methods("GET")

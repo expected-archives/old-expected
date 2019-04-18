@@ -110,6 +110,26 @@ func FindContainerByID(ctx context.Context, id string) (*Container, error) {
 	return nil, nil
 }
 
+func FindTagsByOwnerID(ctx context.Context, id string) ([]string, error) {
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
+		SELECT trim(BOTH '"' FROM json_array_elements(tags)::text) AS tag 
+		FROM containers 
+		WHERE owner_id = $1 GROUP BY tag
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	var tags []string
+	for rows.Next() {
+		tag := ""
+		if err := rows.Scan(&tag); err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
 func FindContainerByOwnerID(ctx context.Context, id string) ([]*Container, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, image, endpoint, memory, environment, tags, owner_id, created_at FROM containers
