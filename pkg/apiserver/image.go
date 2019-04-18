@@ -63,7 +63,7 @@ func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		WithField("id", img.ID).
 		WithField("tag", img.Tag)
 	if img.DeleteMode {
-		response.Error(w, "The image is being deleted", http.StatusConflict)
+		response.Error(w, http.StatusConflict, "The image is being deleted")
 		return
 	}
 	if err := images.UpdateImageDeleteMode(r.Context(), img.ID); err != nil {
