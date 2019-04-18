@@ -11,7 +11,7 @@ import (
 
 func (s *ApiServer) GetTags(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	tags, err := containers.FindTagsByOwnerID(r.Context(), account.ID)
+	tags, err := containers.FindTagsByNamespaceID(r.Context(), account.ID)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get tags")
 		response.ErrorInternal(w)

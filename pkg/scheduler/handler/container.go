@@ -34,7 +34,7 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	if service == nil {
 		replicas := uint64(1)
 		resources := &swarm.Resources{
-			MemoryBytes: int64(container.Memory * 1024 * 1024),
+			MemoryBytes: int64(1 * 1024 * 1024), // 1 == mo
 			NanoCPUs:    int64(100000000 * 2),
 		}
 		response, err := docker.ServiceCreate(swarm.ServiceSpec{

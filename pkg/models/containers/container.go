@@ -23,6 +23,7 @@ type Container struct {
 	NamespaceID string            `json:"namespace_id"`
 	State       State             `json:"state"`
 	CreatedAt   time.Time         `json:"created_at"`
+	UpdatedAt   time.Time         `json:"updated_at"`
 }
 
 type Endpoint struct {
