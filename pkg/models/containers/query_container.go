@@ -112,7 +112,7 @@ func FindContainerByID(ctx context.Context, id string) (*Container, error) {
 
 func FindTagsByOwnerID(ctx context.Context, id string) ([]string, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT trim(BOTH '"' FROM json_array_elements(tags)::text) AS tag 
+		SELECT ('[' || json_array_elements(tags)::text || ']')::json ->> 0 AS tag 
 		FROM containers 
 		WHERE owner_id = $1 GROUP BY tag
 	`, id)
