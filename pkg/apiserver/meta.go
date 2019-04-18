@@ -1,0 +1,37 @@
+package apiserver
+
+import (
+	"github.com/expectedsh/expected/pkg/apiserver/request"
+	"github.com/expectedsh/expected/pkg/apiserver/response"
+	"github.com/expectedsh/expected/pkg/models/containers"
+	"github.com/sirupsen/logrus"
+	"net/http"
+)
+
+func (s *ApiServer) GetTags(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	tags, err := containers.FindTagsByOwnerID(r.Context(), account.ID)
+	if err != nil {
+		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get tags")
+		response.ErrorInternal(w)
+		return
+	}
+	if tags == nil {
+		tags = []string{}
+	}
+	response.Resource(w, "tags", tags)
+}
+
+func (s *ApiServer) GetImagesName(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	tags, err := containers.FindTagsByOwnerID(r.Context(), account.ID)
+	if err != nil {
+		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get tags")
+		response.ErrorInternal(w)
+		return
+	}
+	if tags == nil {
+		tags = []string{}
+	}
+	response.Resource(w, "tags", tags)
+}
