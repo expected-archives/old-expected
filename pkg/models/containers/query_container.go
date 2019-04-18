@@ -26,6 +26,11 @@ func containerFromRows(rows *sql.Rows) (*Container, error) {
 		return nil, err
 	}
 	container.Tags = tags
+	endpoints, err := FindEndpointsByContainerID(context.Background(), container.ID)
+	if err != nil {
+		return nil, err
+	}
+	container.Endpoints = endpoints
 	return container, nil
 }
 

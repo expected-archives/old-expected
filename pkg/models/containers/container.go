@@ -16,7 +16,7 @@ type Container struct {
 	ID          string            `json:"id"`
 	Name        string            `json:"name"`
 	Image       string            `json:"image"`
-	Endpoints   []*Endpoint       `json:"endpoint"`
+	Endpoints   []*Endpoint       `json:"endpoints"`
 	PlanID      string            `json:"plan_id"`
 	Environment map[string]string `json:"environment"`
 	Tags        []string          `json:"tags"`
