@@ -4,6 +4,7 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
+	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -24,14 +25,14 @@ func (s *ApiServer) GetTags(w http.ResponseWriter, r *http.Request) {
 
 func (s *ApiServer) GetImagesName(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	tags, err := containers.FindTagsByOwnerID(r.Context(), account.ID)
+	names, err := images.FindImagesName(r.Context(), account.ID)
 	if err != nil {
-		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get tags")
+		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get names")
 		response.ErrorInternal(w)
 		return
 	}
-	if tags == nil {
-		tags = []string{}
+	if names == nil {
+		names = []string{}
 	}
-	response.Resource(w, "tags", tags)
+	response.Resource(w, "names", names)
 }
