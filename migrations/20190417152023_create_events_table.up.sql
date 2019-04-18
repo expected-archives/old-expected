@@ -1,5 +1,5 @@
-CREATE TYPE event_resource AS ENUM ('container', 'image', 'plan', 'customplan', 'account');
-CREATE TYPE event_action AS ENUM ('create', 'delete', 'update');
+CREATE TYPE event_resource AS ENUM ('account', 'container', 'image');
+CREATE TYPE event_action AS ENUM ('create', 'update', 'delete');
 CREATE TYPE event_issuer AS ENUM ('robot', 'account');
 
 CREATE TABLE events

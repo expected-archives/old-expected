@@ -21,8 +21,8 @@ type Action string
 
 const (
 	ActionCreate Action = "create"
-	ActionDelete Action = "delete"
 	ActionUpdate Action = "update"
+	ActionDelete Action = "delete"
 )
 
 type Metadata map[string]interface{}
