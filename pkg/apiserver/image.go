@@ -6,6 +6,7 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/registryhook"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -41,8 +42,12 @@ func (s *ApiServer) GetImage(w http.ResponseWriter, r *http.Request) {
 
 func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	imageId := mux.Vars(r)["id"]
-	img, err := images.FindImageByID(r.Context(), imageId)
+	id := mux.Vars(r)["id"]
+	if _, err := uuid.Parse(id); err != nil {
+		response.ErrorBadRequest(w, "Invalid image id.", nil)
+		return
+	}
+	img, err := images.FindImageByID(r.Context(), id)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Error("unable find image")
 		response.ErrorInternal(w)
@@ -72,7 +77,7 @@ func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
-	if err := registryhook.RequestDeleteImage(imageId); err != nil {
+	if err := registryhook.RequestDeleteImage(id); err != nil {
 		log.WithError(err).Error("can't publish delete message to rabbit")
 		response.ErrorInternal(w)
 		return

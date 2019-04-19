@@ -3,6 +3,7 @@ package apiserver
 import (
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/plans"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -34,6 +35,10 @@ func (s *ApiServer) ListPlans(w http.ResponseWriter, r *http.Request) {
 
 func (s *ApiServer) GetPlan(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
+	if _, err := uuid.Parse(id); err != nil {
+		response.ErrorBadRequest(w, "Invalid plan id.", nil)
+		return
+	}
 	plan, err := plans.FindPlanByID(r.Context(), id)
 	if err != nil {
 		logrus.WithError(err).Errorln("unable to get plans")
