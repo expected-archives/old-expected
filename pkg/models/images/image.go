@@ -44,6 +44,17 @@ type ImageSummary struct {
 // ImageDetail give all informations about an image.
 // An image can have multiple tags so multiple images.
 type ImageDetail struct {
+	*ImageSummary
+	Manifests Manifests
+}
+
+type Manifest struct {
 	Image  *Image   `json:"image"`
 	Layers []*Layer `json:"layers"`
 }
+
+type Manifests []Manifest
+
+func (m Manifests) Len() int           { return len(m) }
+func (m Manifests) Less(i, j int) bool { return m[i].Image.CreatedAt.After(m[j].Image.CreatedAt) }
+func (m Manifests) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }

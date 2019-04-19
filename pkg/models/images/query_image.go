@@ -6,6 +6,7 @@ import (
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/google/uuid"
+	"sort"
 	"time"
 )
 
@@ -116,7 +117,7 @@ func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string
 	return nil, nil
 }
 
-func FindImageDetail(ctx context.Context, namespaceId, name, tag string) ([]*ImageDetail, error) {
+func FindImageDetail(ctx context.Context, namespaceId, name, tag string) (*ImageDetail, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
 		FROM images
@@ -125,7 +126,7 @@ func FindImageDetail(ctx context.Context, namespaceId, name, tag string) ([]*Ima
 	if err != nil {
 		return nil, err
 	}
-	var list []*ImageDetail
+	var manifests Manifests
 	for rows.Next() {
 		if img, err := imageFromRows(rows); err != nil {
 			return nil, err
@@ -133,9 +134,22 @@ func FindImageDetail(ctx context.Context, namespaceId, name, tag string) ([]*Ima
 			if layers, err := FindLayersByImageId(ctx, img.ID); err != nil {
 				return nil, err
 			} else {
-				list = append(list, &ImageDetail{Image: img, Layers: layers})
+				manifests = append(manifests, Manifest{Image: img, Layers: layers})
 			}
 		}
 	}
-	return list, nil
+	if len(manifests) == 0 {
+		return nil, nil
+	} else {
+		sort.Sort(manifests)
+		return &ImageDetail{
+			ImageSummary: &ImageSummary{
+				NamespaceID: manifests[0].Image.NamespaceID,
+				Name:        manifests[0].Image.Name,
+				Tag:         manifests[0].Image.Tag,
+				LastPushAt:  manifests[0].Image.CreatedAt,
+			},
+			Manifests: manifests,
+		}, nil
+	}
 }
