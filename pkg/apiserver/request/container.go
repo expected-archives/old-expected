@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/docker/distribution/reference"
 	"github.com/expectedsh/expected/pkg/models/plans"
+	"github.com/google/uuid"
 	"regexp"
 )
 
@@ -74,10 +75,13 @@ func (s *CreateContainer) Validate(ctx context.Context) (errors map[string]strin
 		}
 	}
 
-	plan, _ := plans.FindPlanByID(ctx, s.PlanID)
-	if plan == nil {
-		errors["plan_id"] = "Plan not found."
+	if _, err := uuid.Parse(s.PlanID); err != nil {
+		errors["plan_id"] = "Invalid plan id."
+	} else {
+		plan, _ := plans.FindPlanByID(ctx, s.PlanID)
+		if plan == nil {
+			errors["plan_id"] = "Plan not found."
+		}
 	}
-
 	return errors
 }
