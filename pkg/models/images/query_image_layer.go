@@ -37,7 +37,8 @@ func CreateImageLayer(ctx context.Context, layers []Layer, imageId string) error
 	for _, layer := range layers {
 
 		rows, err := tx.QueryContext(ctx, `
-			SELECT * FROM image_layer WHERE image_id = $1 AND layer_digest = $2
+			SELECT image_id, layer_digest, created_at
+			FROM image_layer WHERE image_id = $1 AND layer_digest = $2
 		`, imageId, layer.Digest)
 		if err != nil {
 			return err

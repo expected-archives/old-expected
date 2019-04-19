@@ -96,7 +96,7 @@ func DeleteLayerByDigest(ctx context.Context, digest string) error {
 
 func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT *
+		SELECT digest, repository, size, created_at, updated_at
 		FROM layers
 		WHERE digest = $1
 	`, digest)
@@ -112,7 +112,11 @@ func FindLayerByDigest(ctx context.Context, digest string) (*Layer, error) {
 func FindLayersByImageId(ctx context.Context, imageId string) ([]*Layer, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT
-    		layers.*
+    		layers.digest,
+    		layers.repository,
+    		layers.size,
+    		layers.created_at,
+    		layers.updated_at
 		FROM image_layer
     	LEFT JOIN layers ON image_layer.layer_digest = layers.digest
 		WHERE image_id = $1
@@ -133,7 +137,7 @@ func FindLayersByImageId(ctx context.Context, imageId string) ([]*Layer, error) 
 
 func FindUnusedLayers(ctx context.Context, olderThan time.Duration, limit int64) ([]*Layer, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT * FROM layers 
+		SELECT digest, repository, size, created_at, updated_at FROM layers 
 		WHERE
 			updated_at <  now() - interval '`+olderThan.String()+`' AND
 			(SELECT count(*) FROM image_layer WHERE layer_digest = digest) = 0

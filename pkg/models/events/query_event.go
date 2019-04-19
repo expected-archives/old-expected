@@ -54,7 +54,8 @@ func CreateEvent(ctx context.Context,
 
 func FindEventsByResourceID(ctx context.Context, resourceId string) ([]*Event, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-			SELECT * FROM events WHERE resource_id = $1
+			SELECT id, resource, resource_id, action, issuer, issuer_id, metadata, created_at
+			FROM events WHERE resource_id = $1
 		`, resourceId)
 	if err != nil {
 		return nil, err
@@ -72,7 +73,8 @@ func FindEventsByResourceID(ctx context.Context, resourceId string) ([]*Event, e
 
 func FindEventsByIssuerID(ctx context.Context, issuerId string) ([]*Event, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-			SELECT * FROM events WHERE issuer_id = $1
+			SELECT id, resource, resource_id, action, issuer, issuer_id, metadata, created_at
+			FROM events WHERE issuer_id = $1
 		`, issuerId)
 	if err != nil {
 		return nil, err
