@@ -9,9 +9,8 @@ It is generated from these files:
 	image.proto
 
 It has these top-level messages:
-	ContainerDeploymentRequest
-	ContainerStartRequest
-	ContainerStopRequest
+	CreateContainerRequest
+	ChangeContainerStateRequest
 	ImageDeleteRequest
 */
 package protocol
@@ -31,70 +30,88 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type ContainerDeploymentRequest struct {
+type ChangeContainerStateRequest_RequestedState int32
+
+const (
+	ChangeContainerStateRequest_START ChangeContainerStateRequest_RequestedState = 0
+	ChangeContainerStateRequest_STOP  ChangeContainerStateRequest_RequestedState = 1
+)
+
+var ChangeContainerStateRequest_RequestedState_name = map[int32]string{
+	0: "START",
+	1: "STOP",
+}
+var ChangeContainerStateRequest_RequestedState_value = map[string]int32{
+	"START": 0,
+	"STOP":  1,
+}
+
+func (x ChangeContainerStateRequest_RequestedState) String() string {
+	return proto.EnumName(ChangeContainerStateRequest_RequestedState_name, int32(x))
+}
+func (ChangeContainerStateRequest_RequestedState) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{1, 0}
+}
+
+type CreateContainerRequest struct {
 	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
 }
 
-func (m *ContainerDeploymentRequest) Reset()                    { *m = ContainerDeploymentRequest{} }
-func (m *ContainerDeploymentRequest) String() string            { return proto.CompactTextString(m) }
-func (*ContainerDeploymentRequest) ProtoMessage()               {}
-func (*ContainerDeploymentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (m *CreateContainerRequest) Reset()                    { *m = CreateContainerRequest{} }
+func (m *CreateContainerRequest) String() string            { return proto.CompactTextString(m) }
+func (*CreateContainerRequest) ProtoMessage()               {}
+func (*CreateContainerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *ContainerDeploymentRequest) GetId() string {
+func (m *CreateContainerRequest) GetId() string {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-type ContainerStartRequest struct {
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+type ChangeContainerStateRequest struct {
+	Id             string                                     `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	RequestedState ChangeContainerStateRequest_RequestedState `protobuf:"varint,2,opt,name=requestedState,enum=protocol.ChangeContainerStateRequest_RequestedState" json:"requestedState,omitempty"`
 }
 
-func (m *ContainerStartRequest) Reset()                    { *m = ContainerStartRequest{} }
-func (m *ContainerStartRequest) String() string            { return proto.CompactTextString(m) }
-func (*ContainerStartRequest) ProtoMessage()               {}
-func (*ContainerStartRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (m *ChangeContainerStateRequest) Reset()                    { *m = ChangeContainerStateRequest{} }
+func (m *ChangeContainerStateRequest) String() string            { return proto.CompactTextString(m) }
+func (*ChangeContainerStateRequest) ProtoMessage()               {}
+func (*ChangeContainerStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-func (m *ContainerStartRequest) GetId() string {
+func (m *ChangeContainerStateRequest) GetId() string {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-type ContainerStopRequest struct {
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-}
-
-func (m *ContainerStopRequest) Reset()                    { *m = ContainerStopRequest{} }
-func (m *ContainerStopRequest) String() string            { return proto.CompactTextString(m) }
-func (*ContainerStopRequest) ProtoMessage()               {}
-func (*ContainerStopRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
-
-func (m *ContainerStopRequest) GetId() string {
+func (m *ChangeContainerStateRequest) GetRequestedState() ChangeContainerStateRequest_RequestedState {
 	if m != nil {
-		return m.Id
+		return m.RequestedState
 	}
-	return ""
+	return ChangeContainerStateRequest_START
 }
 
 func init() {
-	proto.RegisterType((*ContainerDeploymentRequest)(nil), "protocol.ContainerDeploymentRequest")
-	proto.RegisterType((*ContainerStartRequest)(nil), "protocol.ContainerStartRequest")
-	proto.RegisterType((*ContainerStopRequest)(nil), "protocol.ContainerStopRequest")
+	proto.RegisterType((*CreateContainerRequest)(nil), "protocol.CreateContainerRequest")
+	proto.RegisterType((*ChangeContainerStateRequest)(nil), "protocol.ChangeContainerStateRequest")
+	proto.RegisterEnum("protocol.ChangeContainerStateRequest_RequestedState", ChangeContainerStateRequest_RequestedState_name, ChangeContainerStateRequest_RequestedState_value)
 }
 
 func init() { proto.RegisterFile("container.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 114 bytes of a gzipped FileDescriptorProto
+	// 168 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4f, 0xce, 0xcf, 0x2b,
 	0x49, 0xcc, 0xcc, 0x4b, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x00, 0x53, 0xc9,
-	0xf9, 0x39, 0x4a, 0x3a, 0x5c, 0x52, 0xce, 0x30, 0x49, 0x97, 0xd4, 0x82, 0x9c, 0xfc, 0xca, 0xdc,
-	0xd4, 0xbc, 0x92, 0xa0, 0xd4, 0xc2, 0xd2, 0xd4, 0xe2, 0x12, 0x21, 0x3e, 0x2e, 0xa6, 0xcc, 0x14,
-	0x09, 0x46, 0x05, 0x46, 0x0d, 0xce, 0x20, 0xa6, 0xcc, 0x14, 0x25, 0x75, 0x2e, 0x51, 0xb8, 0xea,
-	0xe0, 0x92, 0xc4, 0x22, 0x9c, 0x0a, 0xd5, 0xb8, 0x44, 0x90, 0x14, 0xe6, 0x17, 0xe0, 0x50, 0x97,
-	0xc4, 0x06, 0x76, 0x88, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0xb9, 0xf8, 0x43, 0x7f, 0xa2, 0x00,
-	0x00, 0x00,
+	0xf9, 0x39, 0x4a, 0x1a, 0x5c, 0x62, 0xce, 0x45, 0xa9, 0x89, 0x25, 0xa9, 0xce, 0x30, 0x25, 0x41,
+	0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0x7c, 0x5c, 0x4c, 0x99, 0x29, 0x12, 0x8c, 0x0a, 0x8c,
+	0x1a, 0x9c, 0x41, 0x4c, 0x99, 0x29, 0x4a, 0x9b, 0x18, 0xb9, 0xa4, 0x9d, 0x33, 0x12, 0xf3, 0xd2,
+	0x11, 0x4a, 0x83, 0x4b, 0x12, 0x4b, 0x52, 0x71, 0xa8, 0x17, 0x8a, 0xe1, 0xe2, 0x2b, 0x82, 0x48,
+	0xa5, 0xa6, 0x80, 0x15, 0x4a, 0x30, 0x29, 0x30, 0x6a, 0xf0, 0x19, 0x99, 0xe8, 0xc1, 0x2c, 0xd7,
+	0xc3, 0x63, 0x9c, 0x5e, 0x10, 0x8a, 0xde, 0x20, 0x34, 0xb3, 0x94, 0x54, 0xb9, 0xf8, 0x50, 0x55,
+	0x08, 0x71, 0x72, 0xb1, 0x06, 0x87, 0x38, 0x06, 0x85, 0x08, 0x30, 0x08, 0x71, 0x70, 0xb1, 0x04,
+	0x87, 0xf8, 0x07, 0x08, 0x30, 0x26, 0xb1, 0x81, 0xed, 0x32, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff,
+	0x1b, 0xed, 0xa7, 0x5a, 0x02, 0x01, 0x00, 0x00,
 }

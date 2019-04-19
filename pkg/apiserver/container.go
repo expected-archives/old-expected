@@ -9,11 +9,11 @@ import (
 	"net/http"
 )
 
-func (s *ApiServer) GetContainers(w http.ResponseWriter, r *http.Request) {
+func (s *ApiServer) ListContainers(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	ctrs, err := containers.FindContainersByNamespaceID(r.Context(), account.ID)
 	if err != nil {
-		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to get containers")
+		logrus.WithError(err).Errorln("unable to get containers")
 		response.ErrorInternal(w)
 		return
 	}
@@ -37,12 +37,12 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 	container, err := containers.CreateContainer(r.Context(), form.Name, form.Image, form.PlanID,
 		form.Environment, form.Tags, account.ID)
 	if err != nil {
-		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to create container")
+		logrus.WithError(err).Errorln("unable to create container")
 		response.ErrorInternal(w)
 		return
 	}
-	if err = scheduler.RequestDeployment(container.ID); err != nil {
-		logrus.WithError(err).WithField("account", account.ID).Errorln("unable to send container deployment request")
+	if err = scheduler.RequestCreateContainer(container.ID); err != nil {
+		logrus.WithError(err).Errorln("unable to request container creation to scheduler")
 		response.ErrorInternal(w)
 		return
 	}

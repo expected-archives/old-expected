@@ -33,14 +33,15 @@ func (s *ApiServer) Start() error {
 		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
 		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
 
-		v1.HandleFunc("/containers", s.GetContainers).Methods("GET")
+		v1.HandleFunc("/containers", s.ListContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 
-		v1.HandleFunc("/images", s.GetImages).Methods("GET")
-		v1.HandleFunc("/images/{name}/{tag}", s.DetailImages).Methods("GET")
+		v1.HandleFunc("/images", s.ListImages).Methods("GET")
+		v1.HandleFunc("/images/{name}:{tag}", s.GetImage).Methods("GET")
 		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
 
-		v1.HandleFunc("/plans/{type}", s.GetPlans).Methods("GET")
+		v1.HandleFunc("/plans", s.ListPlans).Methods("GET")
+		v1.HandleFunc("/plans/{id}", s.GetPlan).Methods("GET")
 
 		v1.HandleFunc("/meta/tags", s.GetTags).Methods("GET")
 		v1.HandleFunc("/meta/images", s.GetImagesName).Methods("GET")

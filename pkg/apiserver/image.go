@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func (s *ApiServer) GetImages(w http.ResponseWriter, r *http.Request) {
+func (s *ApiServer) ListImages(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	imagesStats, err := images.FindImagesSummariesByNamespaceID(r.Context(), account.ID)
 	if err != nil {
@@ -25,7 +25,8 @@ func (s *ApiServer) GetImages(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "images", imagesStats)
 }
 
-func (s *ApiServer) DetailImages(w http.ResponseWriter, r *http.Request) {
+// todo: c'est de la merde alexis tu es pas embauche
+func (s *ApiServer) GetImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	tag := mux.Vars(r)["tag"]

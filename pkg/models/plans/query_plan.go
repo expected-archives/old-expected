@@ -92,6 +92,25 @@ func FindPlanByID(ctx context.Context, id string) (*Plan, error) {
 	return nil, nil
 }
 
+func FindPlans(ctx context.Context) ([]*Plan, error) {
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
+		SELECT id, name, type, price, metadata, public, created_at, updated_at
+		FROM plans
+	`)
+	if err != nil {
+		return nil, err
+	}
+	var plans []*Plan
+	for rows.Next() {
+		plan, err := planFromRows(rows)
+		if err != nil {
+			return nil, err
+		}
+		plans = append(plans, plan)
+	}
+	return plans, nil
+}
+
 func FindPlansByType(ctx context.Context, planType string) ([]*Plan, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, type, price, metadata, public, created_at, updated_at

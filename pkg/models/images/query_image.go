@@ -126,7 +126,6 @@ func FindImageDetail(ctx context.Context, namespaceId, name, tag string) ([]*Ima
 		return nil, err
 	}
 	var list []*ImageDetail
-
 	for rows.Next() {
 		if img, err := imageFromRows(rows); err != nil {
 			return nil, err
