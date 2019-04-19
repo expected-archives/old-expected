@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/google/uuid"
+	"time"
 )
 
 func containerFromRows(rows *sql.Rows) (*Container, error) {
 	var environmentJson, tagsJson string
 	container := &Container{}
-	err := rows.Scan(&container.ID, &container.Name, &container.PlanID, &environmentJson, &tagsJson,
+	err := rows.Scan(&container.ID, &container.Name, &container.Image, &container.PlanID, &environmentJson, &tagsJson,
 		&container.NamespaceID, &container.State, &container.CreatedAt, &container.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -30,13 +31,15 @@ func containerFromRows(rows *sql.Rows) (*Container, error) {
 	if err != nil {
 		return nil, err
 	}
+	if endpoints == nil {
+		endpoints = []*Endpoint{}
+	}
 	container.Endpoints = endpoints
 	return container, nil
 }
 
 func CreateContainer(ctx context.Context, name, image, planId string, environment map[string]string,
 	tags []string, namespaceId string) (*Container, error) {
-	id := uuid.New().String()
 	jsonEnvironment, err := json.Marshal(environment)
 	if err != nil {
 		return nil, err
@@ -45,11 +48,27 @@ func CreateContainer(ctx context.Context, name, image, planId string, environmen
 	if err != nil {
 		return nil, err
 	}
-	_, err = services.Postgres().Client().ExecContext(ctx, `
-		INSERT INTO containers (id, name, image, plan_id, environment, tags, namespace_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, id, name, image, planId, jsonEnvironment, jsonTags, namespaceId)
-	return FindContainerByID(ctx, id)
+	container := &Container{
+		ID:          uuid.New().String(),
+		Name:        name,
+		Image:       image,
+		PlanID:      planId,
+		Environment: environment,
+		Tags:        tags,
+		NamespaceID: namespaceId,
+		Endpoints:   []*Endpoint{},
+		State:       StateStopped,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	if _, err := services.Postgres().Client().ExecContext(ctx, `
+		INSERT INTO containers (id, name, image, plan_id, environment, tags, namespace_id, state, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	`, container.ID, container.Name, container.Image, container.PlanID, jsonEnvironment, jsonTags, container.NamespaceID,
+		container.State, container.CreatedAt, container.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return container, nil
 }
 
 func UpdateContainer(ctx context.Context, container *Container) error {
