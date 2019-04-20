@@ -12,6 +12,8 @@ It has these top-level messages:
 	CreateContainerRequest
 	ChangeContainerStateRequest
 	ImageDeleteRequest
+	ImageTokenRequest
+	ImageTokenResponse
 */
 package protocol
 

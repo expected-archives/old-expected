@@ -5,3 +5,12 @@ package protocol;
 message ImageDeleteRequest {
     string id = 1;
 }
+
+message ImageTokenRequest {
+    string imageName = 1;
+    int64 tokenDuration = 2;
+}
+
+message ImageTokenResponse {
+    string token = 1;
+}

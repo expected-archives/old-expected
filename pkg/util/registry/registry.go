@@ -2,6 +2,7 @@ package registry
 
 import (
 	"github.com/expectedsh/expected/pkg/authserver/authregistry"
+	"time"
 )
 
 var registryUrl = "http://localhost:5000"
@@ -29,7 +30,7 @@ func (d DeleteStatus) String() string {
 }
 
 func newToken(repository string) (string, error) {
-	return authregistry.Generate(authregistry.RequestFromDaemon{
+	return authregistry.Generate(authregistry.Request{
 		Login:   "admin",
 		Service: "registry",
 	}, []authregistry.AuthorizedScope{
@@ -40,5 +41,5 @@ func newToken(repository string) (string, error) {
 			},
 			AuthorizedActions: []string{"pull", "push", "delete"},
 		},
-	})
+	}, time.Hour)
 }

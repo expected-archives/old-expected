@@ -6,6 +6,7 @@ import (
 	"github.com/expectedsh/expected/pkg/authserver/authregistry"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"time"
 )
 
 func (AuthServer) AuthRegistry(response http.ResponseWriter, request *http.Request) {
@@ -31,7 +32,7 @@ func (AuthServer) AuthRegistry(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	tok, err := authregistry.Generate(*req, authorizedScopes)
+	tok, err := authregistry.Generate(*req, authorizedScopes, time.Hour)
 	if err != nil {
 		logrus.WithField("Generating token fail", err).Error()
 		http.Error(response, fmt.Sprintf("Token generation failed: %s", err), http.StatusInternalServerError)

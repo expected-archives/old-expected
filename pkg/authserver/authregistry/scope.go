@@ -13,7 +13,7 @@ type Scope struct {
 	Actions []string
 }
 
-func parseScope(value string, req *RequestFromDaemon, form url.Values) error {
+func parseScope(value string, req *Request, form url.Values) error {
 	if value != "" {
 		for _, scopeStr := range form["scope"] {
 			parts := strings.Split(scopeStr, ":")

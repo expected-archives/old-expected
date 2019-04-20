@@ -13,11 +13,10 @@ import (
 )
 
 const (
-	Issuer     = "auth_registry"
-	Expiration = time.Hour
+	Issuer = "auth_registry"
 )
 
-func Generate(auth RequestFromDaemon, scopes []AuthorizedScope) (string, error) {
+func Generate(auth Request, scopes []AuthorizedScope, expiration time.Duration) (string, error) {
 	now := time.Now().Unix()
 	_, alg, err := certs.GetPrivateKey().Sign(strings.NewReader("dummy"), 0)
 	if err != nil {
@@ -41,7 +40,7 @@ func Generate(auth RequestFromDaemon, scopes []AuthorizedScope) (string, error) 
 		Audience:   auth.Service,
 		NotBefore:  now - 10,
 		IssuedAt:   now,
-		Expiration: now + int64(Expiration),
+		Expiration: now + int64(expiration),
 		JWTID:      fmt.Sprintf("%d", rand.Int63()),
 		Access:     scopeToResourceActions(scopes),
 	}

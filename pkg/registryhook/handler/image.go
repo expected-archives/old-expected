@@ -3,12 +3,15 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/expectedsh/expected/pkg/authserver/authregistry"
 	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"time"
 )
 
 type ImageDletete struct {
@@ -85,4 +88,48 @@ func (i ImageDletete) Handle(msg amqp.Delivery) error {
 		return err
 	}
 	return nil
+}
+
+type ImageToken struct {
+}
+
+func (ImageToken) Handle(msg amqp.Delivery) error {
+	request := protocol.ImageTokenRequest{}
+	if err := proto.Unmarshal(msg.Body, &request); err != nil {
+		return err
+	}
+	s, err := authregistry.Generate(authregistry.Request{
+		Login:   "admin",
+		Service: "registry",
+	}, []authregistry.AuthorizedScope{
+		{
+			Scope: authregistry.Scope{
+				Type: "repository",
+				Name: request.ImageName,
+			},
+			AuthorizedActions: []string{"pull"},
+		},
+	}, ((time.Hour*24)*365)*10)
+	if err != nil {
+		return err
+	}
+	ch, err := services.RabbitMQ().Client().Channel()
+	if err != nil {
+		return err
+	}
+
+	resp, err := proto.Marshal(&protocol.ImageTokenResponse{Token: s})
+	if err != nil {
+		return err
+	}
+
+	return ch.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
+		ContentType:   "application/vnd.google.protobuf",
+		CorrelationId: msg.CorrelationId,
+		Body:          resp,
+	})
+}
+
+func (ImageToken) Name() string {
+	return "ImageTokenRequest"
 }

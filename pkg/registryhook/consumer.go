@@ -9,6 +9,7 @@ import (
 
 var handlers = []rabbitmq.MessageHandler{
 	&handler.ImageDletete{Logger: logrus.WithField("task", "image-delete")},
+	&handler.ImageToken{},
 }
 
 func findHandler(name string) rabbitmq.MessageHandler {

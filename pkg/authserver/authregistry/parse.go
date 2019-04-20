@@ -7,7 +7,7 @@ import (
 
 type Labels map[string][]string
 
-type RequestFromDaemon struct {
+type Request struct {
 	Login   string
 	Token   string
 	Service string
@@ -15,8 +15,8 @@ type RequestFromDaemon struct {
 	Labels  Labels
 }
 
-func ParseRequest(r *http.Request) (req *RequestFromDaemon, err error) {
-	req = &RequestFromDaemon{
+func ParseRequest(r *http.Request) (req *Request, err error) {
+	req = &Request{
 		Scopes: make([]Scope, 0),
 	}
 
