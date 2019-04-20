@@ -26,7 +26,6 @@ func (s *ApiServer) ListImages(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "images", imagesStats)
 }
 
-// todo: c'est de la merde alexis tu es pas embauche
 func (s *ApiServer) GetImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
@@ -77,8 +76,14 @@ func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
-	if err := registryhook.RequestDeleteImage(id); err != nil {
-		log.WithError(err).Error("can't publish delete message to rabbit")
+	reply, err := registryhook.RequestDeleteImage(r.Context(), id)
+	if err != nil {
+		log.WithError(err).Error("can't publish delete message")
+		response.ErrorInternal(w)
+		return
+	}
+	if reply.Error != "" {
+		log.WithField("error", reply.Error).Error("failed to delete image")
 		response.ErrorInternal(w)
 		return
 	}

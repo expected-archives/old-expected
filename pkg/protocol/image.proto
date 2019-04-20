@@ -11,8 +11,8 @@ message DeleteImageReply {
 }
 
 message GenerateTokenRequest {
-    string imageName = 1;
-    int64 tokenDuration = 2;
+    string image = 1;
+    int64 duration = 2;
 }
 
 message GenerateTokenReply {

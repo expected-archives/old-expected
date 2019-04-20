@@ -70,12 +70,9 @@ func (s *ApiServer) StartContainer(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+	log := logrus.WithField("name", name).WithField("action", "start")
 	if err != nil {
-		logrus.
-			WithField("name", name).
-			WithField("action", "start").
-			WithError(err).
-			Errorln("unable to get container")
+		log.WithError(err).Error("unable to get container")
 		response.ErrorInternal(w)
 		return
 	}
@@ -83,12 +80,14 @@ func (s *ApiServer) StartContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorNotFound(w)
 		return
 	}
-	if _, err = scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_START); err != nil {
-		logrus.
-			WithField("name", name).
-			WithField("action", "start").
-			WithError(err).
-			Errorln("unable to request container state change")
+	reply, err := scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_START)
+	if err != nil {
+		log.WithError(err).Error("unable to request container state change")
+		response.ErrorInternal(w)
+		return
+	}
+	if reply.Error != "" {
+		log.WithField("error", reply.Error).Error("failed to start container")
 		response.ErrorInternal(w)
 		return
 	}
@@ -99,12 +98,9 @@ func (s *ApiServer) StopContainer(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+	log := logrus.WithField("name", name).WithField("action", "stop")
 	if err != nil {
-		logrus.
-			WithField("name", name).
-			WithField("action", "stop").
-			WithError(err).
-			Errorln("unable to get container")
+		log.WithError(err).Error("unable to get container")
 		response.ErrorInternal(w)
 		return
 	}
@@ -112,12 +108,14 @@ func (s *ApiServer) StopContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorNotFound(w)
 		return
 	}
-	if _, err = scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_STOP); err != nil {
-		logrus.
-			WithField("name", name).
-			WithField("action", "stop").
-			WithError(err).
-			Errorln("unable to request container state change")
+	reply, err := scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_STOP)
+	if err != nil {
+		log.WithError(err).Error("unable to request container state change")
+		response.ErrorInternal(w)
+		return
+	}
+	if reply.Error != "" {
+		log.WithField("error", reply.Error).Error("failed to stop container")
 		response.ErrorInternal(w)
 		return
 	}

@@ -1,50 +1,23 @@
 package scheduler
 
 import (
-	"github.com/expectedsh/expected/pkg/scheduler/aws"
+	"fmt"
 	"github.com/expectedsh/expected/pkg/scheduler/docker"
-	"github.com/expectedsh/expected/pkg/scheduler/handler"
-	"github.com/expectedsh/expected/pkg/services/rabbitmq"
-	"github.com/streadway/amqp"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/nats-io/go-nats"
 )
-
-type MessageHandler func(msg []byte) error
-
-var (
-	handlers = []rabbitmq.MessageHandler{
-		&handler.DeploymentHandler{},
-		&handler.StartHandler{},
-		&handler.StopHandler{},
-	}
-	queue *amqp.Queue
-)
-
-func initQueue(ch *amqp.Channel) error {
-	if queue == nil {
-		q, err := ch.QueueDeclare("containers", true, false, false, false, nil)
-		if err != nil {
-			return err
-		}
-		queue = &q
-	}
-	return nil
-}
-
-func findHandler(name string) rabbitmq.MessageHandler {
-	for _, h := range handlers {
-		if h.Name() == name {
-			return h
-		}
-	}
-	return nil
-}
 
 func Start() error {
 	if err := docker.Init(); err != nil {
 		return err
 	}
-	if err := aws.Init(); err != nil {
+
+	ch := make(chan *nats.Msg)
+	if _, err := services.NATS().Client().Conn.ChanSubscribe("containers", ch); err != nil {
 		return err
+	}
+	for msg := range ch {
+		fmt.Printf("reply %v\n", msg.Reply)
 	}
 
 	//ch, err := services.RabbitMQ().Client().Channel()
