@@ -17,7 +17,7 @@ var (
 
 func handleStop(ch chan os.Signal) {
 	<-ch
-	logrus.Info("stopping")
+	logrus.Info("stopping the app")
 	if httpServer != nil {
 		if err := httpServer.Shutdown(context.Background()); err != nil {
 			logrus.WithError(err).Error("failed to shutdown http server")

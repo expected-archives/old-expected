@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	if err := app.Start(&scheduler.App{}); err != nil {
+	if err := app.StartNonBlocking(&scheduler.App{}); err != nil {
 		panic(err)
 	}
 }

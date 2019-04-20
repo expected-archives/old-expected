@@ -29,9 +29,8 @@ const (
 
 var (
 	current                      *App
-	mode                         Mode = ModeDevelopment
-	ErrAppAlreadyStarted              = errors.New("app already started")
-	ErrHttpHandlerAlreadyDefined      = errors.New("app http handler already defined")
+	ErrAppAlreadyStarted         = errors.New("app already started")
+	ErrHttpHandlerAlreadyDefined = errors.New("app http handler already defined")
 )
 
 func Current() *App {
@@ -39,7 +38,10 @@ func Current() *App {
 }
 
 func CurrentMode() Mode {
-	return mode
+	if value := GetEnvOrDefault("MODE", string(ModeDevelopment)); value == string(ModeProduction) {
+		return ModeProduction
+	}
+	return ModeDevelopment
 }
 
 func GetEnvOrDefault(key, defaultValue string) string {
@@ -49,14 +51,12 @@ func GetEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-func Start(app App) error {
-	if current != nil {
-		return ErrAppAlreadyStarted
+func start(app App) {
+	if CurrentMode() == ModeProduction {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	} else {
+		logrus.SetFormatter(&logrus.TextFormatter{})
 	}
-
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-	go handleStop(ch)
 
 	if srvs := app.RequiredServices(); len(srvs) > 0 {
 		for _, service := range srvs {
@@ -74,6 +74,30 @@ func Start(app App) error {
 	if err := app.Run(); err != nil {
 		logrus.WithError(err).Fatal("an error occurred while the app running")
 	}
-	
+}
+
+func Start(app App) error {
+	if current != nil {
+		return ErrAppAlreadyStarted
+	}
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	go handleStop(ch)
+
+	start(app)
+	return nil
+}
+
+func StartNonBlocking(app App) error {
+	if current != nil {
+		return ErrAppAlreadyStarted
+	}
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+
+	start(app)
+	handleStop(ch)
 	return nil
 }

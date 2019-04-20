@@ -1,64 +1,94 @@
 package registryhook
 
-//var handlers = []rabbitmq.MessageHandler{
-//	&handler.ImageDletete{Logger: logrus.WithField("task", "image-delete")},
-//	&handler.ImageToken{},
-//}
-//
-//func findHandler(name string) rabbitmq.MessageHandler {
-//	for _, h := range handlers {
-//		if h.Name() == name {
-//			return h
-//		}
-//	}
-//	return nil
-//}
+import (
+	"context"
+	"fmt"
+	"github.com/expectedsh/expected/pkg/authserver/authregistry"
+	"github.com/expectedsh/expected/pkg/models/images"
+	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/util/registry"
+	"github.com/sirupsen/logrus"
+	"time"
+)
 
-func Start() error {
-	//ch, err := services.RabbitMQ().Client().Channel()
-	//if err != nil {
-	//	return err
-	//}
-	//if err = initQueue(ch); err != nil {
-	//	return err
-	//}
-	//messages, err := ch.Consume(queue.Name, "", false, false, false, false, nil)
-	//for message := range messages {
-	//	logrus.
-	//		WithField("routing-key", message.RoutingKey).
-	//		WithField("headers", message.Headers).
-	//		Infoln("handling new message")
-	//	messageType := message.Headers["Message-Type"]
-	//	if messageType == nil {
-	//		logrus.Warningln("invalid message, no message type provided")
-	//		if err = message.Ack(false); err != nil {
-	//			logrus.WithError(err).Errorln("unable to ack the message")
-	//		}
-	//		continue
-	//	}
-	//	h := findHandler(messageType.(string))
-	//	if h == nil {
-	//		logrus.
-	//			WithField("message-type", messageType.(string)).
-	//			Warningln("unhandled message type")
-	//		if err = message.Nack(false, true); err != nil {
-	//			logrus.WithError(err).Errorln("unable to nack the message")
-	//		}
-	//		continue
-	//	}
-	//	if err = h.Handle(message); err != nil {
-	//		logrus.
-	//			WithField("message-type", messageType.(string)).
-	//			WithError(err).
-	//			Errorln("failed to handle message")
-	//		if err = message.Nack(false, true); err != nil {
-	//			logrus.WithError(err).Errorln("unable to nack the message")
-	//		}
-	//	} else {
-	//		if err = message.Ack(false); err != nil {
-	//			logrus.WithError(err).Errorln("unable to ack the message")
-	//		}
-	//	}
-	//}
-	return nil
+// todo: return error
+func handleDeleteImage(subject, reply string, r *protocol.DeleteImageRequest) {
+	log := logrus.WithField("image-id", r.Id)
+	img, err := images.FindImageByID(context.Background(), r.Id)
+	if err != nil || img == nil {
+		log.WithError(err).Error("unable find image")
+		return
+	}
+	log = log.
+		WithField("repo", fmt.Sprintf("%s/%s", img.NamespaceID, img.Name)).
+		WithField("digest", img.Digest).
+		WithField("tag", img.Tag).
+		WithField("id", img.ID).
+		WithField("tag", img.Tag)
+
+	layers, err := images.FindLayersByImageId(context.Background(), img.ID)
+	if err != nil {
+		log.WithError(err).Error("finding layers by img id")
+		return
+	}
+	// deleting relations between img and layers
+	if err := images.DeleteImageLayerByImageID(context.Background(), img.ID); err != nil {
+		log.WithError(err).Error("deleting image_layer rows by img id")
+		return
+	}
+	for _, layer := range layers {
+		// If layer is again referenced and unfortunately the repository property is the one that
+		// the registry delete, another repository is choose.
+		// Else the layer update_at property is updated to be garbage collected.
+		layerLog := log.WithField("digest", layer.Digest)
+		if cnt, err := images.FindLayerCountReferences(context.Background(), layer.Digest); err != nil {
+			layerLog.WithError(err).Error("finding layer count references")
+			return
+		} else if cnt != 0 && layer.Repository == fmt.Sprintf("%s/%s", img.NamespaceID, img.Name) {
+			if err := images.UpdateLayerRepository(context.Background(), layer.Digest); err != nil {
+				layerLog.WithError(err).Error("updating repository of layer")
+				return
+			}
+		} else {
+			if err := images.UpdateLayer(context.Background(), layer.Digest); err != nil {
+				layerLog.WithError(err).Error("updating layer")
+				return
+			}
+		}
+	}
+	status, err := registry.DeleteManifest(fmt.Sprintf("%s/%s", img.NamespaceID, img.Name), img.Digest)
+	if err != nil || status == registry.DeleteStatusUnknown {
+		log.WithError(err).Error("can't delete manifest")
+		return
+	}
+	// deleting the img at the end to be sure all actions above has been executed
+	if err := images.DeleteImageByID(context.Background(), img.ID); err != nil {
+		log.WithError(err).Error("deleting image")
+		return
+	}
+}
+
+func handleGenerateToken(subject, reply string, r *protocol.GenerateTokenRequest) {
+	s, err := authregistry.Generate(authregistry.Request{
+		Login:   "admin",
+		Service: "registry",
+	}, []authregistry.AuthorizedScope{
+		{
+			Scope: authregistry.Scope{
+				Type: "repository",
+				Name: r.Image,
+			},
+			AuthorizedActions: []string{"pull"},
+		},
+	}, ((time.Hour*24)*365)*10)
+	if err != nil {
+		logrus.WithError(err).Error("failed to generate token")
+		return
+	}
+	if err := services.NATS().Client().PublishRequest(subject, reply, &protocol.GenerateTokenReply{
+		Token: s,
+	}); err != nil {
+		logrus.WithError(err).Error("failed to send response")
+	}
 }
