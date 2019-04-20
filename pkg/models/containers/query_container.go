@@ -111,6 +111,21 @@ func FindContainerByID(ctx context.Context, id string) (*Container, error) {
 	return nil, nil
 }
 
+func FindContainerByNameAndNamespaceID(ctx context.Context, name, namespaceId string) (*Container, error) {
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
+		SELECT id, name, image, plan_id, environment, tags, namespace_id, state, created_at, updated_at FROM containers
+		WHERE name = $1 AND namespace_id = $2
+	`, name, namespaceId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	if rows.Next() {
+		return containerFromRows(rows)
+	}
+	return nil, nil
+}
+
 func FindContainersByNamespaceID(ctx context.Context, id string) ([]*Container, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, name, image, plan_id, environment, tags, namespace_id, state, created_at, updated_at FROM containers

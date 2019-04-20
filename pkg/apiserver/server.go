@@ -35,6 +35,9 @@ func (s *ApiServer) Start() error {
 
 		v1.HandleFunc("/containers", s.ListContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+		v1.HandleFunc("/containers/{name}", s.GetContainer).Methods("GET")
+		v1.HandleFunc("/containers/{name}/start", s.StartContainer).Methods("POST")
+		v1.HandleFunc("/containers/{name}/stop", s.StopContainer).Methods("POST")
 
 		v1.HandleFunc("/images", s.ListImages).Methods("GET")
 		v1.HandleFunc("/images/{name}:{tag}", s.GetImage).Methods("GET")

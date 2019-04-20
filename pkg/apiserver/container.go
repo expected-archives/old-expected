@@ -4,7 +4,9 @@ import (
 	"github.com/expectedsh/expected/pkg/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
+	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/scheduler"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -30,7 +32,7 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorBadRequest(w, "Invalid json payload.", nil)
 		return
 	}
-	if errors := form.Validate(r.Context()); len(errors) > 0 {
+	if errors := form.Validate(r.Context(), account.ID); len(errors) > 0 {
 		response.ErrorBadRequest(w, "Invalid form.", errors)
 		return
 	}
@@ -47,4 +49,82 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.Resource(w, "container", container)
+}
+
+func (s *ApiServer) GetContainer(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	name := mux.Vars(r)["name"]
+	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+	if err != nil {
+		logrus.
+			WithField("name", name).
+			WithField("action", "get").
+			WithError(err).
+			Errorln("unable to get container")
+		response.ErrorInternal(w)
+		return
+	}
+	if ctr == nil {
+		response.ErrorNotFound(w)
+		return
+	}
+	response.Resource(w, "container", ctr)
+}
+
+func (s *ApiServer) StartContainer(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	name := mux.Vars(r)["name"]
+	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+	if err != nil {
+		logrus.
+			WithField("name", name).
+			WithField("action", "start").
+			WithError(err).
+			Errorln("unable to get container")
+		response.ErrorInternal(w)
+		return
+	}
+	if ctr == nil {
+		response.ErrorNotFound(w)
+		return
+	}
+	if err := scheduler.RequestChangeContainerState(ctr.ID, protocol.ChangeContainerStateRequest_START); err != nil {
+		logrus.
+			WithField("name", name).
+			WithField("action", "start").
+			WithError(err).
+			Errorln("unable to request container state change")
+		response.ErrorInternal(w)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *ApiServer) StopContainer(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	name := mux.Vars(r)["name"]
+	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+	if err != nil {
+		logrus.
+			WithField("name", name).
+			WithField("action", "start").
+			WithError(err).
+			Errorln("unable to get container")
+		response.ErrorInternal(w)
+		return
+	}
+	if ctr == nil {
+		response.ErrorNotFound(w)
+		return
+	}
+	if err := scheduler.RequestChangeContainerState(ctr.ID, protocol.ChangeContainerStateRequest_STOP); err != nil {
+		logrus.
+			WithField("name", name).
+			WithField("action", "start").
+			WithError(err).
+			Errorln("unable to request container state change")
+		response.ErrorInternal(w)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

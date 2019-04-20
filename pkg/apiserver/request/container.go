@@ -3,6 +3,7 @@ package request
 import (
 	"context"
 	"github.com/docker/distribution/reference"
+	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/models/plans"
 	"github.com/google/uuid"
 	"regexp"
@@ -30,7 +31,7 @@ type CreateContainer struct {
 	Environment map[string]string `json:"environment"`
 }
 
-func (s *CreateContainer) Validate(ctx context.Context) (errors map[string]string) {
+func (s *CreateContainer) Validate(ctx context.Context, namespaceId string) (errors map[string]string) {
 	errors = make(map[string]string)
 
 	if !nameRegexp.MatchString(s.Name) {
@@ -38,6 +39,9 @@ func (s *CreateContainer) Validate(ctx context.Context) (errors map[string]strin
 	}
 	if len(s.Name) < 3 || len(s.Name) > 32 {
 		errors["name"] = "Name must be between 3 and 32 characters."
+	}
+	if ctr, err := containers.FindContainerByNameAndNamespaceID(ctx, s.Name, namespaceId); err != nil || ctr != nil {
+		errors["name"] = "Name must be unique."
 	}
 
 	if !reference.ReferenceRegexp.MatchString(s.Image) {

@@ -45,11 +45,11 @@ type ImageSummary struct {
 // An image can have multiple tags so multiple images.
 type ImageDetail struct {
 	*ImageSummary
-	Manifests Manifests
+	Manifests Manifests `json:"manifests"`
 }
 
 type Manifest struct {
-	Image  *Image   `json:"image"`
+	*Image
 	Layers []*Layer `json:"layers"`
 }
 
