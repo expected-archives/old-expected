@@ -55,27 +55,6 @@ func UpdateImageDeleteMode(ctx context.Context, imageId string) error {
 	return err
 }
 
-func FindImagesName(ctx context.Context, namespaceId string) ([]string, error) {
-	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT concat(name, concat(':', tag)) 
-		FROM images 
-		WHERE namespace_id = $1 
-		GROUP BY concat(name, concat(':', tag))
-	`, namespaceId)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for rows.Next() {
-		tag := ""
-		if err := rows.Scan(&tag); err != nil {
-			return nil, err
-		}
-		names = append(names, tag)
-	}
-	return names, nil
-}
-
 // DeleteImageByDigest delete an image only if there is no more relations
 // in table image_layer.
 func DeleteImageByDigest(ctx context.Context, digest string) error {
