@@ -2,14 +2,12 @@ package main
 
 import (
 	"github.com/expectedsh/expected/pkg/apiserver"
-	"github.com/expectedsh/expected/pkg/registryhook"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 type Config struct {
@@ -34,8 +32,6 @@ func main() {
 	logrus.Infoln("starting api server")
 	server := apiserver.New(config.Addr, config.Secret, config.DashboardURL)
 
-	token, err := registryhook.RequestTokenRegistry("lolilol", 10*time.Hour)
-	logrus.Info(token, err)
 	logrus.Infof("listening on %v", config.Addr)
 	if err := server.Start(); err != nil {
 		logrus.WithError(err).Fatalln("unable to start api server")
