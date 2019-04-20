@@ -1,42 +1,36 @@
 package scheduler
 
 import (
+	"github.com/expectedsh/expected/pkg/app"
 	"github.com/expectedsh/expected/pkg/scheduler/docker"
 	"github.com/expectedsh/expected/pkg/services"
-	"github.com/nats-io/go-nats"
-	"github.com/sirupsen/logrus"
-	"os"
-	"os/signal"
-	"time"
+	"github.com/expectedsh/expected/pkg/services/nats"
+	"github.com/expectedsh/expected/pkg/services/postgres"
 )
 
-var subscriptions []*nats.Subscription
+type App struct{}
 
-func subscribe(subject string, h nats.Handler) error {
-	sub, err := services.NATS().Client().Subscribe(subject, h)
-	if err != nil {
-		return err
-	}
-	subscriptions = append(subscriptions, sub)
-	return nil
+func (s *App) Name() string {
+	return "scheduler"
 }
 
-func Start() error {
+func (s *App) RequiredServices() []services.Service {
+	return []services.Service{
+		postgres.NewFromEnv(),
+		nats.NewFromEnv(),
+	}
+}
+
+func (s *App) Configure() error {
 	if err := docker.Init(); err != nil {
 		return err
 	}
-	if err := subscribe("container:change-state", handleContainerChangeState); err != nil {
+	return nil
+}
+
+func (s *App) Run() error {
+	if err := app.HandleSubscription("container:change-state", handleContainerChangeState); err != nil {
 		return err
 	}
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, os.Kill)
-	<-ch
-	logrus.Info("unsubscribing to all subjects")
-	for _, sub := range subscriptions {
-		if err := sub.Unsubscribe(); err != nil {
-			logrus.WithField("subject", sub.Subject).WithError(err).Error("failed to unsubscribe")
-		}
-	}
-	time.Sleep(2 * time.Second)
 	return nil
 }
