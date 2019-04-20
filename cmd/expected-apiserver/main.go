@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/expectedsh/expected/pkg/apiserver"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
-	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -25,7 +25,7 @@ func main() {
 
 	logrus.Infoln("initializing services")
 	services.Register(postgres.NewFromEnv())
-	services.Register(rabbitmq.NewFromEnv())
+	services.Register(nats.NewFromEnv())
 	services.Start()
 	defer services.Stop()
 

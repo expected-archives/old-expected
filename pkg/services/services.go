@@ -2,8 +2,8 @@ package services
 
 import (
 	"github.com/expectedsh/expected/pkg/services/consul"
+	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
-	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
 )
@@ -51,6 +51,6 @@ func Consul() *consul.Service {
 	return Get("consul").(*consul.Service)
 }
 
-func RabbitMQ() *rabbitmq.Service {
-	return Get("rabbitmq").(*rabbitmq.Service)
+func NATS() *nats.Service {
+	return Get("nats").(*nats.Service)
 }

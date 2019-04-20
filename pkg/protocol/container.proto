@@ -2,17 +2,16 @@ syntax = "proto3";
 
 package protocol;
 
-message CreateContainerRequest {
-    string id = 1;
+enum State {
+    START = 0;
+    STOP = 1;
 }
 
 message ChangeContainerStateRequest {
     string id = 1;
+    State requestedState = 2;
+}
 
-    enum RequestedState {
-        START = 0;
-        STOP = 1;
-    }
-
-    RequestedState requestedState = 2;
+message ChangeContainerStateReply {
+    string error = 1;
 }

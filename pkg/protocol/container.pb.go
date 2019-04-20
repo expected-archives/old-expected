@@ -9,11 +9,12 @@ It is generated from these files:
 	image.proto
 
 It has these top-level messages:
-	CreateContainerRequest
 	ChangeContainerStateRequest
-	ImageDeleteRequest
-	ImageTokenRequest
-	ImageTokenResponse
+	ChangeContainerStateReply
+	DeleteImageRequest
+	DeleteImageReply
+	GenerateTokenRequest
+	GenerateTokenReply
 */
 package protocol
 
@@ -32,54 +33,36 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type ChangeContainerStateRequest_RequestedState int32
+type State int32
 
 const (
-	ChangeContainerStateRequest_START ChangeContainerStateRequest_RequestedState = 0
-	ChangeContainerStateRequest_STOP  ChangeContainerStateRequest_RequestedState = 1
+	State_START State = 0
+	State_STOP  State = 1
 )
 
-var ChangeContainerStateRequest_RequestedState_name = map[int32]string{
+var State_name = map[int32]string{
 	0: "START",
 	1: "STOP",
 }
-var ChangeContainerStateRequest_RequestedState_value = map[string]int32{
+var State_value = map[string]int32{
 	"START": 0,
 	"STOP":  1,
 }
 
-func (x ChangeContainerStateRequest_RequestedState) String() string {
-	return proto.EnumName(ChangeContainerStateRequest_RequestedState_name, int32(x))
+func (x State) String() string {
+	return proto.EnumName(State_name, int32(x))
 }
-func (ChangeContainerStateRequest_RequestedState) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{1, 0}
-}
-
-type CreateContainerRequest struct {
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-}
-
-func (m *CreateContainerRequest) Reset()                    { *m = CreateContainerRequest{} }
-func (m *CreateContainerRequest) String() string            { return proto.CompactTextString(m) }
-func (*CreateContainerRequest) ProtoMessage()               {}
-func (*CreateContainerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
-
-func (m *CreateContainerRequest) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
+func (State) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 type ChangeContainerStateRequest struct {
-	Id             string                                     `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	RequestedState ChangeContainerStateRequest_RequestedState `protobuf:"varint,2,opt,name=requestedState,enum=protocol.ChangeContainerStateRequest_RequestedState" json:"requestedState,omitempty"`
+	Id             string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	RequestedState State  `protobuf:"varint,2,opt,name=requestedState,enum=protocol.State" json:"requestedState,omitempty"`
 }
 
 func (m *ChangeContainerStateRequest) Reset()                    { *m = ChangeContainerStateRequest{} }
 func (m *ChangeContainerStateRequest) String() string            { return proto.CompactTextString(m) }
 func (*ChangeContainerStateRequest) ProtoMessage()               {}
-func (*ChangeContainerStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*ChangeContainerStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 func (m *ChangeContainerStateRequest) GetId() string {
 	if m != nil {
@@ -88,32 +71,48 @@ func (m *ChangeContainerStateRequest) GetId() string {
 	return ""
 }
 
-func (m *ChangeContainerStateRequest) GetRequestedState() ChangeContainerStateRequest_RequestedState {
+func (m *ChangeContainerStateRequest) GetRequestedState() State {
 	if m != nil {
 		return m.RequestedState
 	}
-	return ChangeContainerStateRequest_START
+	return State_START
+}
+
+type ChangeContainerStateReply struct {
+	Error string `protobuf:"bytes,1,opt,name=error" json:"error,omitempty"`
+}
+
+func (m *ChangeContainerStateReply) Reset()                    { *m = ChangeContainerStateReply{} }
+func (m *ChangeContainerStateReply) String() string            { return proto.CompactTextString(m) }
+func (*ChangeContainerStateReply) ProtoMessage()               {}
+func (*ChangeContainerStateReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *ChangeContainerStateReply) GetError() string {
+	if m != nil {
+		return m.Error
+	}
+	return ""
 }
 
 func init() {
-	proto.RegisterType((*CreateContainerRequest)(nil), "protocol.CreateContainerRequest")
 	proto.RegisterType((*ChangeContainerStateRequest)(nil), "protocol.ChangeContainerStateRequest")
-	proto.RegisterEnum("protocol.ChangeContainerStateRequest_RequestedState", ChangeContainerStateRequest_RequestedState_name, ChangeContainerStateRequest_RequestedState_value)
+	proto.RegisterType((*ChangeContainerStateReply)(nil), "protocol.ChangeContainerStateReply")
+	proto.RegisterEnum("protocol.State", State_name, State_value)
 }
 
 func init() { proto.RegisterFile("container.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 168 bytes of a gzipped FileDescriptorProto
+	// 170 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4f, 0xce, 0xcf, 0x2b,
 	0x49, 0xcc, 0xcc, 0x4b, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x00, 0x53, 0xc9,
-	0xf9, 0x39, 0x4a, 0x1a, 0x5c, 0x62, 0xce, 0x45, 0xa9, 0x89, 0x25, 0xa9, 0xce, 0x30, 0x25, 0x41,
-	0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0x7c, 0x5c, 0x4c, 0x99, 0x29, 0x12, 0x8c, 0x0a, 0x8c,
-	0x1a, 0x9c, 0x41, 0x4c, 0x99, 0x29, 0x4a, 0x9b, 0x18, 0xb9, 0xa4, 0x9d, 0x33, 0x12, 0xf3, 0xd2,
-	0x11, 0x4a, 0x83, 0x4b, 0x12, 0x4b, 0x52, 0x71, 0xa8, 0x17, 0x8a, 0xe1, 0xe2, 0x2b, 0x82, 0x48,
-	0xa5, 0xa6, 0x80, 0x15, 0x4a, 0x30, 0x29, 0x30, 0x6a, 0xf0, 0x19, 0x99, 0xe8, 0xc1, 0x2c, 0xd7,
-	0xc3, 0x63, 0x9c, 0x5e, 0x10, 0x8a, 0xde, 0x20, 0x34, 0xb3, 0x94, 0x54, 0xb9, 0xf8, 0x50, 0x55,
-	0x08, 0x71, 0x72, 0xb1, 0x06, 0x87, 0x38, 0x06, 0x85, 0x08, 0x30, 0x08, 0x71, 0x70, 0xb1, 0x04,
-	0x87, 0xf8, 0x07, 0x08, 0x30, 0x26, 0xb1, 0x81, 0xed, 0x32, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff,
-	0x1b, 0xed, 0xa7, 0x5a, 0x02, 0x01, 0x00, 0x00,
+	0xf9, 0x39, 0x4a, 0x69, 0x5c, 0xd2, 0xce, 0x19, 0x89, 0x79, 0xe9, 0xa9, 0xce, 0x30, 0x25, 0xc1,
+	0x25, 0x89, 0x25, 0xa9, 0x41, 0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0x7c, 0x5c, 0x4c, 0x99,
+	0x29, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x4c, 0x99, 0x29, 0x42, 0xe6, 0x5c, 0x7c, 0x45,
+	0x10, 0xa9, 0xd4, 0x14, 0xb0, 0x42, 0x09, 0x26, 0x05, 0x46, 0x0d, 0x3e, 0x23, 0x7e, 0x3d, 0x98,
+	0x89, 0x7a, 0x10, 0xfd, 0x68, 0xca, 0x94, 0x0c, 0xb9, 0x24, 0xb1, 0xdb, 0x53, 0x90, 0x53, 0x29,
+	0x24, 0xc2, 0xc5, 0x9a, 0x5a, 0x54, 0x94, 0x5f, 0x04, 0xb5, 0x08, 0xc2, 0xd1, 0x92, 0xe1, 0x62,
+	0x05, 0xab, 0x11, 0xe2, 0xe4, 0x62, 0x0d, 0x0e, 0x71, 0x0c, 0x0a, 0x11, 0x60, 0x10, 0xe2, 0xe0,
+	0x62, 0x09, 0x0e, 0xf1, 0x0f, 0x10, 0x60, 0x4c, 0x62, 0x03, 0x5b, 0x68, 0x0c, 0x08, 0x00, 0x00,
+	0xff, 0xff, 0xd8, 0xe5, 0xc7, 0x67, 0xdc, 0x00, 0x00, 0x00,
 }

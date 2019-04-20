@@ -43,11 +43,6 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
-	if err = scheduler.RequestCreateContainer(container.ID); err != nil {
-		logrus.WithError(err).Errorln("unable to request container creation to scheduler")
-		response.ErrorInternal(w)
-		return
-	}
 	response.Resource(w, "container", container)
 }
 
@@ -88,7 +83,7 @@ func (s *ApiServer) StartContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorNotFound(w)
 		return
 	}
-	if err := scheduler.RequestChangeContainerState(ctr.ID, protocol.ChangeContainerStateRequest_START); err != nil {
+	if _, err = scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_START); err != nil {
 		logrus.
 			WithField("name", name).
 			WithField("action", "start").
@@ -107,7 +102,7 @@ func (s *ApiServer) StopContainer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.
 			WithField("name", name).
-			WithField("action", "start").
+			WithField("action", "stop").
 			WithError(err).
 			Errorln("unable to get container")
 		response.ErrorInternal(w)
@@ -117,10 +112,10 @@ func (s *ApiServer) StopContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorNotFound(w)
 		return
 	}
-	if err := scheduler.RequestChangeContainerState(ctr.ID, protocol.ChangeContainerStateRequest_STOP); err != nil {
+	if _, err = scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_STOP); err != nil {
 		logrus.
 			WithField("name", name).
-			WithField("action", "start").
+			WithField("action", "stop").
 			WithError(err).
 			Errorln("unable to request container state change")
 		response.ErrorInternal(w)

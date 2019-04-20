@@ -13,7 +13,7 @@ services:
       - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
     depends_on:
       - postgres
-      - rabbitmq
+      - nats
     ports:
       - 3000:3000
 
@@ -32,7 +32,7 @@ services:
       - "CERTS_PRIVATE_KEY=/certs/server.key"
     depends_on:
       - postgres
-      - rabbitmq
+      - nats
     ports:
       - 3001:3001
     volumes:
@@ -92,19 +92,11 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  rabbitmq:
-    container_name: expected-rabbitmq
-    image: rabbitmq:management-alpine
+  nats:
+    container_name: expected-nats
+    image: nats
     restart: on-failure
-    environment:
-      - "RABBITMQ_DEFAULT_USER=expected"
-      - "RABBITMQ_DEFAULT_PASS=expected"
-      - "RABBITMQ_DEFAULT_VHOST=expected"
     ports:
-      - 5672:5672
-      - 15672:15672
-    volumes:
-      - rabbitmq:/var/lib/rabbitmq
+      - 4222:4222
 volumes:
   postgres: {}
-  rabbitmq: {}

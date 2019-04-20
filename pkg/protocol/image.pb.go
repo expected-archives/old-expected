@@ -12,80 +12,107 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-type ImageDeleteRequest struct {
+type DeleteImageRequest struct {
 	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
 }
 
-func (m *ImageDeleteRequest) Reset()                    { *m = ImageDeleteRequest{} }
-func (m *ImageDeleteRequest) String() string            { return proto.CompactTextString(m) }
-func (*ImageDeleteRequest) ProtoMessage()               {}
-func (*ImageDeleteRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+func (m *DeleteImageRequest) Reset()                    { *m = DeleteImageRequest{} }
+func (m *DeleteImageRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteImageRequest) ProtoMessage()               {}
+func (*DeleteImageRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
 
-func (m *ImageDeleteRequest) GetId() string {
+func (m *DeleteImageRequest) GetId() string {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-type ImageTokenRequest struct {
+type DeleteImageReply struct {
+	Error string `protobuf:"bytes,1,opt,name=error" json:"error,omitempty"`
+}
+
+func (m *DeleteImageReply) Reset()                    { *m = DeleteImageReply{} }
+func (m *DeleteImageReply) String() string            { return proto.CompactTextString(m) }
+func (*DeleteImageReply) ProtoMessage()               {}
+func (*DeleteImageReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+
+func (m *DeleteImageReply) GetError() string {
+	if m != nil {
+		return m.Error
+	}
+	return ""
+}
+
+type GenerateTokenRequest struct {
 	ImageName     string `protobuf:"bytes,1,opt,name=imageName" json:"imageName,omitempty"`
 	TokenDuration int64  `protobuf:"varint,2,opt,name=tokenDuration" json:"tokenDuration,omitempty"`
 }
 
-func (m *ImageTokenRequest) Reset()                    { *m = ImageTokenRequest{} }
-func (m *ImageTokenRequest) String() string            { return proto.CompactTextString(m) }
-func (*ImageTokenRequest) ProtoMessage()               {}
-func (*ImageTokenRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+func (m *GenerateTokenRequest) Reset()                    { *m = GenerateTokenRequest{} }
+func (m *GenerateTokenRequest) String() string            { return proto.CompactTextString(m) }
+func (*GenerateTokenRequest) ProtoMessage()               {}
+func (*GenerateTokenRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
 
-func (m *ImageTokenRequest) GetImageName() string {
+func (m *GenerateTokenRequest) GetImageName() string {
 	if m != nil {
 		return m.ImageName
 	}
 	return ""
 }
 
-func (m *ImageTokenRequest) GetTokenDuration() int64 {
+func (m *GenerateTokenRequest) GetTokenDuration() int64 {
 	if m != nil {
 		return m.TokenDuration
 	}
 	return 0
 }
 
-type ImageTokenResponse struct {
+type GenerateTokenReply struct {
 	Token string `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	Error string `protobuf:"bytes,2,opt,name=error" json:"error,omitempty"`
 }
 
-func (m *ImageTokenResponse) Reset()                    { *m = ImageTokenResponse{} }
-func (m *ImageTokenResponse) String() string            { return proto.CompactTextString(m) }
-func (*ImageTokenResponse) ProtoMessage()               {}
-func (*ImageTokenResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
+func (m *GenerateTokenReply) Reset()                    { *m = GenerateTokenReply{} }
+func (m *GenerateTokenReply) String() string            { return proto.CompactTextString(m) }
+func (*GenerateTokenReply) ProtoMessage()               {}
+func (*GenerateTokenReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
 
-func (m *ImageTokenResponse) GetToken() string {
+func (m *GenerateTokenReply) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
 	return ""
 }
 
+func (m *GenerateTokenReply) GetError() string {
+	if m != nil {
+		return m.Error
+	}
+	return ""
+}
+
 func init() {
-	proto.RegisterType((*ImageDeleteRequest)(nil), "protocol.ImageDeleteRequest")
-	proto.RegisterType((*ImageTokenRequest)(nil), "protocol.ImageTokenRequest")
-	proto.RegisterType((*ImageTokenResponse)(nil), "protocol.ImageTokenResponse")
+	proto.RegisterType((*DeleteImageRequest)(nil), "protocol.DeleteImageRequest")
+	proto.RegisterType((*DeleteImageReply)(nil), "protocol.DeleteImageReply")
+	proto.RegisterType((*GenerateTokenRequest)(nil), "protocol.GenerateTokenRequest")
+	proto.RegisterType((*GenerateTokenReply)(nil), "protocol.GenerateTokenReply")
 }
 
 func init() { proto.RegisterFile("image.proto", fileDescriptor1) }
 
 var fileDescriptor1 = []byte{
-	// 157 bytes of a gzipped FileDescriptorProto
+	// 183 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xce, 0xcc, 0x4d, 0x4c,
 	0x4f, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x00, 0x53, 0xc9, 0xf9, 0x39, 0x4a, 0x2a,
-	0x5c, 0x42, 0x9e, 0x20, 0x09, 0x97, 0xd4, 0x9c, 0xd4, 0x92, 0xd4, 0xa0, 0xd4, 0xc2, 0xd2, 0xd4,
+	0x5c, 0x42, 0x2e, 0xa9, 0x39, 0xa9, 0x25, 0xa9, 0x9e, 0x20, 0xe9, 0xa0, 0xd4, 0xc2, 0xd2, 0xd4,
 	0xe2, 0x12, 0x21, 0x3e, 0x2e, 0xa6, 0xcc, 0x14, 0x09, 0x46, 0x05, 0x46, 0x0d, 0xce, 0x20, 0xa6,
-	0xcc, 0x14, 0xa5, 0x70, 0x2e, 0x41, 0xb0, 0xaa, 0x90, 0xfc, 0xec, 0xd4, 0x3c, 0x98, 0x22, 0x19,
-	0x2e, 0x4e, 0xb0, 0x99, 0x7e, 0x89, 0xb9, 0xa9, 0x50, 0xb5, 0x08, 0x01, 0x21, 0x15, 0x2e, 0xde,
-	0x12, 0x90, 0x6a, 0x97, 0xd2, 0xa2, 0xc4, 0x92, 0xcc, 0xfc, 0x3c, 0x09, 0x26, 0x05, 0x46, 0x0d,
-	0xe6, 0x20, 0x54, 0x41, 0x25, 0x2d, 0xa8, 0xf5, 0x50, 0x83, 0x8b, 0x0b, 0xf2, 0xf3, 0x8a, 0x53,
-	0x85, 0x44, 0xb8, 0x58, 0xc1, 0xca, 0xa0, 0xa6, 0x42, 0x38, 0x49, 0x6c, 0x60, 0x47, 0x1b, 0x03,
-	0x02, 0x00, 0x00, 0xff, 0xff, 0x7f, 0x6f, 0xbb, 0x9b, 0xca, 0x00, 0x00, 0x00,
+	0xcc, 0x14, 0x25, 0x0d, 0x2e, 0x01, 0x14, 0x55, 0x05, 0x39, 0x95, 0x42, 0x22, 0x5c, 0xac, 0xa9,
+	0x45, 0x45, 0xf9, 0x45, 0x50, 0x65, 0x10, 0x8e, 0x52, 0x14, 0x97, 0x88, 0x7b, 0x6a, 0x5e, 0x6a,
+	0x51, 0x62, 0x49, 0x6a, 0x48, 0x7e, 0x76, 0x6a, 0x1e, 0xcc, 0x44, 0x19, 0x2e, 0x4e, 0xb0, 0x03,
+	0xfc, 0x12, 0x73, 0x53, 0xa1, 0x3a, 0x10, 0x02, 0x42, 0x2a, 0x5c, 0xbc, 0x25, 0x20, 0xd5, 0x2e,
+	0xa5, 0x45, 0x89, 0x25, 0x99, 0xf9, 0x79, 0x12, 0x4c, 0x0a, 0x8c, 0x1a, 0xcc, 0x41, 0xa8, 0x82,
+	0x4a, 0x0e, 0x5c, 0x42, 0x68, 0x66, 0x43, 0xdd, 0x01, 0x56, 0x06, 0x73, 0x07, 0x98, 0x83, 0x70,
+	0x1d, 0x13, 0x92, 0xeb, 0x92, 0xd8, 0xc0, 0xfe, 0x36, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x7a,
+	0xa4, 0x76, 0x38, 0x0d, 0x01, 0x00, 0x00,
 }

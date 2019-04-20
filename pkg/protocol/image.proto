@@ -2,15 +2,20 @@ syntax = "proto3";
 
 package protocol;
 
-message ImageDeleteRequest {
+message DeleteImageRequest {
     string id = 1;
 }
 
-message ImageTokenRequest {
+message DeleteImageReply {
+    string error = 1;
+}
+
+message GenerateTokenRequest {
     string imageName = 1;
     int64 tokenDuration = 2;
 }
 
-message ImageTokenResponse {
+message GenerateTokenReply {
     string token = 1;
+    string error = 2;
 }

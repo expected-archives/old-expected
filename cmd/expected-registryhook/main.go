@@ -5,8 +5,8 @@ import (
 	"github.com/expectedsh/expected/pkg/registryhook"
 	"github.com/expectedsh/expected/pkg/registryhook/gc"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
-	"github.com/expectedsh/expected/pkg/services/rabbitmq"
 	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/kelseyhightower/envconfig"
@@ -30,7 +30,7 @@ func main() {
 	}
 
 	services.Register(postgres.NewFromEnv())
-	services.Register(rabbitmq.NewFromEnv())
+	services.Register(nats.NewFromEnv())
 	services.Start()
 	defer services.Stop()
 
