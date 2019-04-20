@@ -17,6 +17,7 @@ var (
 
 func handleStop(ch chan os.Signal) {
 	<-ch
+	logrus.Info("stopping")
 	if httpServer != nil {
 		if err := httpServer.Shutdown(context.Background()); err != nil {
 			logrus.WithError(err).Error("failed to shutdown http server")
@@ -40,7 +41,11 @@ func HandleHTTP(h http.Handler) error {
 		Handler: h,
 		Addr:    GetEnvOrDefault("ADDR", ":3000"),
 	}
-	return httpServer.ListenAndServe()
+	logrus.Infof("listening on %v", httpServer.Addr)
+	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
+		return err
+	}
+	return nil
 }
 
 func HandleSubscription(subject string, h nats.Handler) error {

@@ -67,14 +67,13 @@ func Start(app App) error {
 		services.Start()
 	}
 
-	logrus.Info("configuring the app")
+	logrus.Info("starting the app")
 	if err := app.Configure(); err != nil {
 		logrus.WithError(err).Fatal("failed to configure app")
 	}
-
-	logrus.Info("starting the app")
 	if err := app.Run(); err != nil {
 		logrus.WithError(err).Fatal("an error occurred while the app running")
 	}
+	
 	return nil
 }

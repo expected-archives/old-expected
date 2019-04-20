@@ -1,29 +1,36 @@
 package apiserver
 
 import (
+	"github.com/expectedsh/expected/pkg/app"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/nats"
+	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/cors"
-	"net/http"
-
 	"github.com/gorilla/mux"
-	"golang.org/x/oauth2"
+	"github.com/kelseyhightower/envconfig"
 )
 
-type ApiServer struct {
-	Addr         string
-	Secret       string
-	DashboardURL string
-	OAuth        *oauth2.Config
+type App struct {
+	Secret       string `envconfig:"secret" default:"changeme"`
+	DashboardURL string `envconfig:"dashboard_url"`
 }
 
-func New(addr, secret, dashboardUrl string) *ApiServer {
-	return &ApiServer{
-		Addr:         addr,
-		Secret:       secret,
-		DashboardURL: dashboardUrl,
+func (s *App) Name() string {
+	return "apiserver"
+}
+
+func (s *App) RequiredServices() []services.Service {
+	return []services.Service{
+		postgres.NewFromEnv(),
+		nats.NewFromEnv(),
 	}
 }
 
-func (s *ApiServer) Start() error {
+func (s *App) Configure() error {
+	return envconfig.Process("", s)
+}
+
+func (s *App) Run() error {
 	router := mux.NewRouter()
 	v1 := router.PathPrefix("/v1").Subrouter()
 	{
@@ -52,5 +59,5 @@ func (s *ApiServer) Start() error {
 	if err := cors.ApplyMiddleware(router); err != nil {
 		return err
 	}
-	return http.ListenAndServe(s.Addr, router)
+	return app.HandleHTTP(router)
 }

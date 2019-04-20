@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func (s *ApiServer) ListContainers(w http.ResponseWriter, r *http.Request) {
+func (s *App) ListContainers(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	ctrs, err := containers.FindContainersByNamespaceID(r.Context(), account.ID)
 	if err != nil {
@@ -25,7 +25,7 @@ func (s *ApiServer) ListContainers(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "containers", ctrs)
 }
 
-func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
+func (s *App) CreateContainer(w http.ResponseWriter, r *http.Request) {
 	form := &request.CreateContainer{}
 	account := request.GetAccount(r)
 	if err := request.ParseBody(r, form); err != nil {
@@ -46,7 +46,7 @@ func (s *ApiServer) CreateContainer(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "container", container)
 }
 
-func (s *ApiServer) GetContainer(w http.ResponseWriter, r *http.Request) {
+func (s *App) GetContainer(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
@@ -66,7 +66,7 @@ func (s *ApiServer) GetContainer(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "container", ctr)
 }
 
-func (s *ApiServer) StartContainer(w http.ResponseWriter, r *http.Request) {
+func (s *App) StartContainer(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
@@ -94,7 +94,7 @@ func (s *ApiServer) StartContainer(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *ApiServer) StopContainer(w http.ResponseWriter, r *http.Request) {
+func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
