@@ -1,12 +1,12 @@
 ### Create new container
 POST http://localhost:3000/v1/containers
 Content-Type: application/json
-Authorization: ce41f7ca970745409a47079c2ebd62f2
+Authorization: 7d93f590197e45d49101c25df6366618
 
 {
-  "name": "h$ell",
+  "name": "hell",
   "image": "google/golang-hello",
-  "plan_id": "6031-f678-4786-941a-f561fda8058f",
+  "plan_id": "df6207bb-f897-402b-ac8a-9f310f92aa6c",
   "tags": ["123", "test"],
   "environment": {
     "PORT": "80"
