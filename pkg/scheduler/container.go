@@ -1,16 +1,14 @@
-package handler
+package scheduler
 
 import (
+	"fmt"
+	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/streadway/amqp"
 )
 
-type DeploymentHandler struct{}
-
-func (DeploymentHandler) Name() string {
-	return "ContainerDeploymentRequest"
-}
-
-func (DeploymentHandler) Handle(m amqp.Delivery) error {
+func handleContainerChangeState(subject, reply string, r *protocol.ChangeContainerStateRequest) {
+	fmt.Println(r.Id)
+	fmt.Println(r.RequestedState)
 	//message := &protocol.ChangeContainerStateRequest{}
 	//if err := proto.Unmarshal(m.Body, message); err != nil {
 	//	return err
@@ -72,7 +70,6 @@ func (DeploymentHandler) Handle(m amqp.Delivery) error {
 	//} else {
 	//
 	//}
-	return nil
 }
 
 type StartHandler struct{}

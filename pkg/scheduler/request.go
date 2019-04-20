@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-const Subject = "containers"
-
 func RequestChangeContainerState(parent context.Context, id string, requestedState protocol.State) (*protocol.ChangeContainerStateReply, error) {
 	req := &protocol.ChangeContainerStateRequest{
 		Id:             id,
@@ -16,7 +14,7 @@ func RequestChangeContainerState(parent context.Context, id string, requestedSta
 	}
 	reply := &protocol.ChangeContainerStateReply{}
 	ctx, _ := context.WithTimeout(parent, time.Second)
-	if err := services.NATS().Client().RequestWithContext(ctx, Subject, req, reply); err != nil {
+	if err := services.NATS().Client().RequestWithContext(ctx, "container:change-state", req, reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
