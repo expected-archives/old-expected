@@ -2,6 +2,8 @@ package services
 
 import (
 	"github.com/expectedsh/expected/pkg/services/consul"
+	"github.com/expectedsh/expected/pkg/services/controller"
+	"github.com/expectedsh/expected/pkg/services/image"
 	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/backoff"
@@ -53,4 +55,12 @@ func Consul() *consul.Service {
 
 func NATS() *nats.Service {
 	return Get("nats").(*nats.Service)
+}
+
+func Controller() *controller.Service {
+	return Get("controller").(*controller.Service)
+}
+
+func Image() *image.Service {
+	return Get("image").(*image.Service)
 }
