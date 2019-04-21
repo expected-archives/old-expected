@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"context"
 	"github.com/expectedsh/expected/pkg/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
@@ -9,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strings"
 )
 
 func (a *App) ListContainers(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +42,12 @@ func (a *App) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		form.Environment, form.Tags, account.ID)
 	if err != nil {
 		logrus.WithError(err).Errorln("unable to create container")
+		response.ErrorInternal(w)
+		return
+	}
+	endpoint := strings.ReplaceAll(container.ID, "-", "") + ".ctr.expected.sh"
+	if _, err := containers.CreateEndpoint(context.Background(), container, endpoint, true); err != nil {
+		logrus.WithError(err).Errorln("unable to create default container endpoint")
 		response.ErrorInternal(w)
 		return
 	}

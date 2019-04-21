@@ -1,4 +1,4 @@
-package handler
+package docker
 
 func convertEnv(env map[string]string) []string {
 	var converted []string
