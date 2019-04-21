@@ -30,13 +30,13 @@ func (s *App) GetImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	tag := mux.Vars(r)["tag"]
-	imageDetail, err := images.FindImageDetail(r.Context(), account.ID, name, tag)
+	image, err := images.FindImageDetail(r.Context(), account.ID, name, tag)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Error("unable find image detail")
 		response.ErrorInternal(w)
 		return
 	}
-	response.Resource(w, "image", imageDetail)
+	response.Resource(w, "image", image)
 }
 
 func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +60,7 @@ func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		response.ErrorForbidden(w)
 		return
 	}
-	log := logrus.NewEntry(logrus.StandardLogger()).
+	log := logrus.
 		WithField("task", "api-delete-image").
 		WithField("repo", fmt.Sprintf("%s/%s", img.NamespaceID, img.Name)).
 		WithField("digest", img.Digest).
