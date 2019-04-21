@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (AuthServer) AuthRegistry(response http.ResponseWriter, request *http.Request) {
+func (App) AuthRegistry(response http.ResponseWriter, request *http.Request) {
 	req, err := authregistry.ParseRequest(request)
 	if err != nil {
 		logrus.WithField("Parsing request fail", err).Error()

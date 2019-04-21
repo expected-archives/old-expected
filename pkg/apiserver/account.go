@@ -10,11 +10,11 @@ import (
 	"net/http"
 )
 
-func (s *App) GetAccount(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetAccount(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "account", request.GetAccount(r))
 }
 
-func (s *App) SyncAccount(w http.ResponseWriter, r *http.Request) {
+func (a *App) SyncAccount(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	token := &oauth2.Token{
 		AccessToken: account.GithubAccessToken,
@@ -43,7 +43,7 @@ func (s *App) SyncAccount(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "account", account)
 }
 
-func (s *App) RegenerateAPIKeyAccount(w http.ResponseWriter, r *http.Request) {
+func (a *App) RegenerateAPIKeyAccount(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	account.RegenerateAPIKey()
 	if err := accounts.UpdateAccount(r.Context(), account); err != nil {

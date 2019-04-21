@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (s *App) authMiddleware(next http.Handler) http.Handler {
+func (a *App) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
 		if header == "" {

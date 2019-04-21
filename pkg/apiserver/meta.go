@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (s *App) GetTags(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetTags(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	tags, err := containers.FindTagsByNamespaceID(r.Context(), account.ID)
 	if err != nil {
@@ -23,7 +23,7 @@ func (s *App) GetTags(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "tags", tags)
 }
 
-func (s *App) GetImagesName(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetImagesName(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	names, err := images.FindImagesName(r.Context(), account.ID)
 	if err != nil {

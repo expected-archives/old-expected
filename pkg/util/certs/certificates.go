@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"github.com/docker/libtrust"
 	"github.com/sirupsen/logrus"
-	"os"
 )
 
 type Config struct {
@@ -18,36 +17,36 @@ var (
 	privateKey libtrust.PrivateKey
 )
 
-func Init(config Config) {
+func Init(config Config) error {
 	var err error
 
 	publicKey, privateKey, err = loadCertAndKey(config.PublicKey, config.PrivateKey)
 	if err != nil {
-		dir, _ := os.Getwd()
 		logrus.
 			WithField("init certs", err).
-			WithField("cwd", dir).
 			WithField("publicKey", publicKey).
 			WithField("privateKey", privateKey).
-			Fatalln()
+			Error()
+		return err
 	}
+	return nil
 }
 
 func loadCertAndKey(certFile, keyFile string) (pk libtrust.PublicKey, prk libtrust.PrivateKey, err error) {
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		return
+		return nil, nil, err
 	}
 	x509Cert, err := x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
-		return
+		return nil, nil, err
 	}
 	pk, err = libtrust.FromCryptoPublicKey(x509Cert.PublicKey)
 	if err != nil {
-		return
+		return nil, nil, err
 	}
 	prk, err = libtrust.FromCryptoPrivateKey(cert.PrivateKey)
-	return
+	return pk, prk, nil
 }
 
 func GetPublicKey() libtrust.PublicKey {
