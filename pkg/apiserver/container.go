@@ -80,14 +80,8 @@ func (s *App) StartContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorNotFound(w)
 		return
 	}
-	reply, err := scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_START)
-	if err != nil {
+	if _, err := scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_START); err != nil {
 		log.WithError(err).Error("unable to request container state change")
-		response.ErrorInternal(w)
-		return
-	}
-	if reply.Error != "" {
-		log.WithField("error", reply.Error).Error("failed to start container")
 		response.ErrorInternal(w)
 		return
 	}
@@ -108,14 +102,8 @@ func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorNotFound(w)
 		return
 	}
-	reply, err := scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_STOP)
-	if err != nil {
+	if _, err := scheduler.RequestChangeContainerState(r.Context(), ctr.ID, protocol.State_STOP); err != nil {
 		log.WithError(err).Error("unable to request container state change")
-		response.ErrorInternal(w)
-		return
-	}
-	if reply.Error != "" {
-		log.WithField("error", reply.Error).Error("failed to stop container")
 		response.ErrorInternal(w)
 		return
 	}

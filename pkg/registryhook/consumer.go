@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-// todo: return error
 func handleDeleteImage(subject, reply string, r *protocol.DeleteImageRequest) {
 	log := logrus.WithField("image-id", r.Id)
 	img, err := images.FindImageByID(context.Background(), r.Id)

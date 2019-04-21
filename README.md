@@ -11,7 +11,7 @@ docker-compose up
 | Nom | Description | Valeur par défaut |
 | --- | --- | --- |
 | POSTGRES_ADDR | Permet de changer l'adresse de postgres | postgres://expected:expected@postgres/expected?sslmode=disable |
-| RABBITMQ_ADDR | Permet de changer l'adresse de rabbitmq | amqp://expected:expected@rabbitmq/expected |
+| NATS_ADDR | Permet de changer l'adresse de nats | nats://localhost:4222 |
 | GITHUB_CLIENT_ID | Défini le client id pour l'oauth avec github |  |
 | GITHUB_CLIENT_SECRET | Défini le client secret pour l'oauth avec github |  |
 | DASHBOARD_URL | L'url du dashboard (utilisé pour definir le cookie d'authentification et rediriger l'utilisateur) | http://localhost:8080 |
