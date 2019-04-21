@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/expectedsh/expected/pkg/authserver/authregistry"
+	"github.com/expectedsh/expected/pkg/apps"
 	"time"
 )
 
@@ -30,12 +30,12 @@ func (d DeleteStatus) String() string {
 }
 
 func newToken(repository string) (string, error) {
-	return authregistry.Generate(authregistry.Request{
+	return apps.Generate(apps.Request{
 		Login:   "admin",
 		Service: "registry",
-	}, []authregistry.AuthorizedScope{
+	}, []apps.AuthorizedScope{
 		{
-			Scope: authregistry.Scope{
+			Scope: apps.Scope{
 				Type: "repository",
 				Name: repository,
 			},

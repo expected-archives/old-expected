@@ -14,4 +14,4 @@ protocol:
 		-w $$(pwd) znly/protoc											\
 		-I $$(pwd)/pkg/protocol											\
 		$$(find $$(pwd)/pkg/protocol/ -type f -name "*.proto" | xargs)	\
-		--go_out=$$(pwd)/pkg/protocol
+		--go_out=plugins=grpc:$$(pwd)/pkg/protocol

@@ -8,7 +8,6 @@ services:
       context: .
       dockerfile: cmd/expected-apiserver/Dockerfile
     environment:
-      - "ADDR=:3000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
       - "NATS_ADDR=${NATS_ADDR:-nats://nats:4222}"
     depends_on:
@@ -17,14 +16,13 @@ services:
     ports:
       - 3000:3000
 
-  registryhook:
-    container_name: expected-registryhook
+  imageserver:
+    container_name: expected-imageserver
     restart: on-failure
     build:
       context: .
-      dockerfile: cmd/expected-registryhook/Dockerfile
+      dockerfile: cmd/expected-imageserver/Dockerfile
     environment:
-      - "ADDR=:3001"
       - "REGISTRY_URL=http://registry:5000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
       - "NATS_ADDR=${NATS_ADDR:-nats://nats:4222}"
@@ -34,7 +32,7 @@ services:
       - postgres
       - nats
     ports:
-      - 3001:3001
+      - 3001:3000
     volumes:
       - ./certs:/certs
 
@@ -45,7 +43,6 @@ services:
       context: .
       dockerfile: cmd/expected-authserver/Dockerfile
     environment:
-      - "ADDR=:3002"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
       - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
       - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
@@ -55,7 +52,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - 3002:3002
+      - 3002:3000
     volumes:
       - ./certs:/certs
 

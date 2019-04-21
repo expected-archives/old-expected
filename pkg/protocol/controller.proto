@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package protocol;
+
+enum State {
+    START = 0;
+    STOP = 1;
+}
+
+message ChangeContainerStateRequest {
+    string id = 1;
+    State requestedState = 2;
+}
+
+message ChangeContainerStateReply {
+}
+
+service Controller {
+    rpc ChangeContainerState (ChangeContainerStateRequest) returns (ChangeContainerStateReply) {
+    }
+}
