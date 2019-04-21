@@ -55,7 +55,10 @@ func start(app App) {
 	if CurrentMode() == ModeProduction {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 	} else {
-		logrus.SetFormatter(&logrus.TextFormatter{})
+		logrus.SetFormatter(&logrus.TextFormatter{
+			DisableColors: true,
+			FullTimestamp: true,
+		})
 	}
 
 	if srvs := app.RequiredServices(); len(srvs) > 0 {

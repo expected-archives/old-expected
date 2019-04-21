@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-// todo: return error
 func handleDeleteImage(subject, reply string, r *protocol.DeleteImageRequest) {
 	log := logrus.WithField("image-id", r.Id)
 	img, err := images.FindImageByID(context.Background(), r.Id)
@@ -65,6 +64,11 @@ func handleDeleteImage(subject, reply string, r *protocol.DeleteImageRequest) {
 	// deleting the img at the end to be sure all actions above has been executed
 	if err := images.DeleteImageByID(context.Background(), img.ID); err != nil {
 		log.WithError(err).Error("deleting image")
+		return
+	}
+
+	if err := services.NATS().Client().PublishRequest(subject, reply, &protocol.DeleteImageReply{}); err != nil {
+		logrus.WithError(err).Error("failed to send response")
 		return
 	}
 }

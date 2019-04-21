@@ -7,7 +7,6 @@ message DeleteImageRequest {
 }
 
 message DeleteImageReply {
-    string error = 1;
 }
 
 message GenerateTokenRequest {
