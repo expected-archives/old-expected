@@ -17,7 +17,7 @@ func (a *App) authMiddleware(next http.Handler) http.Handler {
 		}
 		account, err := accounts.FindAccountByAPIKey(r.Context(), header)
 		if err != nil {
-			logrus.WithField("header", header).WithError(err).Errorln("unable to find account")
+			logrus.WithError(err).Errorln("unable to find account")
 			response.ErrorInternal(w)
 			return
 		}

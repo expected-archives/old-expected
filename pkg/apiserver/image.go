@@ -62,7 +62,7 @@ func (a *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	}
 	log := logrus.
 		WithField("task", "api-delete-image").
-		WithField("repo", fmt.Sprintf("%a/%a", img.NamespaceID, img.Name)).
+		WithField("repo", fmt.Sprintf("%v/%v", img.NamespaceID, img.Name)).
 		WithField("digest", img.Digest).
 		WithField("tag", img.Tag).
 		WithField("id", img.ID).
