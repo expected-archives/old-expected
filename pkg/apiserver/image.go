@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func (s *App) ListImages(w http.ResponseWriter, r *http.Request) {
+func (a *App) ListImages(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	imagesStats, err := images.FindImagesSummariesByNamespaceID(r.Context(), account.ID)
 	if err != nil {
@@ -26,7 +26,7 @@ func (s *App) ListImages(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "images", imagesStats)
 }
 
-func (s *App) GetImage(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	name := mux.Vars(r)["name"]
 	tag := mux.Vars(r)["tag"]
@@ -39,7 +39,7 @@ func (s *App) GetImage(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "image", image)
 }
 
-func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
+func (a *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
 	id := mux.Vars(r)["id"]
 	if _, err := uuid.Parse(id); err != nil {
@@ -62,7 +62,7 @@ func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	}
 	log := logrus.
 		WithField("task", "api-delete-image").
-		WithField("repo", fmt.Sprintf("%s/%s", img.NamespaceID, img.Name)).
+		WithField("repo", fmt.Sprintf("%a/%a", img.NamespaceID, img.Name)).
 		WithField("digest", img.Digest).
 		WithField("tag", img.Tag).
 		WithField("id", img.ID).

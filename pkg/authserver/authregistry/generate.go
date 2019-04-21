@@ -18,6 +18,7 @@ const (
 
 func Generate(auth Request, scopes []AuthorizedScope, expiration time.Duration) (string, error) {
 	now := time.Now().Unix()
+	fmt.Println(certs.GetPrivateKey(), certs.GetPublicKey())
 	_, alg, err := certs.GetPrivateKey().Sign(strings.NewReader("dummy"), 0)
 	if err != nil {
 		return "", fmt.Errorf("failed to sign: %s", err)

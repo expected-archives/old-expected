@@ -12,11 +12,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func (s *AuthServer) OAuthGithub(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, s.OAuth.AuthCodeURL("", oauth2.AccessTypeOnline), http.StatusTemporaryRedirect)
+func (a *App) OAuthGithub(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, a.OAuth.AuthCodeURL("", oauth2.AccessTypeOnline), http.StatusTemporaryRedirect)
 }
 
-func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
+func (a *App) OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
 	// todo remove/improve this
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -24,7 +24,7 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 	client := &http.Client{Transport: transport}
 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, client)
 
-	token, err := s.OAuth.Exchange(ctx, r.FormValue("code"))
+	token, err := a.OAuth.Exchange(ctx, r.FormValue("code"))
 	if err != nil {
 		response.ErrorBadRequest(w, "Invalid oauth code.", nil)
 		return
@@ -54,7 +54,7 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 		}
 
 		if account, err = accounts.CreateAccount(ctx, user.Name, email.Email, user.AvatarUrl, user.ID,
-			token.AccessToken, s.isAdmin(user.Login)); err != nil {
+			token.AccessToken, a.isAdmin(user.Login)); err != nil {
 			logrus.WithError(err).Errorln("unable to create your account")
 			response.ErrorInternal(w)
 			return
@@ -74,5 +74,14 @@ func (s *AuthServer) OAuthGithubCallback(w http.ResponseWriter, r *http.Request)
 		Path:  "/",
 		Value: account.APIKey,
 	})
-	http.Redirect(w, r, s.DashboardURL, http.StatusTemporaryRedirect)
+	http.Redirect(w, r, a.DashboardURL, http.StatusTemporaryRedirect)
+}
+
+func (a App) isAdmin(username string) bool {
+	for _, name := range a.Admins {
+		if name == username {
+			return true
+		}
+	}
+	return false
 }

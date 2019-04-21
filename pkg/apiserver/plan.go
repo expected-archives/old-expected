@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (s *App) ListPlans(w http.ResponseWriter, r *http.Request) {
+func (a *App) ListPlans(w http.ResponseWriter, r *http.Request) {
 	var res []*plans.Plan
 	var err error
 
@@ -33,7 +33,7 @@ func (s *App) ListPlans(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "plans", res)
 }
 
-func (s *App) GetPlan(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetPlan(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if _, err := uuid.Parse(id); err != nil {
 		response.ErrorBadRequest(w, "Invalid plan id.", nil)

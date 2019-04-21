@@ -36,7 +36,9 @@ func (s *App) Configure() error {
 	if err := envconfig.Process("", s); err != nil {
 		return err
 	}
-	certs.Init(s.Certs)
+	if err := certs.Init(s.Certs); err != nil {
+		return err
+	}
 	registry.Init(s.RegistryUrl)
 	s.Gc = gc.New(context.Background(), &gc.Config{
 		OlderThan: s.GcConfig.OlderThan,
