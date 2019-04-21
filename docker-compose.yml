@@ -10,7 +10,7 @@ services:
     environment:
       - "ADDR=:3000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
+      - "NATS_ADDR=${NATS_ADDR:-nats://nats:4222}"
     depends_on:
       - postgres
       - nats
@@ -27,7 +27,7 @@ services:
       - "ADDR=:3001"
       - "REGISTRY_URL=http://registry:5000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
+      - "NATS_ADDR=${NATS_ADDR:-nats://nats:4222}"
       - "CERTS_PUBLIC_KEY=/certs/server.crt"
       - "CERTS_PRIVATE_KEY=/certs/server.key"
     depends_on:

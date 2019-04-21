@@ -76,14 +76,8 @@ func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
-	reply, err := registryhook.RequestDeleteImage(r.Context(), id)
-	if err != nil {
+	if _, err := registryhook.RequestDeleteImage(r.Context(), id); err != nil {
 		log.WithError(err).Error("can't publish delete message")
-		response.ErrorInternal(w)
-		return
-	}
-	if reply.Error != "" {
-		log.WithField("error", reply.Error).Error("failed to delete image")
 		response.ErrorInternal(w)
 		return
 	}

@@ -16,5 +16,4 @@ message GenerateTokenRequest {
 
 message GenerateTokenReply {
     string token = 1;
-    string error = 2;
 }
