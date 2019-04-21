@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/util/registry"
@@ -15,8 +14,7 @@ import (
 // onPush is idempotent.
 // It is not supposed to create edge effects by replaying the same event.
 func onPush(ctx context.Context, event notifications.Event) error {
-
-	namespaceId, name, err := apps.parseRepository(event.Target.Repository)
+	namespaceId, name, err := parseRepository(event.Target.Repository)
 	if err != nil {
 		return nil
 	}

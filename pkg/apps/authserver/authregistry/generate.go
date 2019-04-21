@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/distribution/registry/auth/token"
-	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/util/certs"
 	"math/rand"
 	"sort"
@@ -17,7 +16,7 @@ const (
 	Issuer = "auth_registry"
 )
 
-func Generate(auth apps.Request, scopes []apps.AuthorizedScope, expiration time.Duration) (string, error) {
+func Generate(auth Request, scopes []AuthorizedScope, expiration time.Duration) (string, error) {
 	now := time.Now().Unix()
 	fmt.Println(certs.GetPrivateKey(), certs.GetPublicKey())
 	_, alg, err := certs.GetPrivateKey().Sign(strings.NewReader("dummy"), 0)
@@ -60,7 +59,7 @@ func Generate(auth apps.Request, scopes []apps.AuthorizedScope, expiration time.
 	return fmt.Sprintf("%s%s%s", payload, token.TokenSeparator, toBase64(sig)), nil
 }
 
-func scopeToResourceActions(scopes []apps.AuthorizedScope) []*token.ResourceActions {
+func scopeToResourceActions(scopes []AuthorizedScope) []*token.ResourceActions {
 	var actions []*token.ResourceActions
 
 	for _, a := range scopes {

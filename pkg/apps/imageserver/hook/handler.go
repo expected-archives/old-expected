@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/apps"
 	"strings"
 )
 
@@ -12,7 +11,7 @@ import (
 func Handle(envelope notifications.Envelope) error {
 	for _, event := range envelope.Events {
 		if event.Action == notifications.EventActionPush {
-			if err := apps.onPush(context.Background(), event); err != nil {
+			if err := onPush(context.Background(), event); err != nil {
 				return err
 			}
 		}

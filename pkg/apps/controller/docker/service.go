@@ -6,7 +6,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/swarm"
-	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/models/plans"
 )
@@ -14,7 +13,7 @@ import (
 func ServiceFindByName(name string) (*swarm.Service, error) {
 	args := filters.NewArgs()
 	args.Add("name", name)
-	services, err := apps.cli.ServiceList(context.Background(), types.ServiceListOptions{
+	services, err := cli.ServiceList(context.Background(), types.ServiceListOptions{
 		Filters: args,
 	})
 	if err != nil {
@@ -42,7 +41,7 @@ func ServiceCreate(container *containers.Container) error {
 		NanoCPUs:    int64(plan.Metadata["cpu"].(float64) * 100000000),
 	}
 
-	_, err = apps.cli.ServiceCreate(context.Background(), swarm.ServiceSpec{
+	_, err = cli.ServiceCreate(context.Background(), swarm.ServiceSpec{
 		Annotations: swarm.Annotations{
 			Name: container.ID,
 			Labels: map[string]string{
@@ -56,7 +55,7 @@ func ServiceCreate(container *containers.Container) error {
 		TaskTemplate: swarm.TaskSpec{
 			ContainerSpec: swarm.ContainerSpec{
 				Image: container.Image,
-				Env:   apps.convertEnv(container.Environment),
+				Env:   convertEnv(container.Environment),
 			},
 			Resources: &swarm.ResourceRequirements{
 				Limits:       resources,
@@ -79,5 +78,5 @@ func ServiceCreate(container *containers.Container) error {
 }
 
 func ServiceRemove(container *containers.Container) error {
-	return apps.cli.ServiceRemove(context.Background(), container.ID)
+	return cli.ServiceRemove(context.Background(), container.ID)
 }

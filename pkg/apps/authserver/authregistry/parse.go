@@ -2,7 +2,6 @@ package authregistry
 
 import (
 	"fmt"
-	"github.com/expectedsh/expected/pkg/apps"
 	"net/http"
 )
 
@@ -12,13 +11,13 @@ type Request struct {
 	Login   string
 	Token   string
 	Service string
-	Scopes  []apps.Scope
+	Scopes  []Scope
 	Labels  Labels
 }
 
 func ParseRequest(r *http.Request) (req *Request, err error) {
 	req = &Request{
-		Scopes: make([]apps.Scope, 0),
+		Scopes: make([]Scope, 0),
 	}
 
 	user, token, hasAuth := r.BasicAuth()
@@ -39,7 +38,7 @@ func ParseRequest(r *http.Request) (req *Request, err error) {
 		return nil, fmt.Errorf("invalid form value")
 	}
 
-	if err = apps.parseScope(r.FormValue("scope"), req, r.Form); err != nil {
+	if err = parseScope(r.FormValue("scope"), req, r.Form); err != nil {
 		return nil, err
 	}
 	return req, nil

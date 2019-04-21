@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
@@ -41,13 +40,7 @@ func (srv *Service) Name() string {
 }
 
 func (srv *Service) Start() error {
-	var conn *grpc.ClientConn
-	var err error
-	if apps.CurrentMode() == apps.ModeProduction {
-		conn, err = grpc.Dial(srv.config.Addr)
-	} else {
-		conn, err = grpc.Dial(srv.config.Addr, grpc.WithInsecure())
-	}
+	conn, err := grpc.Dial(srv.config.Addr, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}

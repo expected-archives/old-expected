@@ -3,7 +3,7 @@ package imageserver
 import (
 	"context"
 	"fmt"
-	"github.com/expectedsh/expected/pkg/apps"
+	"github.com/expectedsh/expected/pkg/apps/authserver/authregistry"
 	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/util/registry"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func (app.App) DeleteImage(ctx context.Context, r *protocol.DeleteImageRequest) (*protocol.DeleteImageReply, error) {
+func (App) DeleteImage(ctx context.Context, r *protocol.DeleteImageRequest) (*protocol.DeleteImageReply, error) {
 	log := logrus.WithField("image-id", r.Id)
 	img, err := images.FindImageByID(ctx, r.Id)
 	if err != nil || img == nil {
@@ -70,13 +70,13 @@ func (app.App) DeleteImage(ctx context.Context, r *protocol.DeleteImageRequest) 
 	return &protocol.DeleteImageReply{}, nil
 }
 
-func (app.App) GenerateToken(ctx context.Context, r *protocol.GenerateTokenRequest) (*protocol.GenerateTokenReply, error) {
-	s, err := apps.Generate(apps.Request{
+func (App) GenerateToken(ctx context.Context, r *protocol.GenerateTokenRequest) (*protocol.GenerateTokenReply, error) {
+	s, err := authregistry.Generate(authregistry.Request{
 		Login:   "admin",
 		Service: "registry",
-	}, []apps.AuthorizedScope{
+	}, []authregistry.AuthorizedScope{
 		{
-			Scope: apps.Scope{
+			Scope: authregistry.Scope{
 				Type: "repository",
 				Name: r.Image,
 			},

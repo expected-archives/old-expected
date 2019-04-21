@@ -3,6 +3,7 @@ package imageserver
 import (
 	"context"
 	"github.com/expectedsh/expected/pkg/apps"
+	"github.com/expectedsh/expected/pkg/apps/imageserver/gc"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/nats"
@@ -19,12 +20,12 @@ import (
 type App struct {
 	RegistryUrl string `envconfig:"registry_url" default:"http://localhost:5000"`
 	Certs       certs.Config
-	GcConfig    apps.Config
-	Gc          *apps.GarbageCollector
+	GcConfig    gc.Config
+	Gc          *gc.GarbageCollector
 }
 
 func (s *App) Name() string {
-	return "registryhook"
+	return "imageserver"
 }
 
 func (s *App) RequiredServices() []services.Service {
@@ -42,7 +43,7 @@ func (s *App) Configure() error {
 		return err
 	}
 	registry.Init(s.RegistryUrl)
-	s.Gc = apps.New(context.Background(), &apps.Config{
+	s.Gc = gc.New(context.Background(), &gc.Config{
 		OlderThan: s.GcConfig.OlderThan,
 		Interval:  s.GcConfig.Interval,
 		Limit:     s.GcConfig.Limit,
@@ -51,7 +52,7 @@ func (s *App) Configure() error {
 }
 
 func (s *App) ConfigureGRPC(server *grpc.Server) {
-	protocol.RegisterRegistryHookServer(server, s)
+	protocol.RegisterImageServer(server, s)
 }
 
 func must(err error) {
@@ -60,7 +61,7 @@ func must(err error) {
 
 func (s *App) Run() error {
 	router := mux.NewRouter()
-	router.HandleFunc("/hook", apps.Hook)
+	router.HandleFunc("/hook", Hook)
 
 	if err := cors.ApplyMiddleware(router); err != nil {
 		return err

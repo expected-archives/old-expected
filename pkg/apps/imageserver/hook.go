@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/apps"
+	"github.com/expectedsh/expected/pkg/apps/imageserver/hook"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -31,7 +31,7 @@ func Hook(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = apps.Handle(envelope)
+	err = hook.Handle(envelope)
 	if err != nil {
 		logrus.WithField("http-hook-response", err).Error()
 		http.Error(res, fmt.Sprintf("failed to process notifications: %s", err), http.StatusInternalServerError)

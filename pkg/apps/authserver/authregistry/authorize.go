@@ -2,7 +2,6 @@ package authregistry
 
 import (
 	"errors"
-	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -10,11 +9,11 @@ import (
 )
 
 type AuthorizedScope struct {
-	apps.Scope
+	Scope
 	AuthorizedActions []string
 }
 
-func Authorize(account accounts.Account, scopes []apps.Scope) ([]AuthorizedScope, error) {
+func Authorize(account accounts.Account, scopes []Scope) ([]AuthorizedScope, error) {
 	authorizedScopes := make([]AuthorizedScope, 0)
 
 	for _, scope := range scopes {

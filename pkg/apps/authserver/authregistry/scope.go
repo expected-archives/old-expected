@@ -2,7 +2,6 @@ package authregistry
 
 import (
 	"fmt"
-	"github.com/expectedsh/expected/pkg/apps"
 	"net/url"
 	"sort"
 	"strings"
@@ -14,7 +13,7 @@ type Scope struct {
 	Actions []string
 }
 
-func parseScope(value string, req *apps.Request, form url.Values) error {
+func parseScope(value string, req *Request, form url.Values) error {
 	if value != "" {
 		for _, scopeStr := range form["scope"] {
 			parts := strings.Split(scopeStr, ":")

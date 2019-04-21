@@ -3,6 +3,8 @@ package apiserver
 import (
 	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/controller"
+	"github.com/expectedsh/expected/pkg/services/image"
 	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/cors"
@@ -15,46 +17,48 @@ type App struct {
 	DashboardURL string `envconfig:"dashboard_url"`
 }
 
-func (a *App) Name() string {
+func (s *App) Name() string {
 	return "apiserver"
 }
 
-func (a *App) RequiredServices() []services.Service {
+func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
 		nats.NewFromEnv(),
+		controller.NewFromEnv(),
+		image.NewFromEnv(),
 	}
 }
 
-func (a *App) Configure() error {
-	return envconfig.Process("", a)
+func (s *App) Configure() error {
+	return envconfig.Process("", s)
 }
 
-func (a *App) Run() error {
+func (s *App) Run() error {
 	router := mux.NewRouter()
 	v1 := router.PathPrefix("/v1").Subrouter()
 	{
-		v1.Use(a.authMiddleware)
+		v1.Use(s.authMiddleware)
 
-		v1.HandleFunc("/account", a.GetAccount).Methods("GET")
-		v1.HandleFunc("/account/sync", a.SyncAccount).Methods("POST")
-		v1.HandleFunc("/account/regenerate_apikey", a.RegenerateAPIKeyAccount).Methods("POST")
+		v1.HandleFunc("/account", s.GetAccount).Methods("GET")
+		v1.HandleFunc("/account/sync", s.SyncAccount).Methods("POST")
+		v1.HandleFunc("/account/regenerate_apikey", s.RegenerateAPIKeyAccount).Methods("POST")
 
-		v1.HandleFunc("/containers", a.ListContainers).Methods("GET")
-		v1.HandleFunc("/containers", a.CreateContainer).Methods("POST")
-		v1.HandleFunc("/containers/{name}", a.GetContainer).Methods("GET")
-		v1.HandleFunc("/containers/{name}/start", a.StartContainer).Methods("POST")
-		v1.HandleFunc("/containers/{name}/stop", a.StopContainer).Methods("POST")
+		v1.HandleFunc("/containers", s.ListContainers).Methods("GET")
+		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
+		v1.HandleFunc("/containers/{name}", s.GetContainer).Methods("GET")
+		v1.HandleFunc("/containers/{name}/start", s.StartContainer).Methods("POST")
+		v1.HandleFunc("/containers/{name}/stop", s.StopContainer).Methods("POST")
 
-		v1.HandleFunc("/images", a.ListImages).Methods("GET")
-		v1.HandleFunc("/images/{name}:{tag}", a.GetImage).Methods("GET")
-		v1.HandleFunc("/images/{id}", a.DeleteImage).Methods("DELETE")
+		v1.HandleFunc("/images", s.ListImages).Methods("GET")
+		v1.HandleFunc("/images/{name}:{tag}", s.GetImage).Methods("GET")
+		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
 
-		v1.HandleFunc("/plans", a.ListPlans).Methods("GET")
-		v1.HandleFunc("/plans/{id}", a.GetPlan).Methods("GET")
+		v1.HandleFunc("/plans", s.ListPlans).Methods("GET")
+		v1.HandleFunc("/plans/{id}", s.GetPlan).Methods("GET")
 
-		v1.HandleFunc("/meta/tags", a.GetTags).Methods("GET")
-		v1.HandleFunc("/meta/images", a.GetImagesName).Methods("GET")
+		v1.HandleFunc("/meta/tags", s.GetTags).Methods("GET")
+		v1.HandleFunc("/meta/images", s.GetImagesName).Methods("GET")
 	}
 	if err := cors.ApplyMiddleware(router); err != nil {
 		return err

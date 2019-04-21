@@ -24,39 +24,39 @@ type App struct {
 	OAuth *oauth2.Config
 }
 
-func (a *App) Name() string {
+func (s *App) Name() string {
 	return "authserver"
 }
 
-func (a *App) RequiredServices() []services.Service {
+func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
 	}
 }
 
-func (a *App) Configure() error {
-	if err := envconfig.Process("", a); err != nil {
+func (s *App) Configure() error {
+	if err := envconfig.Process("", s); err != nil {
 		return err
 	}
-	a.OAuth = &oauth2.Config{
-		ClientID:     a.Github.ClientID,
-		ClientSecret: a.Github.ClientSecret,
+	s.OAuth = &oauth2.Config{
+		ClientID:     s.Github.ClientID,
+		ClientSecret: s.Github.ClientSecret,
 		Endpoint:     gh.Endpoint,
 		Scopes:       []string{"user", "user:email"},
 	}
-	if err := certs.Init(a.Certs); err != nil {
+	if err := certs.Init(s.Certs); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *App) Run() error {
+func (s *App) Run() error {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/oauth/github", a.OAuthGithub).Methods("GET")
-	router.HandleFunc("/oauth/github/callback", a.OAuthGithubCallback).Methods("GET")
+	router.HandleFunc("/oauth/github", s.OAuthGithub).Methods("GET")
+	router.HandleFunc("/oauth/github/callback", s.OAuthGithubCallback).Methods("GET")
 
-	router.HandleFunc("/auth/registry", a.AuthRegistry).Methods("GET")
+	router.HandleFunc("/auth/registry", s.AuthRegistry).Methods("GET")
 
 	return apps.HandleHTTP(router)
 }
