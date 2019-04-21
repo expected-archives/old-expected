@@ -85,7 +85,7 @@ func handleGenerateToken(subject, reply string, r *protocol.GenerateTokenRequest
 			},
 			AuthorizedActions: []string{"pull"},
 		},
-	}, ((time.Hour*24)*365)*10)
+	}, time.Duration(r.Duration))
 	if err != nil {
 		logrus.WithError(err).Error("failed to generate token")
 		return
