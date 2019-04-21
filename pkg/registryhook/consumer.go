@@ -90,7 +90,7 @@ func handleGenerateToken(subject, reply string, r *protocol.GenerateTokenRequest
 		logrus.WithError(err).Error("failed to generate token")
 		return
 	}
-	if err := services.NATS().Client().PublishRequest(subject, reply, &protocol.GenerateTokenReply{
+	if err := services.NATS().Client().Publish(reply, &protocol.GenerateTokenReply{
 		Token: s,
 	}); err != nil {
 		logrus.WithError(err).Error("failed to send response")

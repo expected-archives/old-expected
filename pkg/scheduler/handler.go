@@ -47,7 +47,7 @@ func handleContainerChangeState(subject, reply string, r *protocol.ChangeContain
 		}
 	}
 
-	if err := services.NATS().Client().PublishRequest(subject, reply, &protocol.ChangeContainerStateReply{}); err != nil {
+	if err := services.NATS().Client().Publish(reply, &protocol.ChangeContainerStateReply{}); err != nil {
 		log.WithError(err).Error("failed to publish reply")
 		return
 	}

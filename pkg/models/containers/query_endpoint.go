@@ -54,7 +54,7 @@ func DeleteEndpoint(ctx context.Context, id string) error {
 func FindEndpointsByContainerID(ctx context.Context, id string) ([]*Endpoint, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
 		SELECT id, endpoint, is_default, created_at
-		FROM containers_endpoints WHERE id = $1
+		FROM containers_endpoints WHERE container_id = $1
 	`, id)
 	if err != nil {
 		return nil, err
