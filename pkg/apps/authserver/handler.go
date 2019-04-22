@@ -5,6 +5,7 @@ import (
 	"github.com/expectedsh/expected/pkg/apps/authserver/authregistry"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
@@ -18,7 +19,7 @@ func (App) GenerateToken(ctx context.Context, r *protocol.GenerateTokenRequest) 
 				Type: "repository",
 				Name: r.Image,
 			},
-			AuthorizedActions: []string{"pull"},
+			AuthorizedActions: lowercaseScopes(r.Scopes),
 		},
 	}, time.Duration(r.Duration))
 
@@ -30,4 +31,12 @@ func (App) GenerateToken(ctx context.Context, r *protocol.GenerateTokenRequest) 
 	return &protocol.GenerateTokenReply{
 		Token: s,
 	}, nil
+}
+
+func lowercaseScopes(scopes []protocol.Scope) []string {
+	var lowerScopes []string
+	for _, v := range scopes {
+		lowerScopes = append(lowerScopes, strings.ToLower(v.String()))
+	}
+	return lowerScopes
 }

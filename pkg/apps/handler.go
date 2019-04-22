@@ -3,18 +3,19 @@ package apps
 import (
 	"context"
 	"github.com/expectedsh/expected/pkg/services"
-	"github.com/nats-io/go-nats"
+	"github.com/nats-io/go-nats-streaming"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
 	httpServer    *http.Server
 	grpcServer    *grpc.Server
-	subscriptions []*nats.Subscription
+	subscriptions []stan.Subscription
 )
 
 type GRPCConfigurer interface {
@@ -26,8 +27,8 @@ func handleStop(ch chan os.Signal) {
 	logrus.Info("stopping the app")
 	if len(subscriptions) > 0 {
 		for _, sub := range subscriptions {
-			if err := sub.Unsubscribe(); err != nil {
-				logrus.WithField("subject", sub.Subject).WithError(err).Error("failed to unsubscribe")
+			if err := sub.Close(); err != nil {
+				logrus.WithError(err).Error("failed to unsubscribe")
 			}
 		}
 	}
@@ -76,12 +77,32 @@ func HandleGRPC(configurer GRPCConfigurer) error {
 	return nil
 }
 
-func HandleSubscription(subject string, h nats.Handler) error {
-	sub, err := services.NATS().Client().Subscribe(subject, h)
+func StanQueueGroupOptions(name string) []stan.SubscriptionOption {
+	return []stan.SubscriptionOption{
+		stan.AckWait(3 * time.Second),
+		stan.DeliverAllAvailable(),
+		stan.MaxInflight(5),
+		stan.SetManualAckMode(),
+		stan.DurableName(name),
+	}
+}
+
+func HandleSubscription(subject string, h stan.MsgHandler, opts ...stan.SubscriptionOption) error {
+	sub, err := services.Stan().Client().Subscribe(subject, h, opts...)
 	if err != nil {
 		return err
 	}
 	subscriptions = append(subscriptions, sub)
 	logrus.WithField("subject", subject).Debug("handling new subscription")
+	return nil
+}
+
+func HandleQueueSubscription(subject string, qgroup string, h stan.MsgHandler, opts ...stan.SubscriptionOption) error {
+	sub, err := services.Stan().Client().QueueSubscribe(subject, qgroup, h, opts...)
+	if err != nil {
+		return err
+	}
+	subscriptions = append(subscriptions, sub)
+	logrus.WithField("subject", subject).Debug("handling new queue subscription")
 	return nil
 }

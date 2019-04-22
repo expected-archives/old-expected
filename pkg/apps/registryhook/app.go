@@ -7,8 +7,8 @@ import (
 	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/auth"
-	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"github.com/gorilla/mux"
@@ -29,7 +29,7 @@ func (s *App) Name() string {
 func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
-		nats.NewFromEnv(),
+		stan.NewFromEnv(),
 		auth.NewFromEnv(),
 	}
 }
@@ -55,6 +55,12 @@ func (s *App) Run() error {
 	router.HandleFunc("/hook", Hook)
 
 	if err := cors.ApplyMiddleware(router); err != nil {
+		return err
+	}
+
+	if err := apps.HandleQueueSubscription(
+		stan.SubjectImageDelete, s.Name(), s.DeleteImage,
+		apps.StanQueueGroupOptions(s.Name())...); err != nil {
 		return err
 	}
 

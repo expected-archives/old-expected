@@ -2,9 +2,17 @@ syntax = "proto3";
 
 package protocol;
 
+
+enum Scope {
+    DELETE = 0;
+    PULL = 1;
+    PUSH = 2;
+}
+
 message GenerateTokenRequest {
     string image = 1;
     int64 duration = 2;
+    repeated Scope scopes = 3;
 }
 
 message GenerateTokenReply {

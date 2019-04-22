@@ -9,10 +9,10 @@ services:
       dockerfile: cmd/expected-apiserver/Dockerfile
     environment:
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "NATS_ADDR=${NATS_ADDR:-nats://nats:4222}"
+      - "STAN_ADDR=${STAN_ADDR:-nats://stan:4222}"
     depends_on:
       - postgres
-      - nats
+      - stan
     ports:
       - 3000:3000
 
@@ -26,12 +26,12 @@ services:
       - "REGISTRY_URL=http://registry:5000"
       - "AUTH_ADDR=authserver:4000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "NATS_ADDR=${NATS_ADDR:-nats://nats:4222}"
+      - "STAN_ADDR=${STAN_ADDR:-nats://stan:4222}"
       - "CERTS_PUBLIC_KEY=/certs/server.crt"
       - "CERTS_PRIVATE_KEY=/certs/server.key"
     depends_on:
       - postgres
-      - nats
+      - stan
       - authserver
     ports:
       - 3001:3000
@@ -92,9 +92,9 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  nats:
-    container_name: expected-nats
-    image: nats
+  stan:
+    container_name: expected-stan
+    image: nats-streaming
     restart: on-failure
     ports:
       - 4222:4222

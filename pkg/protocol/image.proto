@@ -4,4 +4,8 @@ package protocol;
 
 message DeleteImageEvent {
     string id = 1;
+    string namespaceId = 2;
+    string name = 3;
+    string tag = 4;
+    string digest = 5;
 }

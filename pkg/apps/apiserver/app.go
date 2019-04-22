@@ -6,6 +6,7 @@ import (
 	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/controller"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
@@ -25,6 +26,7 @@ func (s *App) RequiredServices() []services.Service {
 		postgres.NewFromEnv(),
 		controller.NewFromEnv(),
 		auth.NewFromEnv(),
+		stan.NewFromEnv(),
 	}
 }
 

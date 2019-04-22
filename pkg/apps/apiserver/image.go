@@ -4,6 +4,10 @@ import (
 	"github.com/expectedsh/expected/pkg/apps/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/images"
+	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/stan"
+	"github.com/gogo/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -59,12 +63,24 @@ func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//if _, err := services.Image().Client().DeleteImage(r.Context(), &protocol.DeleteImageRequest{
-	//	Id: id,
-	//}); err != nil {
-	//	log.WithError(err).Error("can't publish delete message")
-	//	response.ErrorInternal(w)
-	//	return
-	//}
+	event := &protocol.DeleteImageEvent{
+		Id:          img.ID,
+		NamespaceId: img.NamespaceID,
+		Name:        img.Name,
+		Tag:         img.Tag,
+		Digest:      img.Digest,
+	}
+
+	bytes, err := proto.Marshal(event)
+
+	if err != nil {
+		response.ErrorInternal(w)
+		return
+	}
+	if err := services.Stan().Client().Publish(stan.SubjectImageDelete, bytes); err != nil {
+		response.ErrorInternal(w)
+		return
+	}
+
 	w.WriteHeader(202)
 }
