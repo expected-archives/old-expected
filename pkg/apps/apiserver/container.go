@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (s *App) ListContainers(w http.ResponseWriter, r *http.Request) {
@@ -165,10 +166,18 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 			log.WithError(err).Error("failed to receive container logs reply")
 			return
 		}
-		json.Marshal(map)
-		fmt.Println(reply)
-		fmt.Fprintf(w, "event: %s\n", "message")
-		fmt.Fprintf(w, "data: %s\n", reply.Message)
+		b, err := json.Marshal(&map[string]interface{}{
+			"output":  strings.ToLower(reply.Output.String()),
+			"time":    time.Unix(reply.Time.Second, reply.Time.NanoSecond),
+			"task_id": reply.TaskId,
+			"message": reply.Message,
+		})
+		if err != nil {
+			log.WithError(err).Error("failed to marshal container logs")
+			return
+		}
+		_, _ = fmt.Fprintf(w, "event: %s\n", "message")
+		_, _ = fmt.Fprintf(w, "data: %s\n", string(b))
 		flusher.Flush()
 	}
 }
