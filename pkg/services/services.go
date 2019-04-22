@@ -1,9 +1,9 @@
 package services
 
 import (
+	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/consul"
 	"github.com/expectedsh/expected/pkg/services/controller"
-	"github.com/expectedsh/expected/pkg/services/image"
 	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/backoff"
@@ -61,6 +61,6 @@ func Controller() *controller.Service {
 	return Get("controller").(*controller.Service)
 }
 
-func Image() *image.Service {
-	return Get("image").(*image.Service)
+func Auth() *auth.Service {
+	return Get("auth").(*auth.Service)
 }

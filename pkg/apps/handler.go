@@ -64,7 +64,7 @@ func HandleGRPC(configurer GRPCConfigurer) error {
 	}
 	grpcServer = grpc.NewServer()
 	configurer.ConfigureGRPC(grpcServer)
-	addr := GetEnvOrDefault("GRPC_ADDR", ":3001")
+	addr := GetEnvOrDefault("GRPC_ADDR", ":4000")
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err

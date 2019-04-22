@@ -3,8 +3,8 @@ package apiserver
 import (
 	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/controller"
-	"github.com/expectedsh/expected/pkg/services/image"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"github.com/gorilla/mux"
@@ -24,7 +24,7 @@ func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
 		controller.NewFromEnv(),
-		image.NewFromEnv(),
+		auth.NewFromEnv(),
 	}
 }
 

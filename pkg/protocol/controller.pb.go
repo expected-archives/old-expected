@@ -7,12 +7,12 @@ Package protocol is a generated protocol buffer package.
 It is generated from these files:
 	controller.proto
 	image.proto
+	auth.proto
 
 It has these top-level messages:
 	ChangeContainerStateRequest
 	ChangeContainerStateReply
-	DeleteImageRequest
-	DeleteImageReply
+	DeleteImageEvent
 	GenerateTokenRequest
 	GenerateTokenReply
 */

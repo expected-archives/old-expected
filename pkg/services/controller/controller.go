@@ -15,7 +15,7 @@ type Service struct {
 }
 
 type Config struct {
-	Addr string `envconfig:"addr" default:"localhost:3000"`
+	Addr string `envconfig:"addr" default:"localhost:4002"`
 }
 
 func New(config *Config) *Service {

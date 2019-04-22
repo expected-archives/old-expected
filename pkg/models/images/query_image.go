@@ -12,7 +12,7 @@ import (
 
 func imageFromRows(rows *sql.Rows) (*Image, error) {
 	image := &Image{}
-	if err := rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt, &image.DeleteMode); err != nil {
+	if err := rows.Scan(&image.ID, &image.NamespaceID, &image.Digest, &image.Tag, &image.Name, &image.CreatedAt); err != nil {
 		return nil, err
 	}
 	return image, nil
@@ -46,15 +46,6 @@ func DeleteImageByID(ctx context.Context, imageId string) error {
 	return err
 }
 
-func UpdateImageDeleteMode(ctx context.Context, imageId string) error {
-	_, err := services.Postgres().Client().ExecContext(ctx, `
-		UPDATE images 
-		SET delete_mode = TRUE
-		WHERE id = $1
-	`, imageId)
-	return err
-}
-
 // DeleteImageByDigest delete an image only if there is no more relations
 // in table image_layer.
 func DeleteImageByDigest(ctx context.Context, digest string) error {
@@ -68,7 +59,7 @@ func DeleteImageByDigest(ctx context.Context, digest string) error {
 
 func FindImageByID(ctx context.Context, id string) (*Image, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
+		SELECT id, namespace_id, digest, tag, name, created_at
 		FROM images
 		WHERE id = $1
 	`, id)
@@ -83,7 +74,7 @@ func FindImageByID(ctx context.Context, id string) (*Image, error) {
 
 func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string) (*Image, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
+		SELECT id, namespace_id, digest, tag, name, created_at
 		FROM images
 		WHERE namespace_id=$1 AND name=$2 AND tag=$3 AND digest = $4
 	`, namespaceId, name, tag, digest)
@@ -98,7 +89,7 @@ func FindImageByInfos(ctx context.Context, namespaceId, name, tag, digest string
 
 func FindImageDetail(ctx context.Context, namespaceId, name, tag string) (*ImageDetail, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT id, namespace_id, digest, tag, name, created_at, delete_mode
+		SELECT id, namespace_id, digest, tag, name, created_at
 		FROM images
 		WHERE namespace_id=$1 AND name=$2 AND tag=$3
 	`, namespaceId, name, tag)

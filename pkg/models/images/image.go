@@ -12,7 +12,6 @@ type Image struct {
 	Tag         string    `json:"tag"`          // tag version name: latest, v1, v2...
 	Name        string    `json:"name"`         // name of the tag
 	CreatedAt   time.Time `json:"created_at"`   // when the image was created
-	DeleteMode  bool      `json:"delete_mode"`  // when the image is in process of deletion
 }
 
 // Layer is used by Image.

@@ -3,8 +3,8 @@ package gc
 import (
 	"context"
 	"fmt"
+	"github.com/expectedsh/expected/pkg/apps/imageserver/registry"
 	"github.com/expectedsh/expected/pkg/models/images"
-	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"

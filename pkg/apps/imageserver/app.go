@@ -4,17 +4,15 @@ import (
 	"context"
 	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/apps/imageserver/gc"
-	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/apps/imageserver/registry"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/cors"
-	"github.com/expectedsh/expected/pkg/util/registry"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 )
 
 type App struct {
@@ -32,6 +30,7 @@ func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
 		nats.NewFromEnv(),
+		auth.NewFromEnv(),
 	}
 }
 
@@ -51,14 +50,6 @@ func (s *App) Configure() error {
 	return nil
 }
 
-func (s *App) ConfigureGRPC(server *grpc.Server) {
-	protocol.RegisterImageServer(server, s)
-}
-
-func must(err error) {
-	logrus.WithError(err).Fatal("unable to start grpc server")
-}
-
 func (s *App) Run() error {
 	router := mux.NewRouter()
 	router.HandleFunc("/hook", Hook)
@@ -68,6 +59,5 @@ func (s *App) Run() error {
 	}
 
 	s.Gc.Run()
-	go must(apps.HandleGRPC(s))
 	return apps.HandleHTTP(router)
 }

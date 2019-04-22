@@ -2,26 +2,6 @@ syntax = "proto3";
 
 package protocol;
 
-message DeleteImageRequest {
+message DeleteImageEvent {
     string id = 1;
-}
-
-message DeleteImageReply {
-}
-
-message GenerateTokenRequest {
-    string image = 1;
-    int64 duration = 2;
-}
-
-message GenerateTokenReply {
-    string token = 1;
-}
-
-service Image {
-    rpc DeleteImage (DeleteImageRequest) returns (DeleteImageReply) {
-    }
-
-    rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenReply) {
-    }
 }
