@@ -2,13 +2,12 @@ package apiserver
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/util/sse"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -152,11 +151,8 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	defer logs.CloseSend()
 
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
+	sse.SetupConnection(w)
 
-	flusher, _ := w.(http.Flusher)
 	for {
 		reply, err := logs.Recv()
 		if err == io.EOF {
@@ -166,18 +162,14 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 			log.WithError(err).Error("failed to receive container logs reply")
 			return
 		}
-		b, err := json.Marshal(&map[string]interface{}{
+		if err = sse.SendJSON(w, "message", &map[string]interface{}{
 			"output":  strings.ToLower(reply.Output.String()),
 			"time":    time.Unix(reply.Time.Second, reply.Time.NanoSecond),
 			"task_id": reply.TaskId,
 			"message": reply.Message,
-		})
-		if err != nil {
-			log.WithError(err).Error("failed to marshal container logs")
+		}); err != nil {
+			log.WithError(err).Error("failed to send container logs")
 			return
 		}
-		_, _ = fmt.Fprintf(w, "event: %s\n", "message")
-		_, _ = fmt.Fprintf(w, "data: %s\n", string(b))
-		flusher.Flush()
 	}
 }
