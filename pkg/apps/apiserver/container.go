@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"fmt"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
@@ -122,4 +123,45 @@ func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
+	account := request.GetAccount(r)
+	name := mux.Vars(r)["name"]
+	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+	log := logrus.WithField("name", name).WithField("action", "logs")
+	if err != nil {
+		log.WithError(err).Error("unable to get container")
+		response.ErrorInternal(w)
+		return
+	}
+	if ctr == nil {
+		response.ErrorNotFound(w)
+		return
+	}
+	logs, err := services.Controller().Client().GetContainerLogs(r.Context(), &protocol.GetContainersLogsRequest{
+		Id: ctr.ID,
+	})
+	if err != nil {
+		log.WithError(err).Error("unable to request container logs")
+		response.ErrorInternal(w)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	flusher, _ := w.(http.Flusher)
+
+	for {
+		reply, err := logs.Recv()
+		if err != nil {
+			log.WithError(err).Error("failed to receive container logs reply")
+			return
+		}
+		fmt.Println(reply)
+		fmt.Fprintf(w, "event: %s\n", "message")
+		fmt.Fprintf(w, "data: %s\n", reply.Line)
+		flusher.Flush()
+	}
 }

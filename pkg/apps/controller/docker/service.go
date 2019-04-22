@@ -8,12 +8,13 @@ import (
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/models/plans"
+	"io"
 )
 
-func ServiceFindByName(name string) (*swarm.Service, error) {
+func ServiceFindByName(ctx context.Context, name string) (*swarm.Service, error) {
 	args := filters.NewArgs()
 	args.Add("name", name)
-	services, err := cli.ServiceList(context.Background(), types.ServiceListOptions{
+	services, err := cli.ServiceList(ctx, types.ServiceListOptions{
 		Filters: args,
 	})
 	if err != nil {
@@ -26,8 +27,8 @@ func ServiceFindByName(name string) (*swarm.Service, error) {
 	}
 }
 
-func ServiceCreate(container *containers.Container) error {
-	plan, err := plans.FindPlanByID(context.Background(), container.PlanID)
+func ServiceCreate(ctx context.Context, container *containers.Container) error {
+	plan, err := plans.FindPlanByID(ctx, container.PlanID)
 	if err != nil {
 		return err
 	}
@@ -41,7 +42,7 @@ func ServiceCreate(container *containers.Container) error {
 		NanoCPUs:    int64(plan.Metadata["cpu"].(float64) * 100000000),
 	}
 
-	_, err = cli.ServiceCreate(context.Background(), swarm.ServiceSpec{
+	_, err = cli.ServiceCreate(ctx, swarm.ServiceSpec{
 		Annotations: swarm.Annotations{
 			Name: container.ID,
 			Labels: map[string]string{
@@ -77,6 +78,14 @@ func ServiceCreate(container *containers.Container) error {
 	return err
 }
 
-func ServiceRemove(container *containers.Container) error {
-	return cli.ServiceRemove(context.Background(), container.ID)
+func ServiceRemove(ctx context.Context, container *containers.Container) error {
+	return cli.ServiceRemove(ctx, container.ID)
+}
+
+func ServiceGetLogs(ctx context.Context, id string) (io.ReadCloser, error) {
+	return cli.ServiceLogs(ctx, id, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+	})
 }
