@@ -2,7 +2,6 @@ package sse
 
 import (
 	"encoding/base64"
-	"fmt"
 	"sync"
 	"time"
 )

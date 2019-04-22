@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"github.com/expectedsh/expected/pkg/apps/controller/docker"
@@ -22,7 +23,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 		return nil, err
 	}
 
-	service, err := docker.ServiceFindByName(container.ID)
+	service, err := docker.ServiceFindByName(ctx, container.ID)
 	if err != nil {
 		log.WithError(err).Error("failed to find container service")
 		return nil, err
@@ -36,7 +37,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 
 	if r.RequestedState == protocol.State_START {
 		log.Info("creating the service")
-		if err := docker.ServiceCreate(container); err != nil {
+		if err := docker.ServiceCreate(ctx, container); err != nil {
 			log.WithError(err).Error("failed to create container service")
 			return nil, err
 		}
@@ -44,11 +45,52 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 
 	if r.RequestedState == protocol.State_STOP {
 		log.Info("removing the service")
-		if err := docker.ServiceRemove(container); err != nil {
+		if err := docker.ServiceRemove(ctx, container); err != nil {
 			log.WithError(err).Error("failed to remove container service")
 			return nil, err
 		}
 	}
 
 	return &protocol.ChangeContainerStateReply{}, nil
+}
+
+func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.Controller_GetContainerLogsServer) error {
+	container, err := containers.FindContainerByID(ctrl.Context(), r.Id)
+	log := logrus.WithField("id", r.Id)
+	log.Info("new container logs request received")
+
+	if err == nil && container == nil {
+		err = errors.New("container not found")
+	}
+	if err != nil {
+		log.WithError(err).Error("failed to find container")
+		return err
+	}
+
+	service, err := docker.ServiceFindByName(ctrl.Context(), container.ID)
+	if err != nil {
+		log.WithError(err).Error("failed to find container service")
+		return err
+	}
+	if service == nil {
+		return nil
+	}
+
+	logs, err := docker.ServiceGetLogs(ctrl.Context(), service.ID)
+	if err != nil {
+		log.WithError(err).Error("failed to get container logs")
+		return err
+	}
+	defer logs.Close()
+
+	scanner := bufio.NewScanner(logs)
+	for scanner.Scan() {
+		if err := ctrl.Send(&protocol.GetContainersLogsReply{
+			Line: scanner.Text(),
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

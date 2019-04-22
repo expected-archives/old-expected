@@ -15,7 +15,18 @@ message ChangeContainerStateRequest {
 message ChangeContainerStateReply {
 }
 
+message GetContainersLogsRequest {
+    string id = 1;
+}
+
+message GetContainersLogsReply {
+    string line = 1;
+}
+
 service Controller {
     rpc ChangeContainerState (ChangeContainerStateRequest) returns (ChangeContainerStateReply) {
+    }
+
+    rpc GetContainerLogs (GetContainersLogsRequest) returns (stream GetContainersLogsReply) {
     }
 }

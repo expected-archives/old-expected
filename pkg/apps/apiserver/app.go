@@ -45,6 +45,7 @@ func (s *App) Run() error {
 		v1.HandleFunc("/containers", s.ListContainers).Methods("GET")
 		v1.HandleFunc("/containers", s.CreateContainer).Methods("POST")
 		v1.HandleFunc("/containers/{name}", s.GetContainer).Methods("GET")
+		v1.HandleFunc("/containers/{name}/logs", s.GetContainerLogs).Methods("GET")
 		v1.HandleFunc("/containers/{name}/start", s.StartContainer).Methods("POST")
 		v1.HandleFunc("/containers/{name}/stop", s.StopContainer).Methods("POST")
 
