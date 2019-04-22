@@ -29,13 +29,13 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 		return nil, err
 	}
 
-	if (service == nil && r.RequestedState == protocol.State_STOP) ||
-		(service != nil && r.RequestedState == protocol.State_START) {
+	if (service == nil && r.RequestedState == protocol.ChangeContainerStateRequest_STOP) ||
+		(service != nil && r.RequestedState == protocol.ChangeContainerStateRequest_START) {
 		log.Info("service current state is already to desired state")
 		return &protocol.ChangeContainerStateReply{}, nil
 	}
 
-	if r.RequestedState == protocol.State_START {
+	if r.RequestedState == protocol.ChangeContainerStateRequest_START {
 		log.Info("creating the service")
 		if err := docker.ServiceCreate(ctx, container); err != nil {
 			log.WithError(err).Error("failed to create container service")
@@ -43,7 +43,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 		}
 	}
 
-	if r.RequestedState == protocol.State_STOP {
+	if r.RequestedState == protocol.ChangeContainerStateRequest_STOP {
 		log.Info("removing the service")
 		if err := docker.ServiceRemove(ctx, container); err != nil {
 			log.WithError(err).Error("failed to remove container service")
@@ -83,14 +83,30 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 	}
 	defer logs.Close()
 
-	scanner := bufio.NewScanner(logs)
+	reader := docker.NewLogReader(logs)
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		if err := ctrl.Send(&protocol.GetContainersLogsReply{
-			Line: scanner.Text(),
-		}); err != nil {
+		if err = ctrl.Send(logToReply(reader)); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return scanner.Err()
+}
+
+func logToReply(reader *docker.LogReader) *protocol.GetContainersLogsReply {
+	output := protocol.GetContainersLogsReply_STDOUT
+	if reader.Output == docker.OutputStderr {
+		output = protocol.GetContainersLogsReply_STDERR
+	}
+
+	return &protocol.GetContainersLogsReply{
+		Output: output,
+		TaskId: reader.Labels["com.docker.swarm.task.id"],
+		Time: &protocol.Timestamp{
+			Second:     int64(reader.Time.Second()),
+			NanoSecond: int64(reader.Time.Nanosecond()),
+		},
+		Message: reader.Message,
+	}
 }

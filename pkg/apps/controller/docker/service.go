@@ -62,6 +62,13 @@ func ServiceCreate(ctx context.Context, container *containers.Container) error {
 				Limits:       resources,
 				Reservations: resources,
 			},
+			LogDriver: &swarm.Driver{
+				Name: "json-file",
+				Options: map[string]string{
+					"max-size": "10m",
+					"max-file": "3",
+				},
+			},
 		},
 		Mode: swarm.ServiceMode{
 			Replicated: &swarm.ReplicatedService{
@@ -87,5 +94,7 @@ func ServiceGetLogs(ctx context.Context, id string) (io.ReadCloser, error) {
 		ShowStdout: true,
 		ShowStderr: true,
 		Follow:     true,
+		Details:    true,
+		Timestamps: true,
 	})
 }

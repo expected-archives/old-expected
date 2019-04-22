@@ -2,13 +2,16 @@ syntax = "proto3";
 
 package protocol;
 
-enum State {
-    START = 0;
-    STOP = 1;
-}
+import "util.proto";
 
 message ChangeContainerStateRequest {
     string id = 1;
+
+    enum State {
+        START = 0;
+        STOP = 1;
+    }
+
     State requestedState = 2;
 }
 
@@ -20,7 +23,15 @@ message GetContainersLogsRequest {
 }
 
 message GetContainersLogsReply {
-    string line = 1;
+    enum Output {
+        STDOUT = 0;
+        STDERR = 1;
+    }
+
+    Output output = 1;
+    Timestamp time = 2;
+    string taskId = 3;
+    string message = 4;
 }
 
 service Controller {
