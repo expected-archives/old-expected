@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package protocol;
+
+message GenerateTokenRequest {
+    string image = 1;
+    int64 duration = 2;
+}
+
+message GenerateTokenReply {
+    string token = 1;
+}
+
+service Auth {
+    rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenReply) {
+    }
+}

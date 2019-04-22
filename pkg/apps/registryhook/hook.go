@@ -1,10 +1,10 @@
-package imageserver
+package registryhook
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/apps/imageserver/hook"
+	"github.com/expectedsh/expected/pkg/apps/registryhook/hook"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )

@@ -1,15 +1,19 @@
 package authserver
 
 import (
+	"fmt"
 	"github.com/expectedsh/expected/pkg/apps"
+	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/github"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	gh "golang.org/x/oauth2/github"
+	"google.golang.org/grpc"
 )
 
 type App struct {
@@ -50,6 +54,15 @@ func (s *App) Configure() error {
 	return nil
 }
 
+func (s *App) ConfigureGRPC(server *grpc.Server) {
+	protocol.RegisterAuthServer(server, s)
+}
+
+func must(err error) {
+	fmt.Println(err)
+	logrus.WithError(err).Fatal("unable to start grpc server")
+}
+
 func (s *App) Run() error {
 	router := mux.NewRouter()
 
@@ -57,6 +70,13 @@ func (s *App) Run() error {
 	router.HandleFunc("/oauth/github/callback", s.OAuthGithubCallback).Methods("GET")
 
 	router.HandleFunc("/auth/registry", s.AuthRegistry).Methods("GET")
+
+	go func() {
+		if err := apps.HandleGRPC(s); err != nil {
+			logrus.Fatal(err)
+			return
+		}
+	}()
 
 	return apps.HandleHTTP(router)
 }

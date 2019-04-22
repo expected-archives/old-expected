@@ -37,7 +37,7 @@ func (x ChangeContainerStateRequest_State) String() string {
 	return proto.EnumName(ChangeContainerStateRequest_State_name, int32(x))
 }
 func (ChangeContainerStateRequest_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor1, []int{0, 0}
+	return fileDescriptor2, []int{0, 0}
 }
 
 type GetContainersLogsReply_Output int32
@@ -60,7 +60,7 @@ func (x GetContainersLogsReply_Output) String() string {
 	return proto.EnumName(GetContainersLogsReply_Output_name, int32(x))
 }
 func (GetContainersLogsReply_Output) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor1, []int{3, 0}
+	return fileDescriptor2, []int{3, 0}
 }
 
 type ChangeContainerStateRequest struct {
@@ -71,7 +71,7 @@ type ChangeContainerStateRequest struct {
 func (m *ChangeContainerStateRequest) Reset()                    { *m = ChangeContainerStateRequest{} }
 func (m *ChangeContainerStateRequest) String() string            { return proto.CompactTextString(m) }
 func (*ChangeContainerStateRequest) ProtoMessage()               {}
-func (*ChangeContainerStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+func (*ChangeContainerStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
 
 func (m *ChangeContainerStateRequest) GetId() string {
 	if m != nil {
@@ -93,7 +93,7 @@ type ChangeContainerStateReply struct {
 func (m *ChangeContainerStateReply) Reset()                    { *m = ChangeContainerStateReply{} }
 func (m *ChangeContainerStateReply) String() string            { return proto.CompactTextString(m) }
 func (*ChangeContainerStateReply) ProtoMessage()               {}
-func (*ChangeContainerStateReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+func (*ChangeContainerStateReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{1} }
 
 type GetContainersLogsRequest struct {
 	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
@@ -102,7 +102,7 @@ type GetContainersLogsRequest struct {
 func (m *GetContainersLogsRequest) Reset()                    { *m = GetContainersLogsRequest{} }
 func (m *GetContainersLogsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetContainersLogsRequest) ProtoMessage()               {}
-func (*GetContainersLogsRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
+func (*GetContainersLogsRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{2} }
 
 func (m *GetContainersLogsRequest) GetId() string {
 	if m != nil {
@@ -121,7 +121,7 @@ type GetContainersLogsReply struct {
 func (m *GetContainersLogsReply) Reset()                    { *m = GetContainersLogsReply{} }
 func (m *GetContainersLogsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetContainersLogsReply) ProtoMessage()               {}
-func (*GetContainersLogsReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
+func (*GetContainersLogsReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
 
 func (m *GetContainersLogsReply) GetOutput() GetContainersLogsReply_Output {
 	if m != nil {
@@ -293,9 +293,9 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 	Metadata: "controller.proto",
 }
 
-func init() { proto.RegisterFile("controller.proto", fileDescriptor1) }
+func init() { proto.RegisterFile("controller.proto", fileDescriptor2) }
 
-var fileDescriptor1 = []byte{
+var fileDescriptor2 = []byte{
 	// 349 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x91, 0xcf, 0x4a, 0xfb, 0x40,
 	0x10, 0xc7, 0xbb, 0xfd, 0xb5, 0xf9, 0xb5, 0x23, 0x84, 0x30, 0x4a, 0x89, 0xad, 0x87, 0xb0, 0x22,

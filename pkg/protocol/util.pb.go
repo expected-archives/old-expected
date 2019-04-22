@@ -6,19 +6,19 @@ Package protocol is a generated protocol buffer package.
 
 It is generated from these files:
 	util.proto
+	auth.proto
 	controller.proto
 	image.proto
 
 It has these top-level messages:
 	Timestamp
+	GenerateTokenRequest
+	GenerateTokenReply
 	ChangeContainerStateRequest
 	ChangeContainerStateReply
 	GetContainersLogsRequest
 	GetContainersLogsReply
-	DeleteImageRequest
-	DeleteImageReply
-	GenerateTokenRequest
-	GenerateTokenReply
+	DeleteImageEvent
 */
 package protocol
 
