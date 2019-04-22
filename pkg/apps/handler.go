@@ -39,6 +39,8 @@ func handleStop(ch chan os.Signal) {
 	if grpcServer != nil {
 		grpcServer.GracefulStop()
 	}
+	logrus.Info("stopping services")
+	services.Stop()
 }
 
 func HandleHTTP(h http.Handler) error {
@@ -68,7 +70,7 @@ func HandleGRPC(configurer GRPCConfigurer) error {
 		return err
 	}
 	logrus.Infof("grpc server listening on %v", addr)
-	if err := grpcServer.Serve(listener); err != http.ErrServerClosed {
+	if err := grpcServer.Serve(listener); err != nil {
 		return err
 	}
 	return nil

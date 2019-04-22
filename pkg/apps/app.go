@@ -62,6 +62,8 @@ func start(app App) {
 		})
 	}
 
+	logrus.Info("starting the app")
+
 	if srvs := app.RequiredServices(); len(srvs) > 0 {
 		for _, service := range srvs {
 			logrus.Infof("registering service %v", service.Name())
@@ -71,7 +73,6 @@ func start(app App) {
 		services.Start()
 	}
 
-	logrus.Info("starting the app")
 	if err := app.Configure(); err != nil {
 		logrus.WithError(err).Fatal("failed to configure app")
 	}

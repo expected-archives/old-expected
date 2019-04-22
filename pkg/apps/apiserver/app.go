@@ -5,7 +5,6 @@ import (
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/controller"
 	"github.com/expectedsh/expected/pkg/services/image"
-	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"github.com/gorilla/mux"
@@ -24,7 +23,6 @@ func (s *App) Name() string {
 func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
-		nats.NewFromEnv(),
 		controller.NewFromEnv(),
 		image.NewFromEnv(),
 	}
