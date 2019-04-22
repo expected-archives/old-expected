@@ -3,8 +3,10 @@ package gc
 import (
 	"context"
 	"fmt"
-	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
 	"github.com/expectedsh/expected/pkg/models/images"
+	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/services"
+	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -46,7 +48,6 @@ func (gc *GarbageCollector) process() {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
 
-	now := time.Now()
 	layersDeleted := 0
 
 	gc.logger.Info("start")
@@ -56,46 +57,18 @@ func (gc *GarbageCollector) process() {
 		gc.logger.WithError(err).Error("can't find unused layers, skip this garbage collector")
 	} else {
 		for _, layer := range layers {
+			err := services.Stan().Publish(stan.SubjectImageDeleteLayer, &protocol.DeleteImageLayerEvent{
+				Repository: layer.Repository,
+				Digest:     layer.Digest,
+			})
 
-			logger := gc.logger.WithField("digest", layer.Digest)
-
-			// delete the layer by calling the registry
-			deleteStatus, err := registry.DeleteLayer(layer.Repository, layer.Digest)
-			if err != nil {
-				logger.WithError(err).Error("layer can't be deleted with the registry")
-				continue
-			}
-
-			// the layer has not been deleted in the registry
-			if deleteStatus == registry.DeleteStatusUnknown || deleteStatus == registry.DeleteStatusNotFound {
-				logger.WithField("delete-status", deleteStatus.String()).
-					Warn("layer delete status is incoherent")
-			} else {
-				logger.WithField("delete-status", deleteStatus.String()).Info("layer deleted in the registry")
-			}
-
-			// deleting the layer in the database
-			err = images.DeleteLayerByDigest(gc.ctx, layer.Digest)
-			if err != nil {
-				logger.WithError(err).Error("can't delete layer in postgres")
-			} else {
-				logger.Info("layer deleted in postgres")
-			}
-
-			if err := images.DeleteImageByDigest(gc.ctx, layer.Digest); err != nil {
-				logger.WithError(err).Error("can't delete image by digest")
-				return
-			}
-
-			// layer has be delete at least in the database or in the registry
-			if err == nil || deleteStatus == registry.DeleteStatusDeleted {
+			if err == nil {
 				layersDeleted++
 			}
 		}
 	}
 
 	gc.logger.
-		WithField("gc-duration", time.Now().Sub(now).String()).
-		WithField("layers-deleted", fmt.Sprintf("%d/%d", layersDeleted, len(layers))).
+		WithField("layers-in-deletion", fmt.Sprintf("%d/%d", layersDeleted, len(layers))).
 		Info("end")
 }

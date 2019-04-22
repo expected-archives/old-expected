@@ -4,8 +4,8 @@ import (
 	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/consul"
 	"github.com/expectedsh/expected/pkg/services/controller"
-	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
 )
@@ -53,8 +53,8 @@ func Consul() *consul.Service {
 	return Get("consul").(*consul.Service)
 }
 
-func NATS() *nats.Service {
-	return Get("nats").(*nats.Service)
+func Stan() *stan.Service {
+	return Get("stan").(*stan.Service)
 }
 
 func Controller() *controller.Service {

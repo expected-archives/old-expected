@@ -5,8 +5,8 @@ import (
 	"github.com/expectedsh/expected/pkg/apps/controller/docker"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
-	"github.com/expectedsh/expected/pkg/services/nats"
 	"github.com/expectedsh/expected/pkg/services/postgres"
+	"github.com/expectedsh/expected/pkg/services/stan"
 	"google.golang.org/grpc"
 )
 
@@ -19,7 +19,7 @@ func (s *App) Name() string {
 func (s *App) RequiredServices() []services.Service {
 	return []services.Service{
 		postgres.NewFromEnv(),
-		nats.NewFromEnv(),
+		stan.NewFromEnv(),
 	}
 }
 

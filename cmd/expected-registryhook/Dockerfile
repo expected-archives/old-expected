@@ -10,10 +10,10 @@ COPY vendor ./vendor/
 COPY go.mod .
 COPY go.sum .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod vendor -o /go/bin/expected-imageserver cmd/expected-imageserver/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod vendor -o /go/bin/expected-registryhook cmd/expected-registryhook/main.go
 
 FROM alpine
 
-COPY --from=builder /go/bin/expected-imageserver /go/bin/
+COPY --from=builder /go/bin/expected-registryhook /go/bin/
 
 ENTRYPOINT ["/go/bin/expected-imageserver"]

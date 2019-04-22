@@ -1,61 +1,97 @@
 package registryhook
 
-//
-//func (App) DeleteImage(ctx context.Context, r *protocol.DeleteImageRequest) (*protocol.DeleteImageReply, error) {
-//	log := logrus.WithField("image-id", r.Id)
-//	img, err := images.FindImageByID(ctx, r.Id)
-//	if err != nil || img == nil {
-//		log.WithError(err).Error("unable find image")
-//		return nil, err
-//	}
-//	log = log.
-//		WithField("repo", fmt.Sprintf("%s/%s", img.NamespaceID, img.Name)).
-//		WithField("digest", img.Digest).
-//		WithField("tag", img.Tag).
-//		WithField("id", img.ID).
-//		WithField("tag", img.Tag)
-//
-//	layers, err := images.FindLayersByImageId(ctx, img.ID)
-//	if err != nil {
-//		log.WithError(err).Error("finding layers by image id")
-//		return nil, err
-//	}
-//	// deleting relations between img and layers
-//	if err := images.DeleteImageLayerByImageID(ctx, img.ID); err != nil {
-//		log.WithError(err).Error("deleting image_layer rows by img id")
-//		return nil, err
-//	}
-//	for _, layer := range layers {
-//		// If layer is again referenced and unfortunately the repository property is the one that
-//		// the registry delete, another repository is choose.
-//		// Else the layer update_at property is updated to be garbage collected.
-//		layerLog := log.WithField("digest", layer.Digest)
-//		if cnt, err := images.FindLayerCountReferences(ctx, layer.Digest); err != nil {
-//			layerLog.WithError(err).Error("finding layer count references")
-//			return nil, err
-//		} else if cnt != 0 && layer.Repository == fmt.Sprintf("%s/%s", img.NamespaceID, img.Name) {
-//			if err := images.UpdateLayerRepository(ctx, layer.Digest); err != nil {
-//				layerLog.WithError(err).Error("updating repository of layer")
-//				return nil, err
-//			}
-//		} else {
-//			if err := images.UpdateLayer(ctx, layer.Digest); err != nil {
-//				layerLog.WithError(err).Error("updating layer")
-//				return nil, err
-//			}
-//		}
-//	}
-//
-//	status, err := registry.DeleteManifest(fmt.Sprintf("%s/%s", img.NamespaceID, img.Name), img.Digest)
-//	if err != nil || status == registry.DeleteStatusUnknown {
-//		log.WithError(err).Error("can't delete manifest")
-//		return nil, err
-//	}
-//	// deleting the img at the end to be sure all actions above has been executed
-//	if err := images.DeleteImageByID(ctx, img.ID); err != nil {
-//		log.WithError(err).Error("deleting image")
-//		return nil, err
-//	}
-//
-//	return nil
-//}
+import (
+	"context"
+	"fmt"
+	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
+	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/gogo/protobuf/proto"
+	"github.com/nats-io/go-nats-streaming"
+	"github.com/sirupsen/logrus"
+)
+
+func (App) DeleteImage(msg *stan.Msg) {
+	img := &protocol.DeleteImageEvent{}
+	err := proto.Unmarshal(msg.Data, img)
+	if err != nil {
+		logrus.WithField("data", string(msg.Data)).WithField("nats-subject", msg.Subject).
+			WithError(err).
+			Error("can't unmarshall proto")
+		if err := msg.Ack(); err != nil {
+			return
+		}
+	}
+
+	log := logrus.WithField("image-id", img.Id).
+		WithField("repo", fmt.Sprintf("%s/%s", img.NamespaceId, img.Name)).
+		WithField("digest", img.Digest).
+		WithField("tag", img.Tag).
+		WithField("id", img.Id).
+		WithField("nats-subject", msg.Subject)
+
+	status, err := registry.DeleteManifest(fmt.Sprintf("%s/%s", img.NamespaceId, img.Name), img.Digest)
+	if err != nil || status == registry.DeleteStatusUnknown {
+		log.WithError(err).Error("deleting manifest")
+		return
+	}
+
+	if err := msg.Ack(); err != nil {
+		log.WithError(err).Error("can't ACK")
+		return
+	}
+}
+
+func (App) DeleteImageLayer(msg *stan.Msg) {
+	layer := &protocol.DeleteImageLayerEvent{}
+	err := proto.Unmarshal(msg.Data, layer)
+	if err != nil {
+		logrus.WithField("data", string(msg.Data)).WithField("nats-subject", msg.Subject).
+			WithError(err).
+			Error("can't unmarshall proto")
+		if err := msg.Ack(); err != nil {
+			return
+		}
+	}
+
+	ctx := context.Background()
+
+	log := logrus.WithField("nats-subject", msg.Subject).
+		WithField("digest", layer.Digest)
+
+	log.Info("layer deletion requested by gc")
+
+	// todo check layer count before deleting
+
+	//// delete the layer by calling the registry
+	//deleteStatus, err := registry.DeleteLayer(layer.Repository, layer.Digest)
+	//if err != nil {
+	//	log.WithError(err).Error("layer can't be deleted with the registry")
+	//	return
+	//}
+	//
+	//// the layer has not been deleted in the registry
+	//if deleteStatus == registry.DeleteStatusUnknown || deleteStatus == registry.DeleteStatusNotFound {
+	//	log.WithField("delete-status", deleteStatus.String()).
+	//		Warn("layer delete status is incoherent")
+	//} else {
+	//	log.WithField("delete-status", deleteStatus.String()).Info("layer deleted in the registry")
+	//}
+	//
+	//// deleting the layer in the database
+	//err = images.DeleteLayerByDigest(ctx, layer.Digest)
+	//if err != nil {
+	//	log.WithError(err).Error("can't delete layer in postgres")
+	//} else {
+	//	log.Info("layer deleted in postgres")
+	//}
+	//
+	//if err := images.DeleteImageByDigest(ctx, layer.Digest); err != nil {
+	//	log.WithError(err).Error("can't delete image by digest")
+	//	return
+	//}
+	//
+	//if err := msg.Ack(); err != nil {
+	//	log.WithError(err).Error("can't ACK")
+	//	return
+	//}
+}

@@ -21,6 +21,7 @@ func GetManifest(repo, digest string) *schema2.Manifest {
 	token, err := services.Auth().Client().GenerateToken(context.Background(), &protocol.GenerateTokenRequest{
 		Image:    repo,
 		Duration: int64(time.Minute * 10),
+		Scopes:   []protocol.Scope{protocol.Scope_PULL},
 	})
 
 	if err != nil {
@@ -55,6 +56,7 @@ func DeleteManifest(repo, digest string) (DeleteStatus, error) {
 	token, err := services.Auth().Client().GenerateToken(context.Background(), &protocol.GenerateTokenRequest{
 		Image:    repo,
 		Duration: int64(time.Minute * 10),
+		Scopes:   []protocol.Scope{protocol.Scope_PULL, protocol.Scope_DELETE},
 	})
 	if err != nil {
 		return DeleteStatusUnknown, err
