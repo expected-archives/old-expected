@@ -1,14 +1,17 @@
 syntax = "proto3";
 
-package protocol;
+import "google/protobuf/timestamp.proto";
 
-enum State {
-    START = 0;
-    STOP = 1;
-}
+package protocol;
 
 message ChangeContainerStateRequest {
     string id = 1;
+
+    enum State {
+        START = 0;
+        STOP = 1;
+    }
+
     State requestedState = 2;
 }
 
@@ -20,7 +23,13 @@ message GetContainersLogsRequest {
 }
 
 message GetContainersLogsReply {
-    string line = 1;
+    enum Output {
+        STDOUT = 0;
+        STDERR = 1;
+    }
+    Output output = 1;
+    string message = 2;
+    google.protobuf.Timestamp time = 3;
 }
 
 service Controller {

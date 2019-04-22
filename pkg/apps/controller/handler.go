@@ -29,13 +29,13 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 		return nil, err
 	}
 
-	if (service == nil && r.RequestedState == protocol.State_STOP) ||
-		(service != nil && r.RequestedState == protocol.State_START) {
+	if (service == nil && r.RequestedState == protocol.ChangeContainerStateRequest_STOP) ||
+		(service != nil && r.RequestedState == protocol.ChangeContainerStateRequest_START) {
 		log.Info("service current state is already to desired state")
 		return &protocol.ChangeContainerStateReply{}, nil
 	}
 
-	if r.RequestedState == protocol.State_START {
+	if r.RequestedState == protocol.ChangeContainerStateRequest_START {
 		log.Info("creating the service")
 		if err := docker.ServiceCreate(ctx, container); err != nil {
 			log.WithError(err).Error("failed to create container service")
@@ -43,7 +43,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 		}
 	}
 
-	if r.RequestedState == protocol.State_STOP {
+	if r.RequestedState == protocol.ChangeContainerStateRequest_STOP {
 		log.Info("removing the service")
 		if err := docker.ServiceRemove(ctx, container); err != nil {
 			log.WithError(err).Error("failed to remove container service")
@@ -85,9 +85,16 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 
 	scanner := bufio.NewScanner(logs)
 	for scanner.Scan() {
-		if err := ctrl.Send(&protocol.GetContainersLogsReply{
-			Line: scanner.Text(),
-		}); err != nil {
+		b := scanner.Bytes()
+		entry, err := docker.ParseLogEntry(b)
+		if err != nil {
+			return err
+		}
+		err = ctrl.Send(&protocol.GetContainersLogsReply{
+			Output: entry.Output,
+			Message:
+		})
+		if err != nil {
 			return err
 		}
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -91,7 +92,7 @@ func (s *App) StartContainer(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, err := services.Controller().Client().ChangeContainerState(r.Context(), &protocol.ChangeContainerStateRequest{
 		Id:             ctr.ID,
-		RequestedState: protocol.State_START,
+		RequestedState: protocol.ChangeContainerStateRequest_START,
 	}); err != nil {
 		log.WithError(err).Error("unable to request container state change")
 		response.ErrorInternal(w)
@@ -116,7 +117,7 @@ func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, err := services.Controller().Client().ChangeContainerState(r.Context(), &protocol.ChangeContainerStateRequest{
 		Id:             ctr.ID,
-		RequestedState: protocol.State_STOP,
+		RequestedState: protocol.ChangeContainerStateRequest_STOP,
 	}); err != nil {
 		log.WithError(err).Error("unable to request container state change")
 		response.ErrorInternal(w)
@@ -147,21 +148,25 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 		response.ErrorInternal(w)
 		return
 	}
+	defer logs.CloseSend()
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	flusher, _ := w.(http.Flusher)
 
+	flusher, _ := w.(http.Flusher)
 	for {
 		reply, err := logs.Recv()
+		if err == io.EOF {
+			return
+		}
 		if err != nil {
 			log.WithError(err).Error("failed to receive container logs reply")
 			return
 		}
 		fmt.Println(reply)
 		fmt.Fprintf(w, "event: %s\n", "message")
-		fmt.Fprintf(w, "data: %s\n", reply.Line)
+		fmt.Fprintf(w, "data: %s\n", reply.Message)
 		flusher.Flush()
 	}
 }
