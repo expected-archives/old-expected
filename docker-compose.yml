@@ -21,7 +21,7 @@ services:
     restart: on-failure
     build:
       context: .
-      dockerfile: cmd/expected-imageserver/Dockerfile
+      dockerfile: cmd/expected-registryhook/Dockerfile
     environment:
       - "REGISTRY_URL=http://registry:5000"
       - "AUTH_ADDR=authserver:4000"

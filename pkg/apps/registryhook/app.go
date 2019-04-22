@@ -64,6 +64,12 @@ func (s *App) Run() error {
 		return err
 	}
 
+	if err := apps.HandleQueueSubscription(
+		stan.SubjectImageDeleteLayer, s.Name(), s.DeleteImageLayer,
+		apps.StanQueueGroupOptions(s.Name())...); err != nil {
+		return err
+	}
+
 	s.Gc.Run()
 	return apps.HandleHTTP(router)
 }

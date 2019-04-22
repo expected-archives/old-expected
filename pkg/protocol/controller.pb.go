@@ -15,6 +15,7 @@ It has these top-level messages:
 	GetContainersLogsRequest
 	GetContainersLogsReply
 	DeleteImageEvent
+	DeleteImageLayerEvent
 	GenerateTokenRequest
 	GenerateTokenReply
 */

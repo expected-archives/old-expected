@@ -1,6 +1,7 @@
 package stan
 
 import (
+	"github.com/gogo/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nats-io/go-nats-streaming"
@@ -57,4 +58,20 @@ func (srv *Service) Started() bool {
 
 func (srv *Service) Client() stan.Conn {
 	return srv.conn
+}
+
+func (srv *Service) Publish(subject string, message proto.Message) error {
+	bytes, err := proto.Marshal(message)
+	if err != nil {
+		return err
+	}
+	return srv.conn.Publish(subject, bytes)
+}
+
+func (srv *Service) PublishAsync(subject string, message proto.Message, ah stan.AckHandler) (string, error) {
+	bytes, err := proto.Marshal(message)
+	if err != nil {
+		return "", err
+	}
+	return srv.conn.PublishAsync(subject, bytes, ah)
 }

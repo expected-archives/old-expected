@@ -9,3 +9,8 @@ message DeleteImageEvent {
     string tag = 4;
     string digest = 5;
 }
+
+message DeleteImageLayerEvent {
+    string repository = 1;
+    string digest = 2;
+}

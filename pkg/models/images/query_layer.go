@@ -89,7 +89,7 @@ func UpdateLayerRepository(ctx context.Context, digest string) error {
 
 func DeleteLayerByDigest(ctx context.Context, digest string) error {
 	err := backoff.ExecContext(services.Postgres().Client(), ctx, `
-		DELETE FROM layers WHERE digest = $1
+		DELETE FROM layers WHERE digest = $1  AND (SELECT count(*) FROM image_layer WHERE layer_digest = digest) = 0
 	`, digest)
 	return err
 }
