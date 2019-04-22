@@ -1,4 +1,4 @@
-package imageserver
+package registryhook
 
 //
 //func (App) DeleteImage(ctx context.Context, r *protocol.DeleteImageRequest) (*protocol.DeleteImageReply, error) {

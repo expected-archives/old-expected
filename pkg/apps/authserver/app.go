@@ -1,6 +1,7 @@
 package authserver
 
 import (
+	"fmt"
 	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
@@ -58,6 +59,7 @@ func (s *App) ConfigureGRPC(server *grpc.Server) {
 }
 
 func must(err error) {
+	fmt.Println(err)
 	logrus.WithError(err).Fatal("unable to start grpc server")
 }
 
@@ -69,6 +71,12 @@ func (s *App) Run() error {
 
 	router.HandleFunc("/auth/registry", s.AuthRegistry).Methods("GET")
 
-	go must(apps.HandleGRPC(s))
+	go func() {
+		if err := apps.HandleGRPC(s); err != nil {
+			logrus.Fatal(err)
+			return
+		}
+	}()
+
 	return apps.HandleHTTP(router)
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/distribution/notifications"
-	"github.com/expectedsh/expected/pkg/apps/imageserver/registry"
+	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
 	"github.com/expectedsh/expected/pkg/models/accounts"
 	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/sirupsen/logrus"

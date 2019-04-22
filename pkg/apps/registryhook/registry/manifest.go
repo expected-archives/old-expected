@@ -8,6 +8,7 @@ import (
 	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -17,10 +18,15 @@ import (
 func GetManifest(repo, digest string) *schema2.Manifest {
 	manifest := &schema2.Manifest{}
 
-	token, _ := services.Auth().Client().GenerateToken(context.Background(), &protocol.GenerateTokenRequest{
+	token, err := services.Auth().Client().GenerateToken(context.Background(), &protocol.GenerateTokenRequest{
 		Image:    repo,
 		Duration: int64(time.Minute * 10),
 	})
+
+	if err != nil {
+		logrus.WithError(err).Error("can't generate token")
+		return nil
+	}
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/v2/%s/manifests/%s", registryUrl, repo, digest), nil)

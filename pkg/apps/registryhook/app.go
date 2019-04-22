@@ -1,10 +1,10 @@
-package imageserver
+package registryhook
 
 import (
 	"context"
 	"github.com/expectedsh/expected/pkg/apps"
-	"github.com/expectedsh/expected/pkg/apps/imageserver/gc"
-	"github.com/expectedsh/expected/pkg/apps/imageserver/registry"
+	"github.com/expectedsh/expected/pkg/apps/registryhook/gc"
+	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/nats"
@@ -23,7 +23,7 @@ type App struct {
 }
 
 func (s *App) Name() string {
-	return "imageserver"
+	return "registryhook"
 }
 
 func (s *App) RequiredServices() []services.Service {
