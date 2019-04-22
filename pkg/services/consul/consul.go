@@ -5,14 +5,12 @@ import (
 )
 
 type Service struct {
-	config *Config
-	client *api.Client
-
+	config  *Config
+	client  *api.Client
 	stopped bool
 }
 
 type Config struct {
-	AppName string `envconfig:"appname"`
 	Address string `envconfig:"address" default:"localhost:8500"`
 }
 

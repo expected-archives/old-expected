@@ -12,19 +12,17 @@ const (
 type Resource string
 
 const (
-	ResourceContainer  Resource = "container"
-	ResourceImage      Resource = "image"
-	ResourcePlan       Resource = "plan"
-	ResourceCustomPlan Resource = "customplan"
-	ResourceAccount    Resource = "account"
+	ResourceAccount   Resource = "account"
+	ResourceContainer Resource = "container"
+	ResourceImage     Resource = "image"
 )
 
 type Action string
 
 const (
 	ActionCreate Action = "create"
-	ActionDelete Action = "delete"
 	ActionUpdate Action = "update"
+	ActionDelete Action = "delete"
 )
 
 type Metadata map[string]interface{}

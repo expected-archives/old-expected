@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package protocol;
+
+import "util.proto";
+
+message ChangeContainerStateRequest {
+    string id = 1;
+
+    enum State {
+        START = 0;
+        STOP = 1;
+    }
+
+    State requestedState = 2;
+}
+
+message ChangeContainerStateReply {
+}
+
+message GetContainersLogsRequest {
+    string id = 1;
+}
+
+message GetContainersLogsReply {
+    enum Output {
+        STDOUT = 0;
+        STDERR = 1;
+    }
+
+    Output output = 1;
+    Timestamp time = 2;
+    string taskId = 3;
+    string message = 4;
+}
+
+service Controller {
+    rpc ChangeContainerState (ChangeContainerStateRequest) returns (ChangeContainerStateReply) {
+    }
+
+    rpc GetContainerLogs (GetContainersLogsRequest) returns (stream GetContainersLogsReply) {
+    }
+}

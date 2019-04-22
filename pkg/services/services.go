@@ -1,9 +1,11 @@
 package services
 
 import (
+	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/consul"
+	"github.com/expectedsh/expected/pkg/services/controller"
 	"github.com/expectedsh/expected/pkg/services/postgres"
-	"github.com/expectedsh/expected/pkg/services/rabbitmq"
+	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/sirupsen/logrus"
 )
@@ -51,6 +53,14 @@ func Consul() *consul.Service {
 	return Get("consul").(*consul.Service)
 }
 
-func RabbitMQ() *rabbitmq.Service {
-	return Get("rabbitmq").(*rabbitmq.Service)
+func Stan() *stan.Service {
+	return Get("stan").(*stan.Service)
+}
+
+func Controller() *controller.Service {
+	return Get("controller").(*controller.Service)
+}
+
+func Auth() *auth.Service {
+	return Get("auth").(*auth.Service)
 }

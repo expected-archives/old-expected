@@ -2,6 +2,15 @@ syntax = "proto3";
 
 package protocol;
 
-message ImageDeleteRequest {
+message DeleteImageEvent {
     string id = 1;
+    string namespaceId = 2;
+    string name = 3;
+    string tag = 4;
+    string digest = 5;
+}
+
+message DeleteImageLayerEvent {
+    string repository = 1;
+    string digest = 2;
 }

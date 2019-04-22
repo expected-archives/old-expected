@@ -1,17 +1,21 @@
 ### Create new container
 POST http://localhost:3000/v1/containers
 Content-Type: application/json
-Authorization: ce41f7ca970745409a47079c2ebd62f2
+Authorization: 7d93f590197e45d49101c25df6366618
 
 {
-  "name": "hello",
+  "name": "hell",
   "image": "google/golang-hello",
-  "memory": 64,
-  "tags": ["expectedsh", "test"],
+  "plan_id": "df6207bb-f897-402b-ac8a-9f310f92aa6c",
+  "tags": ["123", "test"],
   "environment": {
     "PORT": "80"
   }
 }
+
+### Get list of all tags for owner id
+GET http://localhost:3000/v1/containers
+Authorization: ce41f7ca970745409a47079c2ebd62f2
 
 ### List containers
 GET http://localhost:3000/v1/containers
@@ -21,14 +25,14 @@ Authorization: c2e827438b6a4a26b8262d89e2673ed0
 ### List images
 GET http://localhost:3000/v1/images
 Content-Type: application/json
-Authorization: 958f414e1d504bd58608caac95f082b1
+Authorization: 345c9f3657b3457b8b7fe37aceb4889f
 
 ### Detail image
-GET http://localhost:3000/v1/images/apiserver/latest
+GET http://localhost:3000/v1/images/golang:latest
 Content-Type: application/json
-Authorization: 958f414e1d504bd58608caac95f082b1
+Authorization: 345c9f3657b3457b8b7fe37aceb4889f
 
 ### Delete image
-DELETE http://localhost:3000/v1/images/0afe88e4-941d-44e7-9850-de7c7709e90c
+DELETE http://localhost:3000/v1/images/f3b994e2-df4c-408a-ad83-afa937a6f66b
 Content-Type: application/json
-Authorization: 958f414e1d504bd58608caac95f082b1
+Authorization: 345c9f3657b3457b8b7fe37aceb4889f

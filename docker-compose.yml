@@ -8,12 +8,11 @@ services:
       context: .
       dockerfile: cmd/expected-apiserver/Dockerfile
     environment:
-      - "ADDR=:3000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
+      - "STAN_ADDR=${STAN_ADDR:-nats://stan:4222}"
     depends_on:
       - postgres
-      - rabbitmq
+      - stan
     ports:
       - 3000:3000
 
@@ -24,17 +23,18 @@ services:
       context: .
       dockerfile: cmd/expected-registryhook/Dockerfile
     environment:
-      - "ADDR=:3001"
       - "REGISTRY_URL=http://registry:5000"
+      - "AUTH_ADDR=authserver:4000"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
-      - "RABBITMQ_ADDR=${RABBITMQ_ADDR:-amqp://expected:expected@rabbitmq/expected}"
+      - "STAN_ADDR=${STAN_ADDR:-nats://stan:4222}"
       - "CERTS_PUBLIC_KEY=/certs/server.crt"
       - "CERTS_PRIVATE_KEY=/certs/server.key"
     depends_on:
       - postgres
-      - rabbitmq
+      - stan
+      - authserver
     ports:
-      - 3001:3001
+      - 3001:3000
     volumes:
       - ./certs:/certs
 
@@ -45,7 +45,6 @@ services:
       context: .
       dockerfile: cmd/expected-authserver/Dockerfile
     environment:
-      - "ADDR=:3002"
       - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@postgres/expected?sslmode=disable}"
       - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
       - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
@@ -55,7 +54,8 @@ services:
     depends_on:
       - postgres
     ports:
-      - 3002:3002
+      - 3002:3000
+      - 4001:4000
     volumes:
       - ./certs:/certs
 
@@ -71,7 +71,7 @@ services:
       - "REGISTRY_AUTH_TOKEN_ISSUER=auth_registry"
       - "REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/server.crt"
       - "REGISTRY_AUTH_TOKEN_AUTOREDIRECT=false"
-      - "REGISTRY_NOTIFICATIONS_ENDPOINTS=- name: expected-hook\n  url: ${REGISTRY_AUTH_SERVER:-http://registryhook:3001/hook}\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
+      - "REGISTRY_NOTIFICATIONS_ENDPOINTS=- name: expected-hook\n  url: ${REGISTRY_AUTH_SERVER:-http://registryhook:3000/hook}\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
     depends_on:
       - registryhook
     ports:
@@ -92,19 +92,11 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  rabbitmq:
-    container_name: expected-rabbitmq
-    image: rabbitmq:management-alpine
+  stan:
+    container_name: expected-stan
+    image: nats-streaming
     restart: on-failure
-    environment:
-      - "RABBITMQ_DEFAULT_USER=expected"
-      - "RABBITMQ_DEFAULT_PASS=expected"
-      - "RABBITMQ_DEFAULT_VHOST=expected"
     ports:
-      - 5672:5672
-      - 15672:15672
-    volumes:
-      - rabbitmq:/var/lib/rabbitmq
+      - 4222:4222
 volumes:
   postgres: {}
-  rabbitmq: {}

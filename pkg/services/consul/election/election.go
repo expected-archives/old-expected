@@ -2,6 +2,7 @@ package election
 
 import (
 	"fmt"
+	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/services/consul"
 	"github.com/hashicorp/consul/api"
 	"time"
@@ -24,12 +25,12 @@ type Election struct {
 func NewElection(service consul.Service) (*Election, error) {
 	return &Election{
 		CheckInterval: time.Second * 2,
-		ServiceName:   service.Config().AppName,
+		ServiceName:   apps.Current().Name(),
 		sessionID:     "",
 		client:        service.Client(),
-		key:           fmt.Sprintf("service/%s/leader", service.Config().AppName),
+		key:           fmt.Sprintf("service/%s/leader", apps.Current().Name()),
 		doneChan:      make(chan struct{}),
-	}, err
+	}, nil
 }
 
 // ElectLeader check with consul if the current session (with the serviceName)

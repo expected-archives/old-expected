@@ -12,7 +12,6 @@ type Image struct {
 	Tag         string    `json:"tag"`          // tag version name: latest, v1, v2...
 	Name        string    `json:"name"`         // name of the tag
 	CreatedAt   time.Time `json:"created_at"`   // when the image was created
-	DeleteMode  bool      `json:"delete_mode"`  // when the image is in process of deletion
 }
 
 // Layer is used by Image.
@@ -44,6 +43,17 @@ type ImageSummary struct {
 // ImageDetail give all informations about an image.
 // An image can have multiple tags so multiple images.
 type ImageDetail struct {
-	Image  *Image   `json:"image"`
+	*ImageSummary
+	Manifests Manifests `json:"manifests"`
+}
+
+type Manifest struct {
+	*Image
 	Layers []*Layer `json:"layers"`
 }
+
+type Manifests []Manifest
+
+func (m Manifests) Len() int           { return len(m) }
+func (m Manifests) Less(i, j int) bool { return m[i].Image.CreatedAt.After(m[j].Image.CreatedAt) }
+func (m Manifests) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/google/uuid"
 	"time"
@@ -53,13 +52,6 @@ func CreatePlan(ctx context.Context, name string, planType Type, price float32, 
 	return &plan, nil
 }
 
-func DeletePlanByID(ctx context.Context, id string) error {
-	_, e := services.Postgres().Client().ExecContext(ctx, `
-		DELETE FROM plans WHERE id = $1
-	`, id)
-	return e
-}
-
 func UpdatePlan(ctx context.Context, plan Plan) error {
 	strMet, err := json.Marshal(plan.Metadata)
 	if err != nil {
@@ -79,9 +71,17 @@ func UpdatePlan(ctx context.Context, plan Plan) error {
 	return e
 }
 
+func DeletePlanByID(ctx context.Context, id string) error {
+	_, e := services.Postgres().Client().ExecContext(ctx, `
+		DELETE FROM plans WHERE id = $1
+	`, id)
+	return e
+}
+
 func FindPlanByID(ctx context.Context, id string) (*Plan, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT * FROM  plans WHERE id = $1
+		SELECT id, name, type, price, metadata, public, created_at, updated_at
+		FROM plans WHERE id = $1
 	`, id)
 	if err != nil {
 		return nil, err
@@ -89,13 +89,14 @@ func FindPlanByID(ctx context.Context, id string) (*Plan, error) {
 	if rows.Next() {
 		return planFromRows(rows)
 	}
-	return nil, errors.New("plan not found")
+	return nil, nil
 }
 
-func FindPlansByType(ctx context.Context, planType string, public bool) ([]*Plan, error) {
+func FindPlans(ctx context.Context) ([]*Plan, error) {
 	rows, err := services.Postgres().Client().QueryContext(ctx, `
-		SELECT * FROM  plans WHERE type = $1 AND public = $2
-	`, planType, public)
+		SELECT id, name, type, price, metadata, public, created_at, updated_at
+		FROM plans
+	`)
 	if err != nil {
 		return nil, err
 	}
@@ -110,9 +111,21 @@ func FindPlansByType(ctx context.Context, planType string, public bool) ([]*Plan
 	return plans, nil
 }
 
-func SetCustomPlan(ctx context.Context, namespaceId string, planId string) error {
-	_, err := services.Postgres().Client().ExecContext(ctx, `
-			INSERT INTO custom_plans VALUES ($1, $2)
-		`, planId, namespaceId)
-	return err
+func FindPlansByType(ctx context.Context, planType string) ([]*Plan, error) {
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
+		SELECT id, name, type, price, metadata, public, created_at, updated_at
+		FROM plans WHERE type = $1
+	`, planType)
+	if err != nil {
+		return nil, err
+	}
+	var plans []*Plan
+	for rows.Next() {
+		plan, err := planFromRows(rows)
+		if err != nil {
+			return nil, err
+		}
+		plans = append(plans, plan)
+	}
+	return plans, nil
 }
