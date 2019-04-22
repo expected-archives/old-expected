@@ -26,3 +26,11 @@ Puis executer la commande :
 ```
 migrate -database=$POSTGRES_ADDR -path=migrations up
 ```
+
+### Utiliser les runners pour le controller
+
+```
+export DOCKER_HOST=tcp://51.15.236.158:2376 DOCKER_TLS_VERIFY=1 DOCKER_CERT_PATH="$(pwd)/certs/docker"
+mkdir -p $(pwd)/certs/docker
+scp "root@51.15.236.158:/root/.docker/*" $(pwd)/certs/docker
+```
