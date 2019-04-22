@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/response"
@@ -164,6 +165,7 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 			log.WithError(err).Error("failed to receive container logs reply")
 			return
 		}
+		json.Marshal(map)
 		fmt.Println(reply)
 		fmt.Fprintf(w, "event: %s\n", "message")
 		fmt.Fprintf(w, "data: %s\n", reply.Message)

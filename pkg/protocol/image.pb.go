@@ -24,7 +24,7 @@ type DeleteImageRequest struct {
 func (m *DeleteImageRequest) Reset()                    { *m = DeleteImageRequest{} }
 func (m *DeleteImageRequest) String() string            { return proto.CompactTextString(m) }
 func (*DeleteImageRequest) ProtoMessage()               {}
-func (*DeleteImageRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+func (*DeleteImageRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
 
 func (m *DeleteImageRequest) GetId() string {
 	if m != nil {
@@ -39,7 +39,7 @@ type DeleteImageReply struct {
 func (m *DeleteImageReply) Reset()                    { *m = DeleteImageReply{} }
 func (m *DeleteImageReply) String() string            { return proto.CompactTextString(m) }
 func (*DeleteImageReply) ProtoMessage()               {}
-func (*DeleteImageReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+func (*DeleteImageReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{1} }
 
 type GenerateTokenRequest struct {
 	Image    string `protobuf:"bytes,1,opt,name=image" json:"image,omitempty"`
@@ -49,7 +49,7 @@ type GenerateTokenRequest struct {
 func (m *GenerateTokenRequest) Reset()                    { *m = GenerateTokenRequest{} }
 func (m *GenerateTokenRequest) String() string            { return proto.CompactTextString(m) }
 func (*GenerateTokenRequest) ProtoMessage()               {}
-func (*GenerateTokenRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
+func (*GenerateTokenRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{2} }
 
 func (m *GenerateTokenRequest) GetImage() string {
 	if m != nil {
@@ -72,7 +72,7 @@ type GenerateTokenReply struct {
 func (m *GenerateTokenReply) Reset()                    { *m = GenerateTokenReply{} }
 func (m *GenerateTokenReply) String() string            { return proto.CompactTextString(m) }
 func (*GenerateTokenReply) ProtoMessage()               {}
-func (*GenerateTokenReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
+func (*GenerateTokenReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
 
 func (m *GenerateTokenReply) GetToken() string {
 	if m != nil {
@@ -193,9 +193,9 @@ var _Image_serviceDesc = grpc.ServiceDesc{
 	Metadata: "image.proto",
 }
 
-func init() { proto.RegisterFile("image.proto", fileDescriptor1) }
+func init() { proto.RegisterFile("image.proto", fileDescriptor2) }
 
-var fileDescriptor1 = []byte{
+var fileDescriptor2 = []byte{
 	// 209 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xce, 0xcc, 0x4d, 0x4c,
 	0x4f, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x00, 0x53, 0xc9, 0xf9, 0x39, 0x4a, 0x2a,

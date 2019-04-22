@@ -83,21 +83,30 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 	}
 	defer logs.Close()
 
-	scanner := bufio.NewScanner(logs)
+	reader := docker.NewLogReader(logs)
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		b := scanner.Bytes()
-		entry, err := docker.ParseLogEntry(b)
-		if err != nil {
-			return err
-		}
-		err = ctrl.Send(&protocol.GetContainersLogsReply{
-			Output: entry.Output,
-			Message:
-		})
-		if err != nil {
+		if err = ctrl.Send(logToReply(reader)); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return scanner.Err()
+}
+
+func logToReply(reader *docker.LogReader) *protocol.GetContainersLogsReply {
+	output := protocol.GetContainersLogsReply_STDOUT
+	if reader.Output == docker.OutputStderr {
+		output = protocol.GetContainersLogsReply_STDERR
+	}
+
+	return &protocol.GetContainersLogsReply{
+		Output: output,
+		TaskId: reader.Labels["com.docker.swarm.task.id"],
+		Time: &protocol.Timestamp{
+			Second:     int64(reader.Time.Second()),
+			NanoSecond: int64(reader.Time.Nanosecond()),
+		},
+		Message: reader.Message,
+	}
 }

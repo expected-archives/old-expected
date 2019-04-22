@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 package protocol;
+
+import "util.proto";
 
 message ChangeContainerStateRequest {
     string id = 1;
@@ -27,9 +27,11 @@ message GetContainersLogsReply {
         STDOUT = 0;
         STDERR = 1;
     }
+
     Output output = 1;
-    string message = 2;
-    google.protobuf.Timestamp time = 3;
+    Timestamp time = 2;
+    string taskId = 3;
+    string message = 4;
 }
 
 service Controller {
