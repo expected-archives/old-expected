@@ -16,4 +16,4 @@ FROM alpine
 
 COPY --from=builder /go/bin/expected-registryhook /go/bin/
 
-ENTRYPOINT ["/go/bin/expected-imageserver"]
+ENTRYPOINT ["/go/bin/expected-registryhook"]

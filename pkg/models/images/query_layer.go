@@ -3,6 +3,7 @@ package images
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"time"
@@ -87,9 +88,26 @@ func UpdateLayerRepository(ctx context.Context, digest string) error {
 	return e
 }
 
+func IsLayerUnused(ctx context.Context, digest string) (bool, error) {
+	rows, err := services.Postgres().Client().QueryContext(ctx, `
+		SELECT (SELECT count(*) FROM image_layer WHERE layer_digest = digest) FROM layers WHERE digest = $1
+	`, digest)
+	if err != nil {
+		return false, err
+	}
+	if rows.Next() {
+		n := 0
+		if err := rows.Scan(&n); err != nil {
+			return false, err
+		}
+		return n == 0, nil
+	}
+	return false, errors.New("layer not found")
+}
+
 func DeleteLayerByDigest(ctx context.Context, digest string) error {
 	err := backoff.ExecContext(services.Postgres().Client(), ctx, `
-		DELETE FROM layers WHERE digest = $1  AND (SELECT count(*) FROM image_layer WHERE layer_digest = digest) = 0
+		DELETE FROM layers WHERE digest = $1
 	`, digest)
 	return err
 }
