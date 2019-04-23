@@ -42,3 +42,6 @@ func (s *Service) Client() *api.Client {
 func (s *Service) Config() *Config {
 	return s.config
 }
+func (s *Service) Election(appName string) *Election {
+	return newElection(s, appName)
+}
