@@ -1,7 +1,6 @@
 package registryhook
 
 import (
-	"context"
 	"fmt"
 	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
 	"github.com/expectedsh/expected/pkg/protocol"
@@ -53,7 +52,7 @@ func (App) DeleteImageLayer(msg *stan.Msg) {
 		}
 	}
 
-	ctx := context.Background()
+	//ctx := context.Background()
 
 	log := logrus.WithField("nats-subject", msg.Subject).
 		WithField("digest", layer.Digest)
