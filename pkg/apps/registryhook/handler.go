@@ -3,6 +3,7 @@ package registryhook
 import (
 	"fmt"
 	"github.com/expectedsh/expected/pkg/apps/registryhook/registry"
+	"github.com/expectedsh/expected/pkg/models/images"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/gogo/protobuf/proto"
 	"github.com/nats-io/go-nats-streaming"
@@ -59,38 +60,55 @@ func (App) DeleteImageLayer(msg *stan.Msg) {
 
 	log.Info("layer deletion requested by gc")
 
-	// todo check layer count before deleting
+	// since the message may be delayed, we check that the layer is still unused
+	unused, err := images.IsLayerUnused(ctx, layer.Digest)
+	if err != nil {
+		log.WithError(err).Error()
+		if err := msg.Ack(); err != nil {
+			log.WithError(err).Error("can't ACK")
+			return
+		}
+		return
+	}
 
-	//// delete the layer by calling the registry
-	//deleteStatus, err := registry.DeleteLayer(layer.Repository, layer.Digest)
-	//if err != nil {
-	//	log.WithError(err).Error("layer can't be deleted with the registry")
-	//	return
-	//}
-	//
-	//// the layer has not been deleted in the registry
-	//if deleteStatus == registry.DeleteStatusUnknown || deleteStatus == registry.DeleteStatusNotFound {
-	//	log.WithField("delete-status", deleteStatus.String()).
-	//		Warn("layer delete status is incoherent")
-	//} else {
-	//	log.WithField("delete-status", deleteStatus.String()).Info("layer deleted in the registry")
-	//}
-	//
-	//// deleting the layer in the database
-	//err = images.DeleteLayerByDigest(ctx, layer.Digest)
-	//if err != nil {
-	//	log.WithError(err).Error("can't delete layer in postgres")
-	//} else {
-	//	log.Info("layer deleted in postgres")
-	//}
-	//
-	//if err := images.DeleteImageByDigest(ctx, layer.Digest); err != nil {
-	//	log.WithError(err).Error("can't delete image by digest")
-	//	return
-	//}
-	//
-	//if err := msg.Ack(); err != nil {
-	//	log.WithError(err).Error("can't ACK")
-	//	return
-	//}
+	if !unused {
+		if err := msg.Ack(); err != nil {
+			log.WithError(err).Error("can't ACK")
+			return
+		}
+	}
+
+	// delete the layer by calling the registry
+	deleteStatus, err := registry.DeleteLayer(layer.Repository, layer.Digest)
+	if err != nil {
+		log.WithError(err).Error("layer can't be deleted with the registry")
+		return
+	}
+
+	// the layer has not been deleted in the registry
+	if deleteStatus == registry.DeleteStatusUnknown || deleteStatus == registry.DeleteStatusNotFound {
+		log.WithField("delete-status", deleteStatus.String()).
+			Warn("layer delete status is incoherent")
+	} else {
+		log.WithField("delete-status", deleteStatus.String()).Info("layer deleted in the registry")
+	}
+
+	// deleting the layer in the database
+	err = images.DeleteLayerByDigest(ctx, layer.Digest)
+	if err != nil {
+		log.WithError(err).Error("can't delete layer in postgres")
+	} else {
+		log.Info("layer deleted in postgres")
+	}
+
+	// delete the image linked to this digest if any exist (this should not be the case)
+	if err := images.DeleteImageByDigest(ctx, layer.Digest); err != nil {
+		log.WithError(err).Error("can't delete image by digest")
+		return
+	}
+
+	if err := msg.Ack(); err != nil {
+		log.WithError(err).Error("can't ACK")
+		return
+	}
 }
