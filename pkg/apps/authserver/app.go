@@ -1,7 +1,6 @@
 package authserver
 
 import (
-	"fmt"
 	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
@@ -56,11 +55,6 @@ func (s *App) Configure() error {
 
 func (s *App) ConfigureGRPC(server *grpc.Server) {
 	protocol.RegisterAuthServer(server, s)
-}
-
-func must(err error) {
-	fmt.Println(err)
-	logrus.WithError(err).Fatal("unable to start grpc server")
 }
 
 func (s *App) Run() error {
