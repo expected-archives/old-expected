@@ -6,7 +6,6 @@ import (
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/util/backoff"
 	"github.com/google/uuid"
-	"sort"
 	"time"
 )
 
@@ -92,11 +91,12 @@ func FindImageDetail(ctx context.Context, namespaceId, name, tag string) (*Image
 		SELECT id, namespace_id, digest, tag, name, created_at
 		FROM images
 		WHERE namespace_id=$1 AND name=$2 AND tag=$3
+		ORDER BY created_at DESC
 	`, namespaceId, name, tag)
 	if err != nil {
 		return nil, err
 	}
-	var manifests Manifests
+	var manifests []Manifest
 	for rows.Next() {
 		if img, err := imageFromRows(rows); err != nil {
 			return nil, err
@@ -111,7 +111,6 @@ func FindImageDetail(ctx context.Context, namespaceId, name, tag string) (*Image
 	if len(manifests) == 0 {
 		return nil, nil
 	} else {
-		sort.Sort(manifests)
 		return &ImageDetail{
 			ImageSummary: &ImageSummary{
 				NamespaceID: manifests[0].Image.NamespaceID,
