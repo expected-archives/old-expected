@@ -1,4 +1,4 @@
-### Create new container
+### Create new hello container
 POST http://localhost:3000/v1/containers
 Content-Type: application/json
 Authorization: 98e4ecbc645a440dbcb5d78984aa8b75
@@ -10,6 +10,22 @@ Authorization: 98e4ecbc645a440dbcb5d78984aa8b75
   "tags": ["123", "test"],
   "environment": {
     "PORT": "80"
+  }
+}
+
+### Create new ghost container
+POST http://localhost:3000/v1/containers
+Content-Type: application/json
+Authorization: 98e4ecbc645a440dbcb5d78984aa8b75
+
+{
+  "name": "ghost",
+  "image": "ghost",
+  "plan_id": "1e006139-7010-4f5b-8d7f-be68b34badd1",
+  "tags": ["123", "test"],
+  "environment": {
+    "server__host": "0.0.0.0",
+    "server__port": "80"
   }
 }
 
