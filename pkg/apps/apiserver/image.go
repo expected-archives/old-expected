@@ -10,7 +10,6 @@ import (
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/gogo/protobuf/proto"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -18,16 +17,16 @@ import (
 
 func (s *App) ListImages(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	imagesStats, err := images.FindImagesSummariesByNamespaceID(r.Context(), account.ID)
+	imageSummaries, err := images.FindImagesSummariesByNamespaceID(r.Context(), account.ID)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Error("unable to get images list")
 		response.ErrorInternal(w)
 		return
 	}
-	if imagesStats == nil {
-		imagesStats = []*images.ImageSummary{}
+	if imageSummaries == nil {
+		imageSummaries = []*images.ImageSummary{}
 	}
-	response.Resource(w, "images", imagesStats)
+	response.Resource(w, "images", imageSummaries)
 }
 
 func (s *App) GetImage(w http.ResponseWriter, r *http.Request) {
@@ -45,15 +44,13 @@ func (s *App) GetImage(w http.ResponseWriter, r *http.Request) {
 
 func (s *App) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	account := request.GetAccount(r)
-	id := mux.Vars(r)["id"]
-	if _, err := uuid.Parse(id); err != nil {
-		response.ErrorBadRequest(w, "Invalid image id.", nil)
-		return
-	}
+
+	name := mux.Vars(r)["name"]
+	tag := mux.Vars(r)["tag"]
+	digest := mux.Vars(r)["digest"]
 
 	// Getting image and erroring if the image is already deleted
-
-	img, err := images.FindImageByID(r.Context(), id)
+	img, err := images.FindImageByInfos(r.Context(), account.ID, name, tag, digest)
 	if err != nil {
 		logrus.WithError(err).WithField("account", account.ID).Error("unable find image")
 		response.ErrorInternal(w)

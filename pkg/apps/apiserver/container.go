@@ -37,6 +37,8 @@ func (s *App) CreateContainer(w http.ResponseWriter, r *http.Request) {
 		response.ErrorBadRequest(w, "Invalid json payload.", nil)
 		return
 	}
+
+	//todo check if container with this name is available for the account
 	if errors := form.Validate(r.Context(), account.ID); len(errors) > 0 {
 		response.ErrorBadRequest(w, "Invalid form.", errors)
 		return

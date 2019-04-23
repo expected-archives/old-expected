@@ -53,7 +53,7 @@ func (s *App) Run() error {
 
 		v1.HandleFunc("/images", s.ListImages).Methods("GET")
 		v1.HandleFunc("/images/{name}:{tag}", s.GetImage).Methods("GET")
-		v1.HandleFunc("/images/{id}", s.DeleteImage).Methods("DELETE")
+		v1.HandleFunc("/images/{name}:{tag}/{digest}", s.DeleteImage).Methods("DELETE")
 
 		v1.HandleFunc("/plans", s.ListPlans).Methods("GET")
 		v1.HandleFunc("/plans/{id}", s.GetPlan).Methods("GET")

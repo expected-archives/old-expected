@@ -17,11 +17,11 @@ type Image struct {
 // Layer is used by Image.
 // An image can contain X layers and a layer can be used by Y images.
 type Layer struct {
-	Repository string    `json:"-"`          // Repository that have push this layer
-	Digest     string    `json:"digest"`     // digest sha256 id of the layer
-	Size       int64     `json:"size"`       // size of the layer in bytes
-	CreatedAt  time.Time `json:"created_at"` // when the layer was first registered
-	UpdatedAt  time.Time `json:"updated_at"` // the last time the layer was updated
+	Repository string    `json:"-"`      // Repository that have push this layer
+	Digest     string    `json:"digest"` // digest sha256 id of the layer
+	Size       int64     `json:"size"`   // size of the layer in bytes
+	CreatedAt  time.Time `json:"-"`      // when the layer was first registered
+	UpdatedAt  time.Time `json:"-"`      // the last time the layer was updated
 }
 
 // ImageLayer represent the relation between an Image and X Layer.
@@ -44,16 +44,10 @@ type ImageSummary struct {
 // An image can have multiple tags so multiple images.
 type ImageDetail struct {
 	*ImageSummary
-	Manifests Manifests `json:"manifests"`
+	Manifests []Manifest `json:"manifests"`
 }
 
 type Manifest struct {
 	*Image
 	Layers []*Layer `json:"layers"`
 }
-
-type Manifests []Manifest
-
-func (m Manifests) Len() int           { return len(m) }
-func (m Manifests) Less(i, j int) bool { return m[i].Image.CreatedAt.After(m[j].Image.CreatedAt) }
-func (m Manifests) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }

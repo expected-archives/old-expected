@@ -137,7 +137,7 @@ func FindLayersByImageId(ctx context.Context, imageId string) ([]*Layer, error) 
     		layers.updated_at
 		FROM image_layer
     	LEFT JOIN layers ON image_layer.layer_digest = layers.digest
-		WHERE image_id = $1
+		WHERE image_id = $1 
 	`, imageId)
 	if err != nil {
 		return nil, err
