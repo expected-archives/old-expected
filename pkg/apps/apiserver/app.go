@@ -77,7 +77,7 @@ func (s *App) Run() error {
 		{
 			containers.Use(s.ContainerMiddleware)
 
-			containers.HandleFunc("/", s.GetContainer).Methods("GET")
+			containers.HandleFunc("", s.GetContainer).Methods("GET")
 			containers.HandleFunc("/logs", s.GetContainerLogs).Methods("GET")
 			containers.HandleFunc("/start", s.StartContainer).Methods("POST")
 			containers.HandleFunc("/stop", s.StopContainer).Methods("POST")

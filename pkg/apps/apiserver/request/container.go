@@ -85,6 +85,8 @@ func (s *CreateContainer) Validate(ctx context.Context, namespaceId string) (err
 		plan, _ := plans.FindPlanByID(ctx, s.PlanID)
 		if plan == nil {
 			errors["plan_id"] = "Plan not found."
+		} else if !plan.Public {
+			errors["plan_id"] = "Plan unavailable."
 		}
 	}
 	return errors
