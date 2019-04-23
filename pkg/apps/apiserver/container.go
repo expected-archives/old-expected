@@ -57,95 +57,75 @@ func (s *App) CreateContainer(w http.ResponseWriter, r *http.Request) {
 	response.Resource(w, "container", container)
 }
 
+func (s *App) ContainerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		account := request.GetAccount(r)
+		name := mux.Vars(r)["name"]
+		if !request.NameRegexp.MatchString(name) {
+			response.ErrorBadRequest(w, "Invalid container name.", nil)
+			return
+		}
+		container, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
+		if err != nil {
+			logrus.
+				WithError(err).
+				WithField("name", name).
+				WithField("action", "start").
+				Error("unable to find container")
+			response.ErrorInternal(w)
+			return
+		}
+		if container == nil {
+			response.ErrorNotFound(w)
+			return
+		}
+		request.SetContainer(r, container)
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (s *App) GetContainer(w http.ResponseWriter, r *http.Request) {
-	account := request.GetAccount(r)
-	name := mux.Vars(r)["name"]
-	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
-	if err != nil {
-		logrus.
-			WithField("name", name).
-			WithField("action", "get").
-			WithError(err).
-			Errorln("unable to get container")
-		response.ErrorInternal(w)
-		return
-	}
-	if ctr == nil {
-		response.ErrorNotFound(w)
-		return
-	}
-	response.Resource(w, "container", ctr)
+	response.Resource(w, "container", request.GetContainer(r))
 }
 
 func (s *App) StartContainer(w http.ResponseWriter, r *http.Request) {
-	account := request.GetAccount(r)
-	name := mux.Vars(r)["name"]
-	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
-	log := logrus.WithField("name", name).WithField("action", "start")
-	if err != nil {
-		log.WithError(err).Error("unable to get container")
-		response.ErrorInternal(w)
-		return
-	}
-	if ctr == nil {
-		response.ErrorNotFound(w)
-		return
-	}
+	container := request.GetContainer(r)
+
 	if _, err := services.Controller().Client().ChangeContainerState(r.Context(), &protocol.ChangeContainerStateRequest{
-		Id:             ctr.ID,
+		Id:             container.ID,
 		RequestedState: protocol.ChangeContainerStateRequest_START,
 	}); err != nil {
-		log.WithError(err).Error("unable to request container state change")
+		logrus.WithError(err).Error("unable to request container state change")
 		response.ErrorInternal(w)
 		return
 	}
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
-	account := request.GetAccount(r)
-	name := mux.Vars(r)["name"]
-	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
-	log := logrus.WithField("name", name).WithField("action", "stop")
-	if err != nil {
-		log.WithError(err).Error("unable to get container")
-		response.ErrorInternal(w)
-		return
-	}
-	if ctr == nil {
-		response.ErrorNotFound(w)
-		return
-	}
+	container := request.GetContainer(r)
+
 	if _, err := services.Controller().Client().ChangeContainerState(r.Context(), &protocol.ChangeContainerStateRequest{
-		Id:             ctr.ID,
+		Id:             container.ID,
 		RequestedState: protocol.ChangeContainerStateRequest_STOP,
 	}); err != nil {
-		log.WithError(err).Error("unable to request container state change")
+		logrus.WithError(err).Error("unable to request container state change")
 		response.ErrorInternal(w)
 		return
 	}
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
-	account := request.GetAccount(r)
-	name := mux.Vars(r)["name"]
-	ctr, err := containers.FindContainerByNameAndNamespaceID(r.Context(), name, account.ID)
-	log := logrus.WithField("name", name).WithField("action", "logs")
-	if err != nil {
-		log.WithError(err).Error("unable to get container")
-		response.ErrorInternal(w)
-		return
-	}
-	if ctr == nil {
-		response.ErrorNotFound(w)
-		return
-	}
+	container := request.GetContainer(r)
+
 	logs, err := services.Controller().Client().GetContainerLogs(r.Context(), &protocol.GetContainersLogsRequest{
-		Id: ctr.ID,
+		Id: container.ID,
 	})
 	if err != nil {
-		log.WithError(err).Error("unable to request container logs")
+		logrus.WithError(err).Error("unable to request container logs")
 		response.ErrorInternal(w)
 		return
 	}
@@ -159,7 +139,7 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.WithError(err).Error("failed to receive container logs reply")
+			logrus.WithError(err).Error("failed to receive container logs reply")
 			return
 		}
 		if err = sse.SendJSON(w, "message", &map[string]interface{}{
@@ -168,7 +148,7 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 			"task_id": reply.TaskId,
 			"message": reply.Message,
 		}); err != nil {
-			log.WithError(err).Error("failed to send container logs")
+			logrus.WithError(err).Error("failed to send container logs")
 			return
 		}
 	}

@@ -10,17 +10,17 @@ import (
 )
 
 var (
-	// nameRegexp define the name constraint. Must start with
+	// NameRegexp define the name constraint. Must start with
 	// alpha numeric char, can contain _ or - chars.
-	nameRegexp = regexp.MustCompile(`^[\w0-9]+[\w_\-0-9]$`)
+	NameRegexp = regexp.MustCompile(`^[\w0-9]+[\w_\-0-9]$`)
 
-	// tagRegexp define the tag constraint. Must start with alpha
+	// TagRegexp define the tag constraint. Must start with alpha
 	// char, can numericals character and contain . - _ characters.
-	tagRegexp = regexp.MustCompile(`^[\w]+[\w0-9#?:.-_/]$`)
+	TagRegexp = regexp.MustCompile(`^[\w]+[\w0-9#?:.-_/]$`)
 
-	// environmentKeyRegexp define the shell posix standard to accept environment
+	// EnvironmentKeyRegexp define the shell posix standard to accept environment
 	// key variable.
-	environmentKeyRegexp = regexp.MustCompile(`^[a-zA-Z_]+[a-zA-Z0-9_]$`)
+	EnvironmentKeyRegexp = regexp.MustCompile(`^[a-zA-Z_]+[a-zA-Z0-9_]$`)
 )
 
 type CreateContainer struct {
@@ -34,7 +34,7 @@ type CreateContainer struct {
 func (s *CreateContainer) Validate(ctx context.Context, namespaceId string) (errors map[string]string) {
 	errors = make(map[string]string)
 
-	if !nameRegexp.MatchString(s.Name) {
+	if !NameRegexp.MatchString(s.Name) {
 		errors["name"] = "Name must start with alphanumerical character and can contain dash or underscore."
 	}
 	if len(s.Name) < 3 || len(s.Name) > 32 {
@@ -52,7 +52,7 @@ func (s *CreateContainer) Validate(ctx context.Context, namespaceId string) (err
 		errors["tags"] = "You can't have more than 100 tags."
 	} else {
 		for _, tag := range s.Tags {
-			if !tagRegexp.MatchString(tag) {
+			if !TagRegexp.MatchString(tag) {
 				errors["tags"] = "Tags must start with alpha characters, can contain numbers and this specials " +
 					"characters set '#?:.-_/'."
 			}
@@ -66,7 +66,7 @@ func (s *CreateContainer) Validate(ctx context.Context, namespaceId string) (err
 		errors["environment"] = "You can't have more than 100 environments variables."
 	} else {
 		for key, value := range s.Environment {
-			if !environmentKeyRegexp.MatchString(key) {
+			if !EnvironmentKeyRegexp.MatchString(key) {
 				errors["environment"] = "Environment key must start with alpha characters or underscore and can " +
 					"contain numericals values."
 			}
