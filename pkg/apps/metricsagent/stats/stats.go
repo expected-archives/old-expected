@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"math"
 	"strings"
+	"time"
 )
 
 type Stats struct {
@@ -19,6 +20,7 @@ type Stats struct {
 	BlockInput  uint32    // 32
 	BlockOutput uint32    // 32
 	Cpu         float32   // 32
+	Time        time.Time // 32
 	// 320 bits
 	// 40 bytes
 }
@@ -29,7 +31,8 @@ func (s *Stats) String() string {
 		"Memory: %d\n"+
 		"Net: %.2f / %.2f\n"+
 		"Block: %d / %d\n"+
-		"Cpu: %.2f %%", s.ID, s.Memory, s.NetInput, s.NetOutput, s.BlockInput, s.BlockOutput, s.Cpu)
+		"Cpu: %.2f %%\n"+
+		"Time: %s\n", s.ID, s.Memory, s.NetInput, s.NetOutput, s.BlockInput, s.BlockOutput, s.Cpu, s.Time.String())
 }
 
 func (s *Stats) UnmarshalBinary(data []byte) error {
@@ -54,11 +57,17 @@ func (s *Stats) UnmarshalBinary(data []byte) error {
 	s.NetOutput = math.Float32frombits(binary.LittleEndian.Uint32(data[plus(&seq, 4) : seq+4]))
 
 	// Blocks
-	s.BlockInput = binary.LittleEndian.Uint32(data[plus(&seq, 0) : seq+4])
-	s.BlockOutput = binary.LittleEndian.Uint32(data[plus(&seq, 0) : seq+4])
+	s.BlockInput = binary.LittleEndian.Uint32(data[plus(&seq, 4) : seq+4])
+	s.BlockOutput = binary.LittleEndian.Uint32(data[plus(&seq, 4) : seq+4])
 
 	// Cpu
 	s.Cpu = math.Float32frombits(binary.LittleEndian.Uint32(data[plus(&seq, 4) : seq+4]))
+
+	s.Time = time.Time{}
+	err = s.Time.UnmarshalBinary(data[plus(&seq, 4):])
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -75,29 +84,54 @@ func (s Stats) MarshalBinary() (data []byte, err error) {
 	buffer.Write(buid)
 
 	// Memory
-	bits32toBuffer(buffer, s.Memory)
+	bitsUint32toBuffer(buffer, s.Memory)
 
 	// Networks
-	bits32toBuffer(buffer, math.Float32bits(s.NetInput))
-	bits32toBuffer(buffer, math.Float32bits(s.NetOutput))
+	bitsUint32toBuffer(buffer, math.Float32bits(s.NetInput))
+	bitsUint32toBuffer(buffer, math.Float32bits(s.NetOutput))
 
 	// Blocks
-	bits32toBuffer(buffer, s.BlockInput)
-	bits32toBuffer(buffer, s.BlockOutput)
+	bitsUint32toBuffer(buffer, s.BlockInput)
+	bitsUint32toBuffer(buffer, s.BlockOutput)
 
 	// Cpu
-	bits32toBuffer(buffer, math.Float32bits(s.Cpu))
+	bitsUint32toBuffer(buffer, math.Float32bits(s.Cpu))
+
+	// time
+	marshalBinary, err := s.Time.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	buffer.Write(marshalBinary)
 
 	return buffer.Bytes(), nil
 }
 
-func bits32toBuffer(buffer *bytes.Buffer, u32 uint32) {
+func bitsUint32toBuffer(buffer *bytes.Buffer, u32 uint32) {
 	buffer.Write([]byte{
 		byte(u32),
 		byte(u32 >> 8),
 		byte(u32 >> 16),
 		byte(u32 >> 24),
 	})
+}
+
+func bitsInt32toBuffer(buffer *bytes.Buffer, i32 int) {
+	buffer.Write([]byte{
+		byte(i32),
+		byte(i32 >> 8),
+		byte(i32 >> 16),
+		byte(i32 >> 24),
+	})
+}
+
+func bytesToInt32(b []byte) int {
+	var value int
+	value |= int(b[0])
+	value |= int(b[1]) << 8
+	value |= int(b[2]) << 16
+	value |= int(b[3]) << 24
+	return value
 }
 
 func plus(n *int, add int) int {
@@ -113,6 +147,7 @@ func FromDockerStats(t types.StatsJSON, uuid uuid.UUID) Stats {
 	}
 	s.BlockInput, s.BlockOutput = calculateBlockIO(t.BlkioStats)
 	s.NetInput, s.NetOutput = calculateNetwork(t.Networks)
+	s.Time = t.Read
 
 	return s
 }

@@ -4,7 +4,10 @@ import (
 	"sync"
 )
 
+// packets is a list of of list of packet.
+// A packet is a []byte representing a stats.Stats
 var packets [][][]byte
+
 var mutex = sync.Mutex{}
 
 func AddPackets(s [][]byte) {

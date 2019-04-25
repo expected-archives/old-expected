@@ -3,6 +3,7 @@ package metricsagent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/collector"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
@@ -27,7 +28,7 @@ func run() {
 		group := sync.WaitGroup{}
 		group.Add(len(containers))
 
-		packet := make([]stats.Stats, 0)
+		packet := make([][]byte, 0)
 
 		for _, ctr := range containers {
 			go func(ctr types.Container) {
@@ -37,7 +38,16 @@ func run() {
 					group.Done()
 				}
 
-				packet = append(packet, stats.FromDockerStats(*st, uuid.New()))
+				dockerStats := stats.FromDockerStats(*st, uuid.New())
+
+				fmt.Println(dockerStats.String())
+				data, err := dockerStats.MarshalBinary()
+				if err != nil {
+					logrus.WithError(err).Error(10 * time.Second)
+					group.Done()
+				}
+				fmt.Println(len(data))
+				packet = append(packet, data)
 				group.Done()
 			}(ctr)
 		}
