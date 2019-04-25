@@ -2,7 +2,6 @@ package consul
 
 import (
 	"fmt"
-	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/hashicorp/consul/api"
 	"time"
 )
@@ -27,7 +26,7 @@ func newElection(service *Service, appName string) *Election {
 		ServiceName:   appName,
 		sessionID:     "",
 		client:        service.Client(),
-		key:           fmt.Sprintf("service/%s/leader", apps.Current().Name()),
+		key:           fmt.Sprintf("service/%s/leader", appName),
 		doneChan:      make(chan struct{}),
 	}
 }
