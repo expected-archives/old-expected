@@ -4,8 +4,10 @@ import (
 	"sync"
 )
 
-// packets is a list of of list of packet.
+// packets is a list of list of packet.
 // A packet is a []byte representing a stats.Stats
+// A list of packet is all metrics collected on each
+// running containers in this daemon.
 var packets [][][]byte
 
 var mutex = sync.Mutex{}
