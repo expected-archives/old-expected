@@ -5,7 +5,6 @@ import (
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
@@ -27,12 +26,7 @@ func (a *App) Configure() error {
 }
 
 func (a *App) Run() error {
-	go func() {
-		if err := apps.HandleGRPC(a); err != nil {
-			logrus.Fatal(err)
-			return
-		}
-	}()
-	run() // blocking
-	return nil
+	go run()
+
+	return apps.HandleGRPC(a)
 }

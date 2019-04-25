@@ -5,7 +5,7 @@ import (
 )
 
 // packets is a list of list of packet.
-// A packet is a []byte representing a stats.Stats
+// A packet is a []byte representing a metric.Metric
 // A list of packet is all metrics collected on each
 // running containers in this daemon.
 var packets [][][]byte

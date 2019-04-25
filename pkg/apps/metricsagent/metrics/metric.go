@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type Stats struct {
+type Metric struct {
 	ID          uuid.UUID // 16
 	Memory      uint32    // 32
 	NetInput    float32   // 32
@@ -25,7 +25,7 @@ type Stats struct {
 	// 40 bytes
 }
 
-func (s *Stats) String() string {
+func (s *Metric) String() string {
 	return fmt.Sprintf(""+
 		"ID: %s\n"+
 		"Memory: %d\n"+
@@ -35,9 +35,9 @@ func (s *Stats) String() string {
 		"Time: %s\n", s.ID, s.Memory, s.NetInput, s.NetOutput, s.BlockInput, s.BlockOutput, s.Cpu, s.Time.String())
 }
 
-func (s *Stats) UnmarshalBinary(data []byte) error {
+func (s *Metric) UnmarshalBinary(data []byte) error {
 	if len(data) != 40 {
-		return errors.New("unable to unmarshal stats")
+		return errors.New("unable to unmarshal metrics")
 	}
 
 	seq := 16
@@ -72,7 +72,7 @@ func (s *Stats) UnmarshalBinary(data []byte) error {
 	return nil
 }
 
-func (s Stats) MarshalBinary() (data []byte, err error) {
+func (s Metric) MarshalBinary() (data []byte, err error) {
 	var b []byte
 	buffer := bytes.NewBuffer(b)
 
@@ -121,8 +121,8 @@ func plus(n *int, add int) int {
 	return *n
 }
 
-func FromDockerStats(t types.StatsJSON, uuid uuid.UUID) Stats {
-	s := Stats{
+func FromDockerStats(t types.StatsJSON, uuid uuid.UUID) Metric {
+	s := Metric{
 		ID:     uuid,
 		Memory: uint32(t.MemoryStats.Usage),
 		Cpu:    calculateCPUPercentUnix(t.PreCPUStats.CPUUsage.TotalUsage, t.PreCPUStats.SystemUsage, t),
