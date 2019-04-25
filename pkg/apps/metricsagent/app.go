@@ -1,11 +1,12 @@
 package metricsagent
 
 import (
-	"context"
-	"fmt"
+	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
+	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
-	"io/ioutil"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 type App struct{}
@@ -17,22 +18,21 @@ func (a *App) Name() string {
 func (a *App) RequiredServices() []services.Service {
 	return []services.Service{}
 }
+func (a *App) ConfigureGRPC(server *grpc.Server) {
+	protocol.RegisterMetricsServer(server, a)
+}
 
 func (a *App) Configure() error {
-	return nil
+	return docker.Init()
 }
 
 func (a *App) Run() error {
-	containers, err := docker.GetContainers(context.Background())
-	if err != nil {
-		return err
-	}
-
-	target := containers[0]
-
-	containerStats, _ := docker.GetStats(context.Background(), target.ID)
-
-	bytes, err := ioutil.ReadAll(containerStats.Body)
-	fmt.Println(string(bytes))
-	return err
+	go func() {
+		if err := apps.HandleGRPC(a); err != nil {
+			logrus.Fatal(err)
+			return
+		}
+	}()
+	run() // blocking
+	return nil
 }

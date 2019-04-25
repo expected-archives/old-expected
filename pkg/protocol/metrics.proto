@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protocol;
+
+message MetricsRequest {
+}
+
+message MetricsResponse {
+    repeated bytes metrics = 1;
+}
+
+service Metrics {
+    rpc GetMetrics (MetricsRequest) returns (stream MetricsResponse) {
+    }
+}

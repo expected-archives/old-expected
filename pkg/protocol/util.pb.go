@@ -20,7 +20,7 @@ type Timestamp struct {
 func (m *Timestamp) Reset()                    { *m = Timestamp{} }
 func (m *Timestamp) String() string            { return proto.CompactTextString(m) }
 func (*Timestamp) ProtoMessage()               {}
-func (*Timestamp) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
+func (*Timestamp) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{0} }
 
 func (m *Timestamp) GetSecond() int64 {
 	if m != nil {
@@ -40,9 +40,9 @@ func init() {
 	proto.RegisterType((*Timestamp)(nil), "protocol.Timestamp")
 }
 
-func init() { proto.RegisterFile("util.proto", fileDescriptor2) }
+func init() { proto.RegisterFile("util.proto", fileDescriptor3) }
 
-var fileDescriptor2 = []byte{
+var fileDescriptor3 = []byte{
 	// 95 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2a, 0x2d, 0xc9, 0xcc,
 	0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x00, 0x53, 0xc9, 0xf9, 0x39, 0x4a, 0xce, 0x5c,
