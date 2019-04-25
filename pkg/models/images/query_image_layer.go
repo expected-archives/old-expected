@@ -77,10 +77,10 @@ func FindImagesSummariesByNamespaceID(ctx context.Context, namespaceId string) (
       		img.name,
       		img.tag,
       		(
-      		    SELECT layers.created_at
-      		    FROM layers
-      		    WHERE repository = concat(img.namespace_id, concat('/', img.name))
-      		    ORDER BY layers.created_at DESC
+      		    SELECT images.created_at
+      		    FROM images
+      		    WHERE namespace_id = img.namespace_id AND name = img.name AND tag = img.tag
+      		    ORDER BY images.created_at DESC
       		    LIMIT 1
       		) AS last_push
 		FROM image_layer

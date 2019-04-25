@@ -1,9 +1,7 @@
-package election
+package consul
 
 import (
 	"fmt"
-	"github.com/expectedsh/expected/pkg/apps"
-	"github.com/expectedsh/expected/pkg/services/consul"
 	"github.com/hashicorp/consul/api"
 	"time"
 )
@@ -22,15 +20,15 @@ type Election struct {
 }
 
 // NewElection create an instance of Election.
-func NewElection(service consul.Service) (*Election, error) {
+func newElection(service *Service, appName string) *Election {
 	return &Election{
 		CheckInterval: time.Second * 2,
-		ServiceName:   apps.Current().Name(),
+		ServiceName:   appName,
 		sessionID:     "",
 		client:        service.Client(),
-		key:           fmt.Sprintf("service/%s/leader", apps.Current().Name()),
+		key:           fmt.Sprintf("service/%s/leader", appName),
 		doneChan:      make(chan struct{}),
-	}, nil
+	}
 }
 
 // ElectLeader check with consul if the current session (with the serviceName)
