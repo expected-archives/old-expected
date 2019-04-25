@@ -10,6 +10,7 @@ import (
 func (a *App) GetMetrics(_ *protocol.MetricsRequest, res protocol.Metrics_GetMetricsServer) error {
 	packets := collector.GetPackets()
 	unsendedPackets := make([][]byte, 0)
+
 	for _, packet := range packets {
 		error := res.Send(&protocol.MetricsResponse{
 			Metrics: packet,

@@ -1,4 +1,4 @@
-package stats
+package metrics
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ type Stats struct {
 	BlockInput  uint32    // 32
 	BlockOutput uint32    // 32
 	Cpu         float32   // 32
-	Time        time.Time // 32
+	Time        time.Time // ...
 	// 320 bits
 	// 40 bytes
 }
@@ -114,24 +114,6 @@ func bitsUint32toBuffer(buffer *bytes.Buffer, u32 uint32) {
 		byte(u32 >> 16),
 		byte(u32 >> 24),
 	})
-}
-
-func bitsInt32toBuffer(buffer *bytes.Buffer, i32 int) {
-	buffer.Write([]byte{
-		byte(i32),
-		byte(i32 >> 8),
-		byte(i32 >> 16),
-		byte(i32 >> 24),
-	})
-}
-
-func bytesToInt32(b []byte) int {
-	var value int
-	value |= int(b[0])
-	value |= int(b[1]) << 8
-	value |= int(b[2]) << 16
-	value |= int(b[3]) << 24
-	return value
 }
 
 func plus(n *int, add int) int {

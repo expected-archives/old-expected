@@ -3,11 +3,10 @@ package metricsagent
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/collector"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/stats"
+	"github.com/expectedsh/expected/pkg/apps/metricsagent/metrics"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -28,7 +27,8 @@ func run() {
 		group := sync.WaitGroup{}
 		group.Add(len(containers))
 
-		packet := make([][]byte, 0)
+		// list of metrics for each container at this moment.
+		packets := make([][]byte, 0)
 
 		for _, ctr := range containers {
 			go func(ctr types.Container) {
@@ -38,22 +38,22 @@ func run() {
 					group.Done()
 				}
 
-				dockerStats := stats.FromDockerStats(*st, uuid.New())
+				// translate docker stats to our bytes marshalled metric structure.
+				data, err := metrics.FromDockerStats(*st, uuid.New()).MarshalBinary()
 
-				fmt.Println(dockerStats.String())
-				data, err := dockerStats.MarshalBinary()
 				if err != nil {
 					logrus.WithError(err).Error(10 * time.Second)
 					group.Done()
 				}
-				fmt.Println(len(data))
-				packet = append(packet, data)
+
+				packets = append(packets, data)
 				group.Done()
 			}(ctr)
 		}
 
 		group.Wait()
-		collector.AddPackets(packet)
+		// lock mutex
+		collector.AddPackets(packets)
 
 		time.Sleep(10 * time.Second)
 	}

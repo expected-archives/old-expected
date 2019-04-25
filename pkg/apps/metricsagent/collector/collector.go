@@ -10,7 +10,7 @@ import (
 // running containers in this daemon.
 var packets [][][]byte
 
-var mutex = sync.Mutex{}
+var mutex = sync.RWMutex{}
 
 func AddPackets(s [][]byte) {
 	mutex.Lock()
@@ -19,9 +19,12 @@ func AddPackets(s [][]byte) {
 }
 
 func GetPackets() [][][]byte {
-	mutex.Lock()
-	defer mutex.Unlock()
+	mutex.RLock()
 	p := packets
+	mutex.RUnlock()
+
+	mutex.Lock()
 	packets = make([][][]byte, 0)
+	mutex.Unlock()
 	return p
 }
