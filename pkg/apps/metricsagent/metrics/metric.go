@@ -21,8 +21,6 @@ type Metric struct {
 	BlockOutput uint32    // 32
 	Cpu         float32   // 32
 	Time        time.Time // ...
-	// 320 bits
-	// 40 bytes
 }
 
 func (s *Metric) String() string {
