@@ -12,12 +12,12 @@ func (a *App) GetMetrics(_ *protocol.MetricsRequest, res protocol.Metrics_GetMet
 	unsendedPackets := make([][]byte, 0)
 
 	for _, packet := range packets {
-		error := res.Send(&protocol.MetricsResponse{
+		err := res.Send(&protocol.MetricsResponse{
 			Metrics: packet,
 		})
 
-		if error != nil {
-			logrus.WithError(error).Error("can't send stream")
+		if err != nil {
+			logrus.WithError(err).Error("can't send stream")
 			unsendedPackets = append(unsendedPackets, packet...)
 		}
 	}
