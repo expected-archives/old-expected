@@ -8,5 +8,5 @@ CREATE TABLE containers
     environment JSON         NOT NULL,
     tags        JSON         NOT NULL,
     owner_id    UUID         NOT NULL,
-    created_at  TIMESTAMP DEFAULT NOW()
+    created_at  TIMESTAMPTZ DEFAULT NOW()
 );
