@@ -16,14 +16,14 @@ import (
 
 var ui64 = uint64(0)
 
-func (App) run(ctx context.Context) {
+func (App) run(ctx context.Context) error {
 	for {
 		waveStartedAt := time.Now()
 		ui64++
 
 		select {
 		case <-ctx.Done():
-			return
+			return nil
 		default:
 			containers, err := docker.GetContainers(ctx)
 			if err != nil {
@@ -34,7 +34,8 @@ func (App) run(ctx context.Context) {
 			group := sync.WaitGroup{}
 			group.Add(len(containers))
 
-			// list of metrics for each container at this moment.
+			// list of metrics for each containers running in this host
+			// at this moment.
 			metricList := make([]metrics.Metric, 0)
 
 			for _, ctr := range containers {

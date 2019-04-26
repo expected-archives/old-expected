@@ -51,13 +51,10 @@ func handleStop(ch chan os.Signal) {
 	services.Stop()
 }
 
-type Runner func(ctx context.Context)
-
-func HandleRunner(runner Runner) error {
+func HandleRunner(runner func(ctx context.Context) error) error {
 	ctx, canceller := context.WithCancel(context.Background())
 	cancellers = append(cancellers, canceller)
-	runner(ctx)
-	return nil
+	return runner(ctx)
 }
 
 func HandleHTTP(h http.Handler) error {
