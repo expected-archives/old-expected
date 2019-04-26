@@ -9,7 +9,6 @@ import (
 	"github.com/expectedsh/expected/pkg/services/auth"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/services/stan"
-	"github.com/expectedsh/expected/pkg/util/certs"
 	"github.com/expectedsh/expected/pkg/util/cors"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
@@ -17,7 +16,6 @@ import (
 
 type App struct {
 	RegistryUrl string `envconfig:"registry_url" default:"http://localhost:5000"`
-	Certs       certs.Config
 	GcConfig    gc.Config
 	Gc          *gc.GarbageCollector
 }
@@ -38,9 +36,7 @@ func (s *App) Configure() error {
 	if err := envconfig.Process("", s); err != nil {
 		return err
 	}
-	if err := certs.Init(s.Certs); err != nil {
-		return err
-	}
+
 	registry.Init(s.RegistryUrl)
 	s.Gc = gc.New(context.Background(), &gc.Config{
 		OlderThan: s.GcConfig.OlderThan,

@@ -13,8 +13,10 @@ import (
 )
 
 var (
-	httpServer    *http.Server
-	grpcServer    *grpc.Server
+	httpServer *http.Server
+	grpcServer *grpc.Server
+
+	cancellers    []context.CancelFunc
 	subscriptions []stan.Subscription
 )
 
@@ -25,6 +27,11 @@ type GRPCConfigurer interface {
 func handleStop(ch chan os.Signal) {
 	<-ch
 	logrus.Info("stopping the app")
+	if len(cancellers) > 0 {
+		for _, c := range cancellers {
+			c()
+		}
+	}
 	if len(subscriptions) > 0 {
 		for _, sub := range subscriptions {
 			if err := sub.Close(); err != nil {
@@ -42,6 +49,12 @@ func handleStop(ch chan os.Signal) {
 	}
 	logrus.Info("stopping services")
 	services.Stop()
+}
+
+func HandleRunner(runner func(ctx context.Context) error) error {
+	ctx, canceller := context.WithCancel(context.Background())
+	cancellers = append(cancellers, canceller)
+	return runner(ctx)
 }
 
 func HandleHTTP(h http.Handler) error {
