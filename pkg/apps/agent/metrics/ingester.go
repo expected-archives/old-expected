@@ -1,21 +1,20 @@
-package ingester
+package metrics
 
 import (
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/metrics"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/stan"
 	"github.com/sirupsen/logrus"
 	"sync"
 )
 
-func Ingest(metricList []metrics.Metric) {
+func ingest(metricList []Metric) {
 	group := sync.WaitGroup{}
 	group.Add(len(metricList))
 
 	metricsSended := 0
 
 	for _, packet := range metricList {
-		go func(metric metrics.Metric) {
+		go func(metric Metric) {
 			data, err := metric.MarshalBinary()
 			if err != nil {
 				logrus.WithError(err).Error("can't marshal into binary metric")

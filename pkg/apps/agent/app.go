@@ -1,8 +1,9 @@
-package metricsagent
+package agent
 
 import (
 	"github.com/expectedsh/expected/pkg/apps"
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
+	"github.com/expectedsh/expected/pkg/apps/agent/docker"
+	"github.com/expectedsh/expected/pkg/apps/agent/metrics"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/stan"
 )
@@ -10,7 +11,7 @@ import (
 type App struct{}
 
 func (a *App) Name() string {
-	return "metricsagent"
+	return "agent"
 }
 
 func (a *App) RequiredServices() []services.Service {
@@ -24,5 +25,5 @@ func (a *App) Configure() error {
 }
 
 func (a *App) Run() error {
-	return apps.HandleRunner(a.run)
+	return apps.HandleRunner(metrics.Runner)
 }

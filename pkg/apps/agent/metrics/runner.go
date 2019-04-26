@@ -1,12 +1,10 @@
-package metricsagent
+package metrics
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/ingester"
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/metrics"
+	"github.com/expectedsh/expected/pkg/apps/agent/docker"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -16,7 +14,7 @@ import (
 
 var ui64 = uint64(0)
 
-func (App) run(ctx context.Context) error {
+func Runner(ctx context.Context) error {
 	for {
 		waveStartedAt := time.Now()
 		ui64++
@@ -36,7 +34,7 @@ func (App) run(ctx context.Context) error {
 
 			// list of metrics for each containers running in this host
 			// at this moment.
-			metricList := make([]metrics.Metric, 0)
+			metricList := make([]Metric, 0)
 
 			for _, ctr := range containers {
 				go func(ctr types.Container) {
@@ -49,14 +47,14 @@ func (App) run(ctx context.Context) error {
 
 					// translate docker stats to our metric structure.
 					// todo change uuid.New() with uuid of the container
-					data := metrics.FromDockerStats(*st, uuid.New())
+					data := FromDockerStats(*st, uuid.New())
 					metricList = append(metricList, data)
 					group.Done()
 				}(ctr)
 			}
 
 			group.Wait()
-			ingester.Ingest(metricList)
+			ingest(metricList)
 		}
 		logrus.WithField("wave", ui64).WithField("duration", time.Now().Sub(waveStartedAt).Round(time.Millisecond).String()).Infof("metrics processed")
 		time.Sleep(10 * time.Second)
