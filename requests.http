@@ -4,7 +4,7 @@ Content-Type: application/json
 Authorization: 98e4ecbc645a440dbcb5d78984aa8b75
 
 {
-  "name": "hello",
+  "name": "hello2",
   "image": "google/golang-hello",
   "plan_id": "1e006139-7010-4f5b-8d7f-be68b34badd1",
   "tags": ["123", "test"],
