@@ -6,7 +6,6 @@ Package protocol is a generated protocol buffer package.
 
 It is generated from these files:
 	controller.proto
-	metrics.proto
 	image.proto
 	util.proto
 	auth.proto
@@ -16,8 +15,6 @@ It has these top-level messages:
 	ChangeContainerStateReply
 	GetContainersLogsRequest
 	GetContainersLogsReply
-	MetricsRequest
-	MetricsResponse
 	DeleteImageEvent
 	DeleteImageLayerEvent
 	Timestamp

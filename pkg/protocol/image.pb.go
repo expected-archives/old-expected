@@ -23,7 +23,7 @@ type DeleteImageEvent struct {
 func (m *DeleteImageEvent) Reset()                    { *m = DeleteImageEvent{} }
 func (m *DeleteImageEvent) String() string            { return proto.CompactTextString(m) }
 func (*DeleteImageEvent) ProtoMessage()               {}
-func (*DeleteImageEvent) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
+func (*DeleteImageEvent) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
 
 func (m *DeleteImageEvent) GetId() string {
 	if m != nil {
@@ -68,7 +68,7 @@ type DeleteImageLayerEvent struct {
 func (m *DeleteImageLayerEvent) Reset()                    { *m = DeleteImageLayerEvent{} }
 func (m *DeleteImageLayerEvent) String() string            { return proto.CompactTextString(m) }
 func (*DeleteImageLayerEvent) ProtoMessage()               {}
-func (*DeleteImageLayerEvent) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{1} }
+func (*DeleteImageLayerEvent) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
 
 func (m *DeleteImageLayerEvent) GetRepository() string {
 	if m != nil {
@@ -89,9 +89,9 @@ func init() {
 	proto.RegisterType((*DeleteImageLayerEvent)(nil), "protocol.DeleteImageLayerEvent")
 }
 
-func init() { proto.RegisterFile("image.proto", fileDescriptor2) }
+func init() { proto.RegisterFile("image.proto", fileDescriptor1) }
 
-var fileDescriptor2 = []byte{
+var fileDescriptor1 = []byte{
 	// 180 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x8f, 0xc1, 0x0a, 0xc2, 0x30,
 	0x10, 0x44, 0x69, 0x5a, 0x8b, 0x6e, 0x41, 0xca, 0x82, 0x92, 0x93, 0x94, 0x9e, 0x3c, 0x79, 0xf1,

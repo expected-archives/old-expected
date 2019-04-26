@@ -3,9 +3,8 @@ package metricsagent
 import (
 	"github.com/expectedsh/expected/pkg/apps"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
-	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
-	"google.golang.org/grpc"
+	"github.com/expectedsh/expected/pkg/services/stan"
 )
 
 type App struct{}
@@ -15,10 +14,9 @@ func (a *App) Name() string {
 }
 
 func (a *App) RequiredServices() []services.Service {
-	return []services.Service{}
-}
-func (a *App) ConfigureGRPC(server *grpc.Server) {
-	protocol.RegisterMetricsServer(server, a)
+	return []services.Service{
+		stan.NewFromEnv(),
+	}
 }
 
 func (a *App) Configure() error {
@@ -26,7 +24,5 @@ func (a *App) Configure() error {
 }
 
 func (a *App) Run() error {
-	go run()
-
-	return apps.HandleGRPC(a)
+	return apps.HandleRunner(a.run)
 }

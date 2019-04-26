@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
-	"github.com/expectedsh/expected/pkg/apps/metricsagent/collector"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/docker"
+	"github.com/expectedsh/expected/pkg/apps/metricsagent/ingester"
 	"github.com/expectedsh/expected/pkg/apps/metricsagent/metrics"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -14,53 +14,56 @@ import (
 	"time"
 )
 
-func run() {
+var ui64 = uint64(0)
+
+func (App) run(ctx context.Context) {
 	for {
-		containers, err := docker.GetContainers(context.Background())
+		waveStartedAt := time.Now()
+		ui64++
 
-		if err != nil {
-			logrus.WithError(err).Error("can't get containers")
-			time.Sleep(10 * time.Second)
-			continue
-		}
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			containers, err := docker.GetContainers(ctx)
+			if err != nil {
+				logrus.WithError(err).Error("can't get containers")
+				break
+			}
 
-		group := sync.WaitGroup{}
-		group.Add(len(containers))
+			group := sync.WaitGroup{}
+			group.Add(len(containers))
 
-		// list of metrics for each container at this moment.
-		packets := make([][]byte, 0)
+			// list of metrics for each container at this moment.
+			metricList := make([]metrics.Metric, 0)
 
-		for _, ctr := range containers {
-			go func(ctr types.Container) {
-				st, err := getDockerStats(ctr)
-				if err != nil {
-					logrus.WithError(err).Error(10 * time.Second)
+			for _, ctr := range containers {
+				go func(ctr types.Container) {
+					st, err := getDockerStats(ctx, ctr)
+					if err != nil {
+						logrus.WithError(err).Error(10 * time.Second)
+						group.Done()
+						return
+					}
+
+					// translate docker stats to our metric structure.
+					// todo change uuid.New() with uuid of the container
+					data := metrics.FromDockerStats(*st, uuid.New())
+					metricList = append(metricList, data)
 					group.Done()
-				}
+				}(ctr)
+			}
 
-				// translate docker stats to our bytes marshalled metric structure.
-				data, err := metrics.FromDockerStats(*st, uuid.New()).MarshalBinary()
-
-				if err != nil {
-					logrus.WithError(err).Error(10 * time.Second)
-					group.Done()
-				}
-
-				packets = append(packets, data)
-				group.Done()
-			}(ctr)
+			group.Wait()
+			ingester.Ingest(metricList)
 		}
-
-		group.Wait()
-		// lock mutex
-		collector.AddPackets(packets)
-
+		logrus.WithField("wave", ui64).WithField("duration", time.Now().Sub(waveStartedAt).Round(time.Millisecond).String()).Infof("metrics processed")
 		time.Sleep(10 * time.Second)
 	}
 }
 
-func getDockerStats(ctr types.Container) (*types.StatsJSON, error) {
-	response, err := docker.GetStats(context.Background(), ctr.ID)
+func getDockerStats(ctx context.Context, ctr types.Container) (*types.StatsJSON, error) {
+	response, err := docker.GetStats(ctx, ctr.ID)
 	if err != nil {
 		logrus.WithError(err).Error("can't get stats")
 		return nil, err
