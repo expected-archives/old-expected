@@ -8,13 +8,14 @@ import (
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/models/plans"
+	"github.com/expectedsh/expected/pkg/util"
 	"io"
 )
 
 func ServiceFindByName(ctx context.Context, name string) (*swarm.Service, error) {
 	args := filters.NewArgs()
 	args.Add("name", name)
-	services, err := cli.ServiceList(ctx, types.ServiceListOptions{
+	services, err := util.cli.ServiceList(ctx, types.ServiceListOptions{
 		Filters: args,
 	})
 	if err != nil {
@@ -42,7 +43,7 @@ func ServiceCreate(ctx context.Context, container *containers.Container) error {
 		NanoCPUs:    int64(plan.Metadata["cpu"].(float64) * 100000000),
 	}
 
-	_, err = cli.ServiceCreate(ctx, swarm.ServiceSpec{
+	_, err = util.cli.ServiceCreate(ctx, swarm.ServiceSpec{
 		Annotations: swarm.Annotations{
 			Name: container.ID,
 			Labels: map[string]string{
@@ -56,7 +57,7 @@ func ServiceCreate(ctx context.Context, container *containers.Container) error {
 		TaskTemplate: swarm.TaskSpec{
 			ContainerSpec: swarm.ContainerSpec{
 				Image: container.Image,
-				Env:   convertEnv(container.Environment),
+				Env:   util.convertEnv(container.Environment),
 			},
 			Resources: &swarm.ResourceRequirements{
 				Limits:       resources,
@@ -86,11 +87,11 @@ func ServiceCreate(ctx context.Context, container *containers.Container) error {
 }
 
 func ServiceRemove(ctx context.Context, container *containers.Container) error {
-	return cli.ServiceRemove(ctx, container.ID)
+	return util.cli.ServiceRemove(ctx, container.ID)
 }
 
 func ServiceGetLogs(ctx context.Context, id string) (io.ReadCloser, error) {
-	return cli.ServiceLogs(ctx, id, types.ContainerLogsOptions{
+	return util.cli.ServiceLogs(ctx, id, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Follow:     true,

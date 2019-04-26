@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"context"
 	"errors"
-	"github.com/expectedsh/expected/pkg/apps/controller/docker"
 	"github.com/expectedsh/expected/pkg/models/containers"
 	"github.com/expectedsh/expected/pkg/protocol"
+	"github.com/expectedsh/expected/pkg/util"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,7 +23,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 		return nil, err
 	}
 
-	service, err := docker.ServiceFindByName(ctx, container.ID)
+	service, err := util.ServiceFindByName(ctx, container.ID)
 	if err != nil {
 		log.WithError(err).Error("failed to find container service")
 		return nil, err
@@ -37,7 +37,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 
 	if r.RequestedState == protocol.ChangeContainerStateRequest_START {
 		log.Info("creating the service")
-		if err := docker.ServiceCreate(ctx, container); err != nil {
+		if err := util.ServiceCreate(ctx, container); err != nil {
 			log.WithError(err).Error("failed to create container service")
 			return nil, err
 		}
@@ -45,7 +45,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 
 	if r.RequestedState == protocol.ChangeContainerStateRequest_STOP {
 		log.Info("removing the service")
-		if err := docker.ServiceRemove(ctx, container); err != nil {
+		if err := util.ServiceRemove(ctx, container); err != nil {
 			log.WithError(err).Error("failed to remove container service")
 			return nil, err
 		}
@@ -67,7 +67,7 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 		return err
 	}
 
-	service, err := docker.ServiceFindByName(ctrl.Context(), container.ID)
+	service, err := util.ServiceFindByName(ctrl.Context(), container.ID)
 	if err != nil {
 		log.WithError(err).Error("failed to find container service")
 		return err
@@ -76,14 +76,14 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 		return nil
 	}
 
-	logs, err := docker.ServiceGetLogs(ctrl.Context(), service.ID)
+	logs, err := util.ServiceGetLogs(ctrl.Context(), service.ID)
 	if err != nil {
 		log.WithError(err).Error("failed to get container logs")
 		return err
 	}
 	defer logs.Close()
 
-	reader := docker.NewLogReader(logs)
+	reader := util.NewLogReader(logs)
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		if err = ctrl.Send(logToReply(reader)); err != nil {
@@ -94,9 +94,9 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 	return scanner.Err()
 }
 
-func logToReply(reader *docker.LogReader) *protocol.GetContainersLogsReply {
+func logToReply(reader *util.LogReader) *protocol.GetContainersLogsReply {
 	output := protocol.GetContainersLogsReply_STDOUT
-	if reader.Output == docker.OutputStderr {
+	if reader.Output == util.OutputStderr {
 		output = protocol.GetContainersLogsReply_STDERR
 	}
 

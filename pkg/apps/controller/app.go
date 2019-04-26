@@ -2,11 +2,11 @@ package controller
 
 import (
 	"github.com/expectedsh/expected/pkg/apps"
-	"github.com/expectedsh/expected/pkg/apps/controller/docker"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/services"
 	"github.com/expectedsh/expected/pkg/services/postgres"
 	"github.com/expectedsh/expected/pkg/services/stan"
+	"github.com/expectedsh/expected/pkg/util"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +24,7 @@ func (s *App) RequiredServices() []services.Service {
 }
 
 func (s *App) Configure() error {
-	if err := docker.Init(); err != nil {
+	if err := util.Init(); err != nil {
 		return err
 	}
 	return nil

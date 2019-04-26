@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
-	"github.com/expectedsh/expected/pkg/apps/agent/docker"
+	"github.com/expectedsh/expected/pkg/util/docker"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"io"

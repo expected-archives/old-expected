@@ -32,5 +32,5 @@ func ingest(metricList []Metric) {
 		}(packet)
 	}
 	group.Wait()
-	logrus.Infof("%d/%d metrics ingested.", metricsSended, len(metricList))
+	logrus.Infof("%d/%d metrics ingested", metricsSended, len(metricList))
 }
