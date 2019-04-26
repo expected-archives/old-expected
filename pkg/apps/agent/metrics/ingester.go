@@ -22,8 +22,7 @@ func ingest(metricList []Metric) {
 				return
 			}
 
-			// todo maybe change the ID with the namespace ID ?
-			err = services.Stan().Client().Publish(stan.SubjectMetricNamespaceID(packet.ID.String()), data)
+			err = services.Stan().Client().Publish(stan.SubjectMetric, data)
 			if err != nil {
 				logrus.WithError(err).Error("can't ingest metric")
 			} else {
