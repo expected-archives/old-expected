@@ -1,0 +1,23 @@
+version: "3.4"
+services:
+  postgres:
+    container_name: expected-postgres
+    image: postgres:alpine
+    restart: on-failure
+    environment:
+      - "POSTGRES_USER=expected"
+      - "POSTGRES_PASSWORD=expected"
+      - "TZ=Europe/Paris"
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  stan:
+    container_name: expected-stan
+    image: nats-streaming
+    restart: on-failure
+    ports:
+      - 4222:4222
+volumes:
+  postgres: {}

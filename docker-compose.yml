@@ -75,7 +75,7 @@ services:
     depends_on:
       - registryhook
     ports:
-      - 5000:5000
+      -  :5000
     volumes:
       - ./certs:/certs
 

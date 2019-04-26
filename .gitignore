@@ -5,3 +5,5 @@
 /.env
 /certs
 /vendor
+/hack/.vagrant
+/hack/*.log
