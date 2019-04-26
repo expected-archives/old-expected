@@ -13,6 +13,6 @@ CREATE TABLE containers
     tags         JSON            NOT NULL,
     namespace_id UUID            NOT NULL,
     state        container_state NOT NULL DEFAULT 'stopped',
-    created_at   TIMESTAMP       NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMP       NOT NULL DEFAULT NOW()
+    created_at   TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ       NOT NULL DEFAULT NOW()
 );

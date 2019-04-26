@@ -8,8 +8,8 @@ CREATE TABLE plans
     price      FLOAT        NOT NULL,
     metadata   JSON         NOT NULL,
     public     BOOLEAN      NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE plans_authorizations

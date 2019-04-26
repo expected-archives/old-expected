@@ -8,5 +8,5 @@ CREATE TABLE accounts
     github_access_token VARCHAR(255) NOT NULL,
     api_key             VARCHAR(32)  NOT NULL,
     admin               BOOLEAN   DEFAULT FALSE,
-    created_at          TIMESTAMP DEFAULT NOW()
+    created_at          TIMESTAMPTZ DEFAULT NOW()
 );

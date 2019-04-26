@@ -7,5 +7,5 @@ CREATE TABLE containers_endpoints
     container_id UUID         NOT NULL REFERENCES containers (id),
     endpoint     VARCHAR(255) NOT NULL,
     is_default   BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at   TIMESTAMP    NOT NULL DEFAULT NOW()
+    created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );

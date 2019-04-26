@@ -11,5 +11,5 @@ CREATE TABLE events
     issuer      event_issuer   NOT NULL,
     issuer_id   UUID,
     metadata    JSON           NOT NULL,
-    created_at  TIMESTAMP      NOT NULL DEFAULT NOW()
+    created_at  TIMESTAMPTZ      NOT NULL DEFAULT NOW()
 )
