@@ -81,7 +81,7 @@ services:
 
   postgres:
     container_name: expected-postgres
-    image: postgres:alpine
+    image: timescale/timescaledb
     restart: on-failure
     environment:
       - "POSTGRES_USER=expected"
