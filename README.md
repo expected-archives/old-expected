@@ -3,21 +3,19 @@
 ### Installation
 
 ```
-docker-compose up
+vagrant up
+vagrant ssh
+cd ~/expected
+sh hack/start-services.sh
+sh hack/start-apps.sh [apps...]
 ```
 
-#### Configuration du docker-compose
-
-| Nom | Description | Valeur par défaut |
-| --- | --- | --- |
-| POSTGRES_ADDR | Permet de changer l'adresse de postgres | postgres://expected:expected@postgres/expected?sslmode=disable |
-| STAN_ADDR | Permet de changer l'adresse de nats | nats://localhost:4222 |
-| AUTH_ADDR | Permet de changer l'adresse du service d'authentification | http://localhost:3002 |
-| GITHUB_CLIENT_ID | Défini le client id pour l'oauth avec github |  |
-| GITHUB_CLIENT_SECRET | Défini le client secret pour l'oauth avec github |  |
-| DASHBOARD_URL | L'url du dashboard (utilisé pour definir le cookie d'authentification et rediriger l'utilisateur) | http://localhost:8080 |
-| REGISTRY_AUTH_TOKEN_REALM | L'adresse du serveur d'authentification de la registry qui sera donné au client | http://localhost:3001/registry/auth |
-| REGISTRY_AUTH_SERVER | L'adresse du serveur qui recoit les events de la registry | http://registryhook:3001/registry/hook |
+Liste des ports utilisés :
+- apiserver (http: 3000, grpc: n.a)
+- registryhook (http: 3001, grpc: n.a)
+- authserver (http: 3002, grpc: 4002)
+- controller (http: n.a, grpc: 4003)
+- agent (http: n.a, grpc: n.a)
 
 ### Lancer les migrations
 

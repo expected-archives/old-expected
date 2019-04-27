@@ -15,9 +15,11 @@ services:
   stan:
     container_name: expected-stan
     image: nats-streaming
+    command: "-store file -dir /datastore"
     restart: always
-    ports:
-      - 4222:4222
+    network_mode: host
+    volumes:
+      - stan:/datastore
 
   registry:
     container_name: expected-registry
@@ -26,14 +28,17 @@ services:
     environment:
       - "REGISTRY_STORAGE_DELETE_ENABLED=true"
       - "REGISTRY_AUTH=token"
-      - "REGISTRY_AUTH_TOKEN_REALM=${REGISTRY_AUTH_TOKEN_REALM:-http://localhost:3002/auth/registry}"
+      - "REGISTRY_AUTH_TOKEN_REALM=http://localhost:3002/auth/registry"
       - "REGISTRY_AUTH_TOKEN_SERVICE=registry"
       - "REGISTRY_AUTH_TOKEN_ISSUER=auth_registry"
       - "REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/server.crt"
       - "REGISTRY_AUTH_TOKEN_AUTOREDIRECT=false"
-      - "REGISTRY_NOTIFICATIONS_ENDPOINTS=- name: expected-hook\n  url: ${REGISTRY_AUTH_SERVER:-http://localhost:3000/hook}\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
+      - "REGISTRY_NOTIFICATIONS_ENDPOINTS=- name: expected-hook\n  url: http://localhost:3000/hook\n  timeout: 10s\n  threshold: 8\n  backoff: 10s"
     network_mode: host
     volumes:
       - ../certs:/certs
+      - registry:/var/lib/registry
 volumes:
   postgres: {}
+  stan: {}
+  registry: {}
