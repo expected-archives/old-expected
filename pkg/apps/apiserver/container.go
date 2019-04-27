@@ -124,7 +124,7 @@ func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
 func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 	container := request.GetContainer(r)
 
-	logs, err := services.Controller().Client().GetContainerLogs(r.Context(), &protocol.GetContainersLogsRequest{
+	logs, err := services.Controller().Client().GetContainerLogs(r.Context(), &protocol.GetContainerLogsRequest{
 		Id: container.ID,
 	})
 	if err != nil {
