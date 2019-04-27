@@ -18,11 +18,11 @@ message ChangeContainerStateRequest {
 message ChangeContainerStateReply {
 }
 
-message GetContainersLogsRequest {
+message GetContainerLogsRequest {
     string id = 1;
 }
 
-message GetContainersLogsReply {
+message GetContainerLogsReply {
     enum Output {
         STDOUT = 0;
         STDERR = 1;
@@ -34,10 +34,21 @@ message GetContainersLogsReply {
     string message = 4;
 }
 
+message GetContainerMetricsRequest {
+    string id = 1;
+}
+
+message GetContainerMetricsReply {
+    bytes message = 1;
+}
+
 service Controller {
     rpc ChangeContainerState (ChangeContainerStateRequest) returns (ChangeContainerStateReply) {
     }
 
-    rpc GetContainerLogs (GetContainersLogsRequest) returns (stream GetContainersLogsReply) {
+    rpc GetContainerLogs (GetContainerLogsRequest) returns (stream GetContainerLogsReply) {
+    }
+
+    rpc GetContainerMetrics (GetContainerMetricsRequest) returns (stream GetContainerMetricsReply) {
     }
 }

@@ -49,7 +49,10 @@ func (srv *Service) Start() error {
 }
 
 func (srv *Service) Stop() error {
-	return srv.conn.Close()
+	if srv.conn != nil {
+		return srv.conn.Close()
+	}
+	return nil
 }
 
 func (srv *Service) Started() bool {

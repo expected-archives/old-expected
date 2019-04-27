@@ -13,14 +13,14 @@ import (
 )
 
 type Metric struct {
-	ID          uuid.UUID // 16
-	Memory      uint32    // 32
-	NetInput    float32   // 32
-	NetOutput   float32   // 32
-	BlockInput  uint32    // 32
-	BlockOutput uint32    // 32
-	Cpu         float32   // 32
-	Time        time.Time // ...
+	ID          uuid.UUID
+	Memory      uint32
+	NetInput    float32
+	NetOutput   float32
+	BlockInput  uint32
+	BlockOutput uint32
+	Cpu         float32
+	Time        time.Time
 }
 
 func (s *Metric) String() string {
@@ -34,7 +34,7 @@ func (s *Metric) String() string {
 }
 
 func (s *Metric) UnmarshalBinary(data []byte) error {
-	if len(data) != 40 {
+	if len(data) != 55 {
 		return errors.New("unable to unmarshal metrics")
 	}
 

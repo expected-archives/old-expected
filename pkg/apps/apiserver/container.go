@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"github.com/expectedsh/expected/pkg/apps/agent/metrics"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/request"
 	"github.com/expectedsh/expected/pkg/apps/apiserver/response"
 	"github.com/expectedsh/expected/pkg/models/containers"
@@ -123,7 +124,7 @@ func (s *App) StopContainer(w http.ResponseWriter, r *http.Request) {
 func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 	container := request.GetContainer(r)
 
-	logs, err := services.Controller().Client().GetContainerLogs(r.Context(), &protocol.GetContainersLogsRequest{
+	logs, err := services.Controller().Client().GetContainerLogs(r.Context(), &protocol.GetContainerLogsRequest{
 		Id: container.ID,
 	})
 	if err != nil {
@@ -152,6 +153,50 @@ func (s *App) GetContainerLogs(w http.ResponseWriter, r *http.Request) {
 		}); err != nil {
 			logrus.WithError(err).Error("failed to send container logs")
 			return
+		}
+	}
+}
+
+func (s *App) GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
+	container := request.GetContainer(r)
+
+	metricsClient, err := services.Controller().Client().GetContainerMetrics(r.Context(), &protocol.GetContainerMetricsRequest{
+		Id: container.ID,
+	})
+	if err != nil {
+		logrus.WithError(err).Error("unable to request container metrics")
+		response.ErrorInternal(w)
+		return
+	}
+	defer metricsClient.CloseSend()
+
+	sse.SetupConnection(w)
+
+	for {
+		reply, err := metricsClient.Recv()
+		if err == io.EOF {
+			return
+		}
+		if err != nil {
+			logrus.WithError(err).Error("failed to receive container metricsClient reply")
+			return
+		}
+		metric := metrics.Metric{}
+		err = metric.UnmarshalBinary(reply.Message)
+		if err != nil {
+			logrus.WithError(err).Error("failed to unmarshal metric")
+		} else {
+			if err = sse.SendJSON(w, "message", &map[string]interface{}{
+				"memory":       metric.Memory,
+				"cpu":          metric.Cpu,
+				"net_input":    metric.NetInput,
+				"net_output":   metric.NetOutput,
+				"block_input":  metric.BlockInput,
+				"block_output": metric.BlockOutput,
+			}); err != nil {
+				logrus.WithError(err).Error("failed to send container metrics")
+				return
+			}
 		}
 	}
 }
