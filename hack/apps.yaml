@@ -1,0 +1,50 @@
+version: "3.4"
+
+services:
+  apiserver:
+    container_name: expected-apiserver
+    restart: always
+    build:
+      context: .
+      dockerfile: cmd/expected-apiserver/Dockerfile
+    environment:
+      - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@localhost/expected?sslmode=disable}"
+      - "STAN_ADDR=${STAN_ADDR:-nats://stan:4222}"
+    network_mode: host
+
+  registryhook:
+    container_name: expected-registryhook
+    restart: always
+    build:
+      context: .
+      dockerfile: cmd/expected-registryhook/Dockerfile
+    environment:
+      - "REGISTRY_URL=http://localhost:5000"
+      - "AUTH_ADDR=localhost:4002"
+      - "HTTP_ADDR=:3001"
+      - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@localhost/expected?sslmode=disable}"
+      - "STAN_ADDR=${STAN_ADDR:-nats://stan:4222}"
+      - "CERTS_PUBLIC_KEY=/certs/server.crt"
+      - "CERTS_PRIVATE_KEY=/certs/server.key"
+    network_mode: host
+    volumes:
+      - ./certs:/certs
+
+  authserver:
+    container_name: expected-authserver
+    restart: always
+    build:
+      context: .
+      dockerfile: cmd/expected-authserver/Dockerfile
+    environment:
+      - "POSTGRES_ADDR=${POSTGRES_ADDR:-postgres://expected:expected@localhost/expected?sslmode=disable}"
+      - "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
+      - "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
+      - "CERTS_PUBLIC_KEY=/certs/server.crt"
+      - "CERTS_PRIVATE_KEY=/certs/server.key"
+      - "HTTP_ADDR=:3002"
+      - "GRPC_ADDR=:4002"
+      - "DASHBOARD_URL=${DASHBOARD_URL:-http://localhost:8080}"
+    network_mode: host
+    volumes:
+      - ./certs:/certs
