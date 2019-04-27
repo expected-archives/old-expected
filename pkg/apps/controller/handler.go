@@ -4,9 +4,14 @@ import (
 	"bufio"
 	"context"
 	"errors"
+	"github.com/expectedsh/expected/pkg/apps/agent/metrics"
+	"github.com/expectedsh/expected/pkg/apps/controller/metricsstream"
 	"github.com/expectedsh/expected/pkg/models/containers"
+	metricsmodel "github.com/expectedsh/expected/pkg/models/metrics"
 	"github.com/expectedsh/expected/pkg/protocol"
 	"github.com/expectedsh/expected/pkg/util/docker"
+	"github.com/google/uuid"
+	"github.com/nats-io/go-nats-streaming"
 	"github.com/sirupsen/logrus"
 )
 
@@ -109,4 +114,39 @@ func logToReply(reader *docker.LogReader) *protocol.GetContainersLogsReply {
 		},
 		Message: reader.Message,
 	}
+}
+
+func (s App) GetContainerMetrics(req *protocol.GetContainerMetricsRequest, res protocol.Controller_GetContainerMetricsServer) error {
+	streamId := uuid.New().String()
+	metricsstream.AddStream(req.Id, streamId, res)
+
+	<-res.Context().Done()
+	metricsstream.RemoveStream(req.Id, streamId)
+	return nil
+}
+
+func (App) MetricsToPostgres(msg *stan.Msg) {
+	m := metrics.Metric{}
+	err := m.UnmarshalBinary(msg.Data)
+	if err != nil {
+		logrus.WithError(err).WithField("subject", msg.Subject).Error()
+		_ = msg.Ack()
+		return
+	}
+
+	err = metricsmodel.CreateMetric(context.Background(), m)
+	if err != nil {
+		logrus.WithError(err).WithField("subject", msg.Subject).Error("can't insert metric in postgres")
+		return
+	}
+	_ = msg.Ack()
+}
+
+func (App) MetricsToStream(msg *stan.Msg) {
+	id := msg.Data[:16]
+	uid, err := uuid.FromBytes(id)
+	if err != nil {
+		return
+	}
+	metricsstream.Send(uid.String(), msg.Data)
 }

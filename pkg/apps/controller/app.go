@@ -35,5 +35,13 @@ func (s *App) ConfigureGRPC(server *grpc.Server) {
 }
 
 func (s *App) Run() error {
+	if err := apps.HandleQueueSubscription(stan.SubjectMetric, "metric-postgres",
+		s.MetricsToPostgres, apps.StanQueueGroupOptions("metric-postgres")...); err != nil {
+		return err
+	}
+
+	if err := apps.HandleSubscription(stan.SubjectMetric, s.MetricsToStream); err != nil {
+		return err
+	}
 	return apps.HandleGRPC(s)
 }

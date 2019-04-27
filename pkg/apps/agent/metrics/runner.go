@@ -80,6 +80,5 @@ func getDockerStats(ctx context.Context, ctr types.Container) (*types.StatsJSON,
 			return nil, err
 		}
 	}
-
 	return v, nil
 }

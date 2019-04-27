@@ -34,10 +34,21 @@ message GetContainersLogsReply {
     string message = 4;
 }
 
+message GetContainerMetricsRequest {
+    string id = 1;
+}
+
+message GetContainerMetricsReply {
+    bytes message = 1;
+}
+
 service Controller {
     rpc ChangeContainerState (ChangeContainerStateRequest) returns (ChangeContainerStateReply) {
     }
 
     rpc GetContainerLogs (GetContainersLogsRequest) returns (stream GetContainersLogsReply) {
+    }
+
+    rpc GetContainerMetrics (GetContainerMetricsRequest) returns (stream GetContainerMetricsReply) {
     }
 }
