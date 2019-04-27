@@ -59,7 +59,7 @@ func (App) ChangeContainerState(ctx context.Context, r *protocol.ChangeContainer
 	return &protocol.ChangeContainerStateReply{}, nil
 }
 
-func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.Controller_GetContainerLogsServer) error {
+func (App) GetContainerLogs(r *protocol.GetContainerLogsRequest, ctrl protocol.Controller_GetContainerLogsServer) error {
 	container, err := containers.FindContainerByID(ctrl.Context(), r.Id)
 	log := logrus.WithField("id", r.Id)
 	log.Info("new container logs request received")
@@ -99,13 +99,13 @@ func (App) GetContainerLogs(r *protocol.GetContainersLogsRequest, ctrl protocol.
 	return scanner.Err()
 }
 
-func logToReply(reader *docker.LogReader) *protocol.GetContainersLogsReply {
-	output := protocol.GetContainersLogsReply_STDOUT
+func logToReply(reader *docker.LogReader) *protocol.GetContainerLogsReply {
+	output := protocol.GetContainerLogsReply_STDOUT
 	if reader.Output == docker.OutputStderr {
-		output = protocol.GetContainersLogsReply_STDERR
+		output = protocol.GetContainerLogsReply_STDERR
 	}
 
-	return &protocol.GetContainersLogsReply{
+	return &protocol.GetContainerLogsReply{
 		Output: output,
 		TaskId: reader.Labels["com.docker.swarm.task.id"],
 		Time: &protocol.Timestamp{
